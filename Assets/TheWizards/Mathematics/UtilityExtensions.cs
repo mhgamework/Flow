@@ -80,6 +80,10 @@ namespace MHGameWork.TheWizards
         {
             return new Point3(((int)Math.Floor(v.x)), ((int)Math.Floor(v.y)), ((int)Math.Floor(v.z)));
         }
+        public static Point3 ToCeiled(this Vector3 v)
+        {
+            return new Point3(((int)Math.Ceiling(v.x)), ((int)Math.Ceiling(v.y)), ((int)Math.Ceiling(v.z)));
+        }
 
 
 

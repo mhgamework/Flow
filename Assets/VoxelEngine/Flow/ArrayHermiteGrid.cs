@@ -9,20 +9,27 @@ namespace Assets.VoxelEngine
     public class ArrayHermiteGrid : AbstractHermiteGrid
     {
         private readonly Array3D<VoxelMaterial> gridPoints;
+        private readonly Point3 offset;
+        private readonly Point3 size;
 
-        public ArrayHermiteGrid(Array3D<VoxelMaterial> gridPoints)
+        public ArrayHermiteGrid(Array3D<VoxelMaterial> gridPoints, Point3 offset, Point3 size)
         {
             this.gridPoints = gridPoints;
+            this.offset = offset;
+            this.size = size;
         }
 
         public override bool GetSign(Point3 pos)
         {
-            return gridPoints.Get(pos) != null;
+            return gridPoints.Get(pos+offset) != null;
         }
 
         public override Point3 Dimensions
         {
-            get { return gridPoints.Size - new Point3(1,1,1); }
+            get
+            {
+                return size; //gridPoints.Size - new Point3(1,1,1);
+            }
         }
 
         public override Vector4 getEdgeData(Point3 cube, int edgeId)

@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.TheWizards.Mathematics.DataTypes;
 using DirectX11;
 using UnityEngine;
 
@@ -13,12 +14,12 @@ namespace MHGameWork.TheWizards.Scattered._Engine
         /// <returns></returns>
         public static Bounds CenteredBoundingbox(this Vector3 size)
         {
-            return new Bounds(-size * 0.5f, size * 0.5f);
+            return new BoundingBox(-size * 0.5f, size * 0.5f).unity();
         }
 
         public static Bounds ToBoundingBox(this Vector3 center, Vector3 radius)
         {
-            return new Bounds(center - radius, center + radius);
+            return new BoundingBox(center - radius, center + radius).unity();
         }
 
 

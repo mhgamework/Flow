@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using DirectX11;
 
 namespace MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures
@@ -79,5 +80,36 @@ namespace MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures
             return arr[x, y, z];
         }
 
+        public T[] ToArray()
+        {
+            var data = new T[Size.X*Size.Y*Size.Z];
+
+            int index = 0;
+
+            for (int x = 0; x < Size.X; x++)
+                for (int y = 0; y < Size.Y; y++)
+                    for (int z = 0; z < Size.Z; z++)
+                        data[index++] = GetFast(x,y,z);
+
+            return data;
+
+        }
+
+        public static Array3D<T> FromFlattenedArray(T[] data, Point3 size)
+        {
+            var ret = new Array3D<T>(size);
+
+            int index = 0;
+
+            for (int x = 0; x < size.X; x++)
+                for (int y = 0; y < size.Y; y++)
+                    for (int z = 0; z < size.Z; z++)
+                    { 
+                        ret[new Point3(x,y,z)] = data[index++];
+                    }
+
+            return ret;
+
+        }
     }
 }
