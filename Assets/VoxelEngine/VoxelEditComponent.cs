@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.VoxelEngine;
 using DirectX11;
 using MHGameWork.TheWizards;
+using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 
 [ExecuteInEditMode]
 public class VoxelEditComponent : MonoBehaviour
@@ -13,15 +15,11 @@ public class VoxelEditComponent : MonoBehaviour
 
     private VoxelData data;
     private MeshFilter meshFilter;
-    private VoxelMaterial mat = new VoxelMaterial();
 
     public Material VoxelMaterial;
     private List<VoxelRendererComponent> parts = new List<VoxelRendererComponent>();
 
     public VoxelRendererComponent VoxelRendererPrefab;
-
-
-    public int EditRange = 2;
 
     // Use this for initialization
     void Start()
@@ -29,11 +27,7 @@ public class VoxelEditComponent : MonoBehaviour
         if (InitialVoxelData != null)
         {
             SetVoxelData(InitialVoxelData.ToVoxelData());
-
-
         }
-
-
 
         //addSubpart(new Point3(0, 0, 0), new Point3(size-1, size-1, size-1));
         //addSubpart(new Point3(10, 0, 0), new Point3(20, 10, 10));
@@ -53,7 +47,7 @@ public class VoxelEditComponent : MonoBehaviour
 
     private void addSubpart(Point3 viewMin, Point3 viewMax)
     {
-        var obj = GameObject.Instantiate(VoxelRendererPrefab); 
+        var obj = GameObject.Instantiate(VoxelRendererPrefab);
         VoxelRendererComponent subPart;
         subPart = obj.GetComponent<VoxelRendererComponent>();
         //subPart = obj.AddComponent<VoxelRendererComponent>();
@@ -74,52 +68,39 @@ public class VoxelEditComponent : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+
+
+    }
+
+
+    public void updateEditHighlight(RaycastHit? closest, float range, Color color)
+    {
+        if (closest == null)
+        {
+            parts.ForEach(v => v.ClearHightlight());
+            return;
+        }
+        parts.ForEach(v => v.SetHighlight(closest.Value.point, range, color));
+    }
+
+    public RaycastHit? Raycast()
+    {
+        var ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         RaycastHit? closest = null;
         foreach (var c in parts)
         {
-            if (c.raycastHitInfo == null) continue;
-            if (closest == null || closest.Value.distance > c.raycastHitInfo.Value.distance)
-                closest = c.raycastHitInfo;
+            var info = c.Raycast(ray);
+            if (info == null) continue;
+            if (closest == null || closest.Value.distance > info.Value.distance)
+                closest = info;
         }
         if (closest != null)
-        {
-            if (Input.GetMouseButtonDown(0))
-                setSphere(closest.Value.point, EditRange, null);
-            if (Input.GetMouseButtonDown(1))
-                setSphere(closest.Value.point, EditRange, mat);
-        }
+            Debug.DrawRay(ray.origin, ray.direction * closest.Value.distance, Color.yellow);
 
-
-        if (Input.mouseScrollDelta.y < 0)
-            setEditRange(EditRange - 1);
-        if (Input.mouseScrollDelta.y > 0)
-            setEditRange(EditRange + 1);
-
-
+        return closest;
     }
 
-    private void setEditRange(int value)
-    {
-        EditRange = Mathf.Max(1, value);
-        parts.ForEach(p => p.HightlightRange = EditRange);
-    }
-
-    public void setSphere(Vector3 clickpoint, int radius, VoxelMaterial voxelMaterial)
-    {
-        var range = Vector3.one * radius;
-        var bounds = new Bounds(clickpoint, range * 2);
-
-        bounds.IterateCells(1, (x, y, z) =>
-        {
-            var pos = new Point3(x, y, z);
-            if (data.GridPoints.InArray(pos) && (clickpoint - pos.ToVector3()).magnitude < radius)
-                data.GridPoints[pos] = voxelMaterial;
-        });
-
-
-        parts.ForEach(p => p.markDirty(bounds.min.ToFloored(), bounds.max.ToCeiled()));
-
-    }
 
     public void SetVoxelData(VoxelData voxelData)
     {
@@ -135,5 +116,10 @@ public class VoxelEditComponent : MonoBehaviour
     public VoxelData GetVoxelData()
     {
         return data;
+    }
+
+    public void MarkDirty(Bounds bounds)
+    {
+        parts.ForEach(p => p.markDirty(bounds.min.ToFloored(), bounds.max.ToCeiled()));
     }
 }

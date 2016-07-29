@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using DirectX11;
 using UnityEngine;
 
 namespace MHGameWork.TheWizards
@@ -35,6 +36,23 @@ namespace MHGameWork.TheWizards
                     {
                         action(x, y, z);
                     }
+        }
+        /// <summary>
+        /// Returns the dimensions of the IterateCells cell structure
+        /// </summary>
+        public static Point3 IterateCellDimensions(this Bounds bb, int cellSize)
+        {
+            bb.min = bb.min / cellSize;
+            bb.max = bb.max / cellSize;
+
+            var min = new int[3];
+            var max = new int[3];
+            for (int i = 0; i < 3; i++)
+            {
+                min[i] = (int)Math.Floor(bb.min[i]);
+                max[i] = (int)Math.Ceiling(bb.max[i]);
+            }
+            return new Point3(max[0]-min[0], max[1] - min[1], max[2] - min[2]);
         }
     }
 }

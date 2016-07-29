@@ -7,15 +7,13 @@ using UnityEngine;
 namespace Assets.VoxelEngine
 {
     [ExecuteInEditMode]
-    public class VoxelRendererComponent:MonoBehaviour
+    public class VoxelRendererComponent : MonoBehaviour
     {
         public VoxelData VoxelData;
         public Point3 ViewMin;
         public Point3 ViewMax;
         private MeshFilter meshFilter;
         private VoxelMaterial mat;
-        public RaycastHit? raycastHitInfo;
-        public int HightlightRange = 2;
 
         void Start()
         {
@@ -43,38 +41,53 @@ namespace Assets.VoxelEngine
         void Update()
         {
 
-            var ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-            RaycastHit hitInfo;
-            if (GetComponent<MeshCollider>().Raycast(ray, out hitInfo, 1000))
-            {
-                raycastHitInfo = hitInfo;
-                Debug.DrawRay(ray.origin, ray.direction * hitInfo.distance, Color.yellow);
-
-                var clickpoint = ray.GetPoint(hitInfo.distance);
-                var localclickPoint = transform.InverseTransformPoint(clickpoint);
-                meshFilter.sharedMesh.SetColors(
-                    meshFilter.sharedMesh.vertices.Select(v => Color.Lerp(Color.red, Color.white, (localclickPoint - v).magnitude <= HightlightRange ? 0:1)).ToList());
-            }
-            else
-            {
-                if (raycastHitInfo != null)
-                    meshFilter.sharedMesh.SetColors(
-                    meshFilter.sharedMesh.vertices.Select(v => Color.white).ToList());
-
-                raycastHitInfo = null;
-            }
 
 
         }
 
+        public RaycastHit? Raycast(Ray ray)
+        {
+            RaycastHit hitInfo;
+            if (GetComponent<MeshCollider>().Raycast(ray, out hitInfo, 1000))
+                return hitInfo;
+
+            return null;
+        }
+
+        private bool highlightSet = false;
+
+        public void ClearHightlight()
+        {
+            if (!highlightSet) return;
+            highlightSet = false;
+            meshFilter.sharedMesh.SetColors(
+            meshFilter.sharedMesh.vertices.Select(v => Color.white).ToList());
+
+        }
+        public void SetHighlight(Vector3 pos, float range, Color col)
+        {
+            var clickpoint = pos;
+            var localclickPoint = transform.InverseTransformPoint(clickpoint);
+
+            if (!meshFilter.mesh.bounds.Intersects(new Bounds(localclickPoint, Vector3.one * range*2)))
+            {
+                ClearHightlight();
+                return;
+            }
+
+            highlightSet = true;
+            meshFilter.sharedMesh.SetColors(
+                meshFilter.sharedMesh.vertices.Select(v => Color.Lerp(col, Color.white, (localclickPoint - v).magnitude <= range ? 0 : 1)).ToList());
+        }
+
+
 
         public void markDirty(Point3 min, Point3 max)
         {
-            var view  = new Bounds();
-            view.SetMinMax(ViewMin,ViewMax);
+            var view = getViewBounds();
 
             var dirty = new Bounds();
-            dirty.SetMinMax(min,max);
+            dirty.SetMinMax(min, max);
 
             dirty.Expand(0.1f);
 
@@ -82,5 +95,11 @@ namespace Assets.VoxelEngine
                 updateMesh();
         }
 
+        private Bounds getViewBounds()
+        {
+            var view = new Bounds();
+            view.SetMinMax(ViewMin, ViewMax);
+            return view;
+        }
     }
 }
