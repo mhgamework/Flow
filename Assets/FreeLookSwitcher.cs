@@ -14,7 +14,23 @@ public class FreeLookSwitcher : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        setPlayerFromSpecaterOrientation();
         UpdateCameraState();
+    }
+
+    private void setPlayerFromSpecaterOrientation()
+    {
+
+        PlayerCharacterController.transform.position = SpectaterCamera.transform.position;
+        PlayerCharacterController.transform.rotation = SpectaterCamera.transform.rotation;
+
+    }
+
+    private void setSpectatorFromPlayerOrientation()
+    {
+
+        SpectaterCamera.transform.position = PlayerCharacterController.transform.position;
+        SpectaterCamera.transform.rotation = PlayerCharacterController.transform.rotation;
     }
 
     // Update is called once per frame
@@ -25,10 +41,9 @@ public class FreeLookSwitcher : MonoBehaviour
             FreeLookEnabled = !FreeLookEnabled;
             UpdateCameraState();
             if (!FreeLookEnabled)
-            {
-                PlayerCharacterController.transform.position = SpectaterCamera.transform.position;
-                PlayerCharacterController.transform.rotation = SpectaterCamera.transform.rotation;
-            }
+                setPlayerFromSpecaterOrientation();
+            else
+                setSpectatorFromPlayerOrientation();
         }
     }
 
