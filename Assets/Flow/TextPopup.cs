@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Assets.Flow
 {
@@ -9,6 +10,7 @@ namespace Assets.Flow
         private TextPopupUi instance;
 
         public Vector3 Offset;
+
 
         public void OnUnfocus(Player p)
         {
@@ -22,13 +24,19 @@ namespace Assets.Flow
             {
                 instance = Instantiate(Prefab);
                 instance.transform.parent = transform;
-                instance.transform.position += Offset;
+                instance.transform.position += transform.position + Offset;
             }
 
             instance.gameObject.SetActive(true);
 
             
 
+        }
+
+        public void SetText(String txt)
+        {
+            if (instance != null)
+            instance.SetText(txt);
         }
     }
 }
