@@ -107,6 +107,11 @@ namespace Assets.Flow
                 WaterMagic += delta;
 
             }
+
+            if (Input.GetMouseButton(1))
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }

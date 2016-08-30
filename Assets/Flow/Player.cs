@@ -48,7 +48,7 @@ namespace Assets.Flow
                 if (currentTarget != null)
                     currentTarget.TryInteract(this, hit.point);
             }
-      
+
         }
 
         //private void tryPlaceStorage()
@@ -59,14 +59,14 @@ namespace Assets.Flow
         //    Vector3 pos;
         //    if (!getTargetedPlacePosition(out pos)) return;
 
-           
+
         //}
 
         private void tryPlaceMinerGoblin()
         {
             if (Clay < 1) return;
 
-            Vector3 pos ;
+            Vector3 pos;
             if (!getTargetedPlacePosition(out pos)) return;
 
             Clay--;
@@ -90,7 +90,7 @@ namespace Assets.Flow
             var ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
             RaycastHit hit;
             var ret = Physics.Raycast(ray, out hit, 10f);
-            pos = new Vector3(0,0,0);
+            pos = new Vector3(0, 0, 0);
             if (ret)
                 pos = hit.point;
 
@@ -114,8 +114,10 @@ namespace Assets.Flow
         {
             if (currentTarget == null) return;
             Debug.Log("Stopped interacting with: " + currentTarget);
+
             currentTarget.OnUnfocus(this);
-            currentTargetCollider.GetComponents(typeof(ISecondaryInteractable)).Cast<ISecondaryInteractable>().ForEach(i => i.OnUnfocus(this));
+            if (currentTargetCollider) // disposal check
+                currentTargetCollider.GetComponents(typeof(ISecondaryInteractable)).Cast<ISecondaryInteractable>().ForEach(i => i.OnUnfocus(this));
             currentTarget = null;
             currentTargetCollider = null;
 

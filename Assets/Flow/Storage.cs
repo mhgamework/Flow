@@ -27,7 +27,10 @@ namespace Assets.Flow
         public void TryInteract(Player p, Vector3 point)
         {
             TextPopup.SetText("Water: " + WaterCrystals + "\nFire: " + FireCrystals);
-           
+            if (Input.GetMouseButton(1))
+            {
+                Destroy(gameObject);
+            }
         }
 
         public void AddResources(string resourceType, int i)
