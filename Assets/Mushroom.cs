@@ -3,7 +3,7 @@ using System.Collections;
 using Assets;
 using System;
 
-public class RedMushroom : MonoBehaviour,IInteractable {
+public class Mushroom : MonoBehaviour,IInteractable {
 
     public float AmountHealthLost = 0.2f;
     public float AmountFoodGained = 0.1f;
