@@ -1,0 +1,168 @@
+fileFormatVersion: 2
+guid: a52651eb7c631e0419753f37ff418066
+timeCreated: 1444152967
+licenseType: Free
+ModelImporter:
+  serializedVersion: 18
+  fileIDToRecycleName:
+    100000: Box1052
+    100002: Box1055
+    100004: Box1056
+    100006: Box1057
+    100008: Box1058
+    100010: Box1059
+    100012: Box1060
+    100014: Box1062
+    100016: Box1063
+    100018: //RootNode
+    100020: Pyramid486
+    100022: Pyramid489
+    100024: Pyramid490
+    100026: Pyramid491
+    100028: Pyramid492
+    100030: Pyramid493
+    100032: Pyramid494
+    100034: Pyramid496
+    100036: Pyramid497
+    100038: Tilebase146
+    400000: Box1052
+    400002: Box1055
+    400004: Box1056
+    400006: Box1057
+    400008: Box1058
+    400010: Box1059
+    400012: Box1060
+    400014: Box1062
+    400016: Box1063
+    400018: //RootNode
+    400020: Pyramid486
+    400022: Pyramid489
+    400024: Pyramid490
+    400026: Pyramid491
+    400028: Pyramid492
+    400030: Pyramid493
+    400032: Pyramid494
+    400034: Pyramid496
+    400036: Pyramid497
+    400038: Tilebase146
+    2300000: Box1052
+    2300002: Box1055
+    2300004: Box1056
+    2300006: Box1057
+    2300008: Box1058
+    2300010: Box1059
+    2300012: Box1060
+    2300014: Box1062
+    2300016: Box1063
+    2300018: Pyramid486
+    2300020: Pyramid489
+    2300022: Pyramid490
+    2300024: Pyramid491
+    2300026: Pyramid492
+    2300028: Pyramid493
+    2300030: Pyramid494
+    2300032: Pyramid496
+    2300034: Pyramid497
+    2300036: Tilebase146
+    3300000: Box1052
+    3300002: Box1055
+    3300004: Box1056
+    3300006: Box1057
+    3300008: Box1058
+    3300010: Box1059
+    3300012: Box1060
+    3300014: Box1062
+    3300016: Box1063
+    3300018: Pyramid486
+    3300020: Pyramid489
+    3300022: Pyramid490
+    3300024: Pyramid491
+    3300026: Pyramid492
+    3300028: Pyramid493
+    3300030: Pyramid494
+    3300032: Pyramid496
+    3300034: Pyramid497
+    3300036: Tilebase146
+    4300000: Box1052
+    4300002: Box1055
+    4300004: Box1056
+    4300006: Box1057
+    4300008: Box1058
+    4300010: Box1059
+    4300012: Box1060
+    4300014: Box1062
+    4300016: Box1063
+    4300018: Pyramid486
+    4300020: Pyramid489
+    4300022: Pyramid490
+    4300024: Pyramid491
+    4300026: Pyramid492
+    4300028: Pyramid493
+    4300030: Pyramid494
+    4300032: Pyramid496
+    4300034: Pyramid497
+    4300036: Tilebase146
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

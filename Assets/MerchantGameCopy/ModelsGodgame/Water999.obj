@@ -1,0 +1,29 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 11.08.2014 17:16:12
+
+mtllib Water999.mtl
+
+#
+# object Hole005
+#
+
+v  5.0000 -1.0000 -5.0000
+v  5.0000 -10.0000 -5.0000
+v  5.0000 -10.0000 5.0000
+v  5.0000 -1.0000 5.0000
+# 4 vertices
+
+vn -1.0000 0.0000 -0.0000
+# 1 vertex normals
+
+vt 1.0000 0.0000 0.0000
+vt 0.0000 0.0000 0.0000
+# 2 texture coords
+
+g Hole005
+usemtl wire_038021002
+s off
+f 1/1/1 2/2/1 3/1/1 
+f 3/1/1 4/2/1 1/1/1 
+# 2 faces
+

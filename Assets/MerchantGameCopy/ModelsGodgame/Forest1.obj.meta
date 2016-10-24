@@ -1,0 +1,128 @@
+fileFormatVersion: 2
+guid: 9063eff2e7329ee4696b8718b312b0fb
+timeCreated: 1444152963
+licenseType: Free
+ModelImporter:
+  serializedVersion: 18
+  fileIDToRecycleName:
+    100000: Box1065
+    100002: Box1067
+    100004: Box1069
+    100006: Box1071
+    100008: Box1072
+    100010: //RootNode
+    100012: Pyramid499
+    100014: Pyramid501
+    100016: Pyramid503
+    100018: Pyramid505
+    100020: Pyramid506
+    100022: Tilebase147
+    400000: Box1065
+    400002: Box1067
+    400004: Box1069
+    400006: Box1071
+    400008: Box1072
+    400010: //RootNode
+    400012: Pyramid499
+    400014: Pyramid501
+    400016: Pyramid503
+    400018: Pyramid505
+    400020: Pyramid506
+    400022: Tilebase147
+    2300000: Box1065
+    2300002: Box1067
+    2300004: Box1069
+    2300006: Box1071
+    2300008: Box1072
+    2300010: Pyramid499
+    2300012: Pyramid501
+    2300014: Pyramid503
+    2300016: Pyramid505
+    2300018: Pyramid506
+    2300020: Tilebase147
+    3300000: Box1065
+    3300002: Box1067
+    3300004: Box1069
+    3300006: Box1071
+    3300008: Box1072
+    3300010: Pyramid499
+    3300012: Pyramid501
+    3300014: Pyramid503
+    3300016: Pyramid505
+    3300018: Pyramid506
+    3300020: Tilebase147
+    4300000: Box1065
+    4300002: Box1067
+    4300004: Box1069
+    4300006: Box1071
+    4300008: Box1072
+    4300010: Pyramid499
+    4300012: Pyramid501
+    4300014: Pyramid503
+    4300016: Pyramid505
+    4300018: Pyramid506
+    4300020: Tilebase147
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

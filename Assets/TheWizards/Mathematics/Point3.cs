@@ -72,6 +72,12 @@ namespace DirectX11
         {
             return new Vector3(X, Y, Z);
         }
+
+        internal static Point3 Floor(Vector3 vector3)
+        {
+            return new Point3((int)Math.Floor(vector3.x), (int)Math.Floor(vector3.y), (int)Math.Floor(vector3.z));
+        }
+
         public static implicit operator Vector3(Point3 p)
         {
             return p.ToVector3();
