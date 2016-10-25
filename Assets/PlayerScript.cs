@@ -3,8 +3,9 @@ using System.Collections;
 using System;
 using System.Linq;
 using Assets;
+using UnityEngine.EventSystems;
 
-public class PlayerScript : MonoBehaviour
+public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler
 {
 
     public float MoveSpeed = 1;
@@ -98,5 +99,8 @@ public class PlayerScript : MonoBehaviour
         transform.position += delta;
     }
 
-
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        Debug.Log("Click player!");
+    }
 }

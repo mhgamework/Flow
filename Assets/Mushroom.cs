@@ -7,6 +7,8 @@ public class Mushroom : MonoBehaviour,IInteractable {
 
     public float AmountHealthLost = 0.2f;
     public float AmountFoodGained = 0.1f;
+    public string ResourceType;
+    public float ResourceAmount=1;
 
 
 
