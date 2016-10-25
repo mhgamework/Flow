@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class InteractableInventoryUIScript : MonoBehaviour
 {
@@ -10,10 +11,13 @@ public class InteractableInventoryUIScript : MonoBehaviour
     public ItemSlotScript ItemSlotPrefab;
 
     public int NumSlots = 16;
+    private Action unregisterListeners = null;
 
     // Use this for initialization
     void Start()
     {
+        if (TargetInventory != null)
+            SetInventory(TargetInventory);
         BuildUI();
         UpdateUI();
     }
@@ -51,8 +55,17 @@ public class InteractableInventoryUIScript : MonoBehaviour
 
     public void SetInventory(InventoryScript inventoryScript)
     {
+        if (unregisterListeners != null)
+        {
+            unregisterListeners();
+            unregisterListeners = null;
+        }
         TargetInventory = inventoryScript;
+
         BuildUI();
         UpdateUI();
+
+        unregisterListeners = TargetInventory.RegisterChangeListener(iSlot => transform.GetChild(iSlot).GetComponent<ItemSlotScript>().UpdateUI());
+
     }
 }

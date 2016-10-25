@@ -10,6 +10,7 @@ using System.Linq;
 public class InventoryScript : MonoBehaviour
 {
     public List<InventoryItem> Inventory = new List<InventoryItem>();
+    private List<Action<int>> onChangedListeners = new List<Action<int>>();
 
     // Use this for initialization
     void Start()
@@ -35,6 +36,7 @@ public class InventoryScript : MonoBehaviour
         }
         i.ResourceType = resourceType;
         i.Amount += amount;
+        this.onChangedListeners.ForEach(f => f(Inventory.IndexOf(i)));
     }
 
     public void RemoveResourcse(string resourceType, int amount)
@@ -47,6 +49,7 @@ public class InventoryScript : MonoBehaviour
 
         if (amount > i.Amount) throw new InvalidOperationException();
         i.Amount -= amount;
+        this.onChangedListeners.ForEach(f => f(Inventory.IndexOf(i)));
     }
 
     public int GetResourceCount(string resourceType)
@@ -56,6 +59,13 @@ public class InventoryScript : MonoBehaviour
         return i.Amount;
     }
 
+
+    public Action RegisterChangeListener(Action<int> onSlotChanged)
+    {
+        onChangedListeners.Add(onSlotChanged);
+
+        return () => onChangedListeners = onChangedListeners.Where(f => f != onSlotChanged).ToList();
+    }
 
 
 

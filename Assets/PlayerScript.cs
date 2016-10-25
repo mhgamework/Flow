@@ -17,10 +17,19 @@ public class PlayerScript : MonoBehaviour
     public float MaxInteractDistance = 2;
     public float MinInteractDistance = 0.5f;
 
+    public InventoryScript HotbarInventory;
+
     // Use this for initialization
     void Start()
     {
 
+    }
+
+    public bool TryAddResource(string resourceType, int amount)
+    {
+        //TODO: limiting
+        HotbarInventory.AddResources(resourceType, amount);
+        return true;
     }
 
     // Update is called once per frame
