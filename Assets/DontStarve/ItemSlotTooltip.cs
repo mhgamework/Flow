@@ -21,7 +21,9 @@ public class ItemSlotTooltip : MonoBehaviour,IPointerEnterHandler,IPointerExitHa
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        var text = itemSlotScript.GetSlotStack().GetItemType().Name;
+        var inventoryItem = itemSlotScript.GetSlotStack();
+        if (inventoryItem == null) return;
+        var text = inventoryItem.GetItemType().Name;
         TextCursorTooltipSingleton.Instance.SetTooltip(text, null);
 
     }

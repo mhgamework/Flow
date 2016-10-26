@@ -13,5 +13,32 @@ namespace Assets.DontStarve.Inventory
         {
             Name = name;
         }
+
+
+
+        public bool IsEdible { get; private set; }
+
+        private float EatFood;
+        private float EatHealth;
+        public void SetEdible(float food, float health)
+        {
+            IsEdible = true;
+            EatFood = food;
+            EatHealth = health;
+        }
+        public void Eat(PlayerScript player)
+        {
+            player.takeDamage(-EatHealth);
+            player.gainFood(EatFood);
+        }
+
+
+        public bool IsCookable { get; private set; }
+        public string CookedItemType { get; private set; }
+        public void SetCookable(string cookedItemType)
+        {
+            IsCookable = true;
+            CookedItemType = cookedItemType;
+        }
     }
 }

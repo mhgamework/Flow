@@ -7,11 +7,12 @@ public class FirePitScript : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 {
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (isHoldingCookable())
+        var type = DraggableItemStackScript.Instance().GetDraggingItemType();
+        if (type == null) return;
+
+        if (type.IsCookable)
         {
-            string newType = null;
-            if (DraggableItemStackScript.Instance().stack.ResourceType == "redmushroom")
-                newType = "cookedredmushroom";
+            string newType = type.CookedItemType;
 
             if (PlayerScript.Instance.TryAddResource(newType,1))
             {

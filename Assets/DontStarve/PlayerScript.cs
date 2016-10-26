@@ -5,7 +5,7 @@ using System.Linq;
 using Assets;
 using UnityEngine.EventSystems;
 
-public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler
+public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler, IPointerEnterHandler,IPointerExitHandler
 {
 
     public float MoveSpeed = 1;
@@ -101,6 +101,32 @@ public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log("Click player!");
+        if (!DraggableItemStackScript.Instance().IsDragging) return;
+        var itemType = DraggableItemStackScript.Instance().stack.GetItemType();
+        if (itemType == null) return;
+
+        if (itemType.IsEdible)
+        {
+            itemType.Eat(this);
+            DraggableItemStackScript.Instance().RemoveItems(1);
+        }
+
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (!DraggableItemStackScript.Instance().IsDragging) return;
+        var itemType = DraggableItemStackScript.Instance().stack.GetItemType();
+        if (itemType == null) return;
+
+        if (itemType.IsEdible)
+        {
+            TextCursorTooltipSingleton.Instance.SetTooltip("Eat",null);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        TextCursorTooltipSingleton.Instance.ClearTooltip();
     }
 }

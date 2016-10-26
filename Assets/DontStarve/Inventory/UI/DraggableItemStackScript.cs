@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
+using Assets.DontStarve.Inventory;
 
 public class DraggableItemStackScript : MonoBehaviour
 {
@@ -14,6 +15,12 @@ public class DraggableItemStackScript : MonoBehaviour
     public static DraggableItemStackScript Instance()
     {
         return FindObjectOfType<DraggableItemStackScript>();
+    }
+
+    public ItemType GetDraggingItemType()
+    {
+        if (!IsDragging) return null;
+        return stack.GetItemType();
     }
 
     // Use this for initialization
@@ -55,5 +62,16 @@ public class DraggableItemStackScript : MonoBehaviour
         uiStack.gameObject.SetActive(IsDragging);
         if (IsDragging)
             uiStack.UpdateUI(stack);
+    }
+
+    public void RemoveItems(int amount)
+    {
+        if (stack.Amount < amount) throw new Exception("Not enough items!");
+        stack.Amount -= amount;
+
+        if (stack.Amount == 0)
+            StopDrag();
+        else
+            UpdateUI();
     }
 }

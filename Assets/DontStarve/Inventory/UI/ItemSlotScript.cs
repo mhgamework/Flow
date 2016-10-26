@@ -23,6 +23,7 @@ public class ItemSlotScript : MonoBehaviour, IPointerClickHandler
 
     private InventoryScript GetInventory()
     {
+        if (inventoryUI == null) return null;
         return inventoryUI.TargetInventory;
     }
 
@@ -117,6 +118,7 @@ public class ItemSlotScript : MonoBehaviour, IPointerClickHandler
 
     public InventoryScript.InventoryItem GetSlotStack()
     {
+        if (GetInventory() == null) return null;
         return GetInventory().GetSlot(SlotNum);
     }
 

@@ -21,7 +21,25 @@ public class ResourceTypesScript : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        itemTypes.Add("redmushroom", new ItemType("Red Mushroom"));
+        ItemType t ;
+
+        t= new ItemType("Red Mushroom");
+        t.SetEdible(-0.2f, -0.1f);
+        t.SetCookable("cookedredmushroom");
+        itemTypes.Add("redmushroom", t);
+
+        t = new ItemType("Cooked Red Mushroom");
+        t.SetEdible(0.2f, -0.1f);
+        itemTypes.Add("cookedredmushroom", t);
+
+        t = new ItemType("Brown Mushroom");
+        t.SetEdible(0.1f, -0.2f);
+        t.SetCookable("cookedbrownmushroom");
+        itemTypes.Add("brownmushroom", t);
+
+        t = new ItemType("Cooked Brown Mushroom");
+        t.SetEdible(-0.1f, 0.2f);
+        itemTypes.Add("cookedbrownmushroom", t);
     }
 
     // Update is called once per frame
@@ -37,6 +55,7 @@ public class ResourceTypesScript : MonoBehaviour
 
     public ItemType GetItemTypeForIdentifier(string identifier)
     {
+        if (!itemTypes.ContainsKey(identifier)) return new ItemType("UNKNOWN - " + identifier);
         return itemTypes[identifier];
     }
 
