@@ -36,7 +36,16 @@ public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler, IPoin
 
     internal void Craft(Recipe activeRecipe)
     {
-        throw new NotImplementedException();
+        if (!CanCraft(activeRecipe)) throw new Exception("Cannot craft this recipe!");
+
+        activeRecipe.ResourceCost.ForEach(c =>
+        {
+            HotbarInventory.RemoveResourcse(c.Resource, c.Amount);
+        });
+
+        HotbarInventory.AddResources(activeRecipe.CraftedResourceType, 1);
+        
+
     }
 
     internal bool CanCraft(Recipe activeRecipe)

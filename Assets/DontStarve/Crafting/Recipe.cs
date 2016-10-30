@@ -15,6 +15,8 @@ namespace Assets.DontStarve.Crafting
         public List<ResourceAmount> ResourceCost;
         public String  Description;
 
+        public String CraftedResourceType;
+
         [Serializable]
         public class ResourceAmount
         {

@@ -40,6 +40,9 @@ public class ResourceTypesScript : MonoBehaviour
         t = new ItemType("Cooked Brown Mushroom");
         t.SetEdible(-0.1f, 0.2f);
         itemTypes.Add("cookedbrownmushroom", t);
+
+        t = new ItemType("Axe");
+        itemTypes.Add("axe", t);
     }
 
     // Update is called once per frame
