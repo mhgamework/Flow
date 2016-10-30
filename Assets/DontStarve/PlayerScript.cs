@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using Assets;
 using UnityEngine.EventSystems;
+using Assets.DontStarve.Crafting;
 
 public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler, IPointerEnterHandler,IPointerExitHandler
 {
@@ -31,6 +32,16 @@ public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler, IPoin
         //TODO: limiting
         HotbarInventory.AddResources(resourceType, amount);
         return true;
+    }
+
+    internal void Craft(Recipe activeRecipe)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal bool CanCraft(Recipe activeRecipe)
+    {
+        return activeRecipe.ResourceCost.All(k => k.Amount <= GetResourceCount(k.Resource));
     }
 
     // Update is called once per frame
@@ -66,6 +77,11 @@ public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler, IPoin
         Health = Mathf.Clamp(Health - amountHealthLost, 0, 1);
         if (Health == 0)
             Debug.Log("YOU DIEEED!");
+    }
+
+    internal int GetResourceCount(string resource)
+    {
+        return HotbarInventory.Inventory.Where(k => k.ResourceType == resource).Select(k => k.Amount).Sum();
     }
 
     private void tryInteract()

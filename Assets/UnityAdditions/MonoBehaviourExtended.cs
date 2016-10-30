@@ -21,5 +21,14 @@ namespace Assets.UnityAdditions
             }
             return result;
         }
+
+        public static IEnumerable<T> GetChildren<T>(this Transform target) where T : Component
+        {
+            for (int i = 0; i < target.childCount; i++)
+            {
+                var c = target.GetChild(i).GetComponent<T>();
+                if (c != null) yield return c;
+            }
+        }
     }
 }
