@@ -21,6 +21,15 @@ public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler, IPoin
 
     public InventoryScript HotbarInventory;
 
+    public GameObject Axe;
+
+
+    internal bool IsHoldingTool(string resourceType)
+    {
+        if (HotbarInventory.Inventory[11].ResourceType != resourceType || HotbarInventory.Inventory[11].Amount <= 0) return false;
+        return true;
+    }
+
     // Use this for initialization
     void Start()
     {
@@ -74,6 +83,8 @@ public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler, IPoin
 
         if (Input.GetKey(KeyCode.Space))
             tryInteract();
+
+        Axe.SetActive(IsHoldingTool("axe"));
     }
 
     public void gainFood(float amountFoodGained)
@@ -103,7 +114,7 @@ public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler, IPoin
         var dist = closest.getDistance(this);
         if (dist <= MinInteractDistance)
         {
-            closest.interact(this);
+            closest.Interact(this);
         }
         else
         {

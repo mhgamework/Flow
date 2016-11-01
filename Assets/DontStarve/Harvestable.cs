@@ -18,7 +18,7 @@ public class Harvestable : MonoBehaviour,IInteractable {
         return transform.position;
     }
 
-    public void interact(PlayerScript player)
+    public void Interact(PlayerScript player)
     {
         if (!player.TryAddResource(ResourceType, Amount)) return;
 

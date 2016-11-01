@@ -10,6 +10,6 @@ namespace Assets
     {
         float getDistance(PlayerScript player);
         Vector3 getPosition();
-        void interact(PlayerScript player);
+        void Interact(PlayerScript player);
     }
 }

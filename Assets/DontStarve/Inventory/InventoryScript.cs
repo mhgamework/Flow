@@ -100,6 +100,12 @@ public class InventoryScript : MonoBehaviour
         {
             return ResourceTypesScript.Instance().GetItemTypeForIdentifier(ResourceType);
         }
+
+        public override String ToString()
+        {
+            return ResourceType + ": " + Amount;
+        }
+
     }
 
     public InventoryItem GetSlot(int slotNum)

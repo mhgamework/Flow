@@ -22,7 +22,7 @@ public class Mushroom : MonoBehaviour,IInteractable {
         return transform.position;
     }
 
-    public void interact(PlayerScript player)
+    public void Interact(PlayerScript player)
     {
         player.takeDamage(AmountHealthLost);
         player.gainFood(AmountFoodGained);
