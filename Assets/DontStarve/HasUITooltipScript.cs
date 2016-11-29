@@ -5,23 +5,23 @@ using System;
 
 public class HasUITooltipScript : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler {
 
-    public string LeftMouseText;
-    public string RightMouseText;
+	public string LeftMouseText;
+	public string RightMouseText;
 
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        Debug.Log("Enter " + this);
-        TextCursorTooltipSingleton.Instance.SetTooltip(LeftMouseText, RightMouseText);
-    }
+	public void OnPointerEnter(PointerEventData eventData)
+	{
+		Debug.Log("Enter " + this);
+		TextCursorTooltipSingleton.Instance.SetTooltip(LeftMouseText, RightMouseText);
+	}
 
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        Debug.Log("Exit " + this);
-        TextCursorTooltipSingleton.Instance.ClearTooltip();
-    }
+	public void OnPointerExit(PointerEventData eventData)
+	{
+		Debug.Log("Exit " + this);
+		TextCursorTooltipSingleton.Instance.ClearTooltip();
+	}
 
-    // Use this for initialization
-    void Start () {
+	// Use this for initialization
+	void Start () {
 	
 	}
 	

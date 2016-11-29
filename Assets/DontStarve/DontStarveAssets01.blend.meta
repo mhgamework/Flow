@@ -181,6 +181,11 @@ ModelImporter:
     100346: Plane_001
     100348: Plane_002
     100350: Plane_000
+    100352: Cube_016
+    100354: Cube_017
+    100356: Cube_018
+    100358: Cube_019
+    100360: Cube_020
     400000: //RootNode
     400002: Circle
     400004: Circle_001
@@ -357,6 +362,11 @@ ModelImporter:
     400346: Plane_001
     400348: Plane_002
     400350: Plane_000
+    400352: Cube_016
+    400354: Cube_017
+    400356: Cube_018
+    400358: Cube_019
+    400360: Cube_020
     2300000: //RootNode
     2300002: Circle
     2300004: Circle_001
@@ -531,6 +541,11 @@ ModelImporter:
     2300342: Plane_001
     2300344: Plane_002
     2300346: Plane_000
+    2300348: Cube_016
+    2300350: Cube_017
+    2300352: Cube_018
+    2300354: Cube_019
+    2300356: Cube_020
     3300000: //RootNode
     3300002: Circle
     3300004: Circle_001
@@ -705,6 +720,11 @@ ModelImporter:
     3300342: Plane_001
     3300344: Plane_002
     3300346: Plane_000
+    3300348: Cube_016
+    3300350: Cube_017
+    3300352: Cube_018
+    3300354: Cube_019
+    3300356: Cube_020
     4300000: Cube
     4300002: Mesh1_Mushroom_Red_Model
     4300004: Cylinder_033
@@ -878,6 +898,11 @@ ModelImporter:
     4300340: Plane_002
     4300342: Plane_001
     4300344: Plane_000
+    4300346: Cube_020
+    4300348: Cube_019
+    4300350: Cube_018
+    4300352: Cube_017
+    4300354: Cube_016
     7400000: Default Take
     9500000: //RootNode
   materials:

@@ -35,10 +35,20 @@ namespace Assets.DontStarve.Inventory
 
         public bool IsCookable { get; private set; }
         public string CookedItemType { get; private set; }
+
         public void SetCookable(string cookedItemType)
         {
             IsCookable = true;
             CookedItemType = cookedItemType;
+        }
+
+
+        public bool IsFuel { get; private set; }
+        public float FuelAmount { get; private set; }
+        public void SetFuel(int amount)
+        {
+            IsFuel = true;
+            FuelAmount = amount;
         }
     }
 }

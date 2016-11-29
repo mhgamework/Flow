@@ -43,6 +43,10 @@ public class ResourceTypesScript : MonoBehaviour
 
         t = new ItemType("Axe");
         itemTypes.Add("axe", t);
+
+        t = new ItemType("Logs");
+        t.SetFuel(1);
+        itemTypes.Add("logs", t);
     }
 
     // Update is called once per frame
