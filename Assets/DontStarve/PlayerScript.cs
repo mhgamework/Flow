@@ -22,6 +22,7 @@ public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler, IPoin
     public InventoryScript HotbarInventory;
 
     public GameObject Axe;
+    public GameObject Pickaxe;
 
 
     internal bool IsHoldingTool(string resourceType)
@@ -85,6 +86,7 @@ public class PlayerScript : Singleton<PlayerScript>, IPointerClickHandler, IPoin
             tryInteract();
 
         Axe.SetActive(IsHoldingTool("axe"));
+        Pickaxe.SetActive(IsHoldingTool("pickaxe"));
     }
 
     public void gainFood(float amountFoodGained)
