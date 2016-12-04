@@ -51,9 +51,9 @@ public class Tree : MonoBehaviour, IInteractable, IPointerEnterHandler, IPointer
         if (step < 0.5f)
             movement = 0;
         else if (step < 0.75f)
-            movement = (step - 0.5f) / 0.25f;
+            movement = EasingFunction.EaseInBack(0,1,(step - 0.5f) / 0.25f);
         else
-            movement = 1 - ((step - 0.75f) / 0.25f);
+            movement = EasingFunction.EaseOutBack(0,1,1 - ((step - 0.75f) / 0.25f));
 
         Debug.Log(movement);
 
@@ -76,7 +76,7 @@ public class Tree : MonoBehaviour, IInteractable, IPointerEnterHandler, IPointer
         var time = 0f;
         while (time < 1f)
         {
-            transform.localRotation = Quaternion.AngleAxis(time * 90, Vector3.forward);
+            transform.localRotation = Quaternion.AngleAxis(EasingFunction.EaseInCubic(0,1,  time) * 90, Vector3.forward);
             time += Time.deltaTime;
             yield return new WaitForSeconds(0);
         }
