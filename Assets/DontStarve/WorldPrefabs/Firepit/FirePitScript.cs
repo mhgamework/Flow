@@ -79,6 +79,7 @@ public class FirePitScript : MonoBehaviour, IPointerClickHandler, IPointerEnterH
             return;
         }
 
+        if (!isBurning()) return;
         if (type.IsCookable)
         {
             string newType = type.CookedItemType;
