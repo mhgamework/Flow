@@ -28,3 +28,10 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+/ConsoleApplication1/Release
+/ConsoleApplication1/Debug
+/Release
+/debug
+/Flow.VC.VC.opendb
+/Flow.VC.db
+/ipch
