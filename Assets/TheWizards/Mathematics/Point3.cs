@@ -118,6 +118,15 @@ namespace DirectX11
             return new Point3(p.X / num, p.Y / num, p.Z / num);
         }
 
+        /// <summary>
+        /// Component wise multiplication
+        /// </summary>
+        /// <returns></returns>
+        public Point3 Multiply(Point3 other)
+        {
+            return new Point3(X * other.X, Y * other.Y, Z * other.Z);
+        }
+
         public override string ToString()
         {
             return string.Format("X: {0},Y: {1},Z: {2}", X, Y, Z);
