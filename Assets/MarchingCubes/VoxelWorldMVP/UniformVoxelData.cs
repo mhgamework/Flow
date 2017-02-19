@@ -6,6 +6,10 @@ using System.Text;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
+    /// <summary>
+    /// Represents the data of a single voxel
+    /// Also contains info on when the data was last changed
+    /// </summary>
     public class UniformVoxelData
     {
 

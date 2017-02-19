@@ -348,8 +348,8 @@ namespace MHGameWork.TheWizards.Graphics.SlimDX.DirectX11.Graphics
             Vector3 vSnelheid = new Vector3();
 
             if (Input.GetKey(KeyCode.S)) { vSnelheid += Vector3.back; }
-            if (Input.GetKey(KeyCode.Z)) { vSnelheid += Vector3.forward; }
-            if (Input.GetKey(KeyCode.Q)) { vSnelheid += Vector3.left; }
+            if (Input.GetKey(KeyCode.Z) || Input.GetKey(KeyCode.W)) { vSnelheid += Vector3.forward; }
+            if (Input.GetKey(KeyCode.Q) || Input.GetKey(KeyCode.A)) { vSnelheid += Vector3.left; }
             if (Input.GetKey(KeyCode.D)) { vSnelheid += Vector3.right; }
             if (Input.GetKey(KeyCode.Space)) { vSnelheid += Vector3.up; }
             if (Input.GetKey(KeyCode.LeftControl)) { vSnelheid += Vector3.down; }

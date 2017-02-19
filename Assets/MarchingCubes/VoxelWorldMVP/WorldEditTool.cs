@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
+    /// <summary>
+    /// Service class
+    /// </summary>
     class WorldEditTool
     {
 

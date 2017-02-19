@@ -11,6 +11,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     [RequireComponent(typeof(MeshRenderer))]
     public class VoxelChunkRenderer : MonoBehaviour
     {
+        public Material VoxelMaterial;
         private UniformVoxelData chunkData;
 
 
@@ -45,6 +46,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             meshFilter = GetComponent<MeshFilter>();
             mesh = new Mesh();
             meshFilter.mesh = mesh;
+            GetComponent<MeshRenderer>().material = VoxelMaterial;
 
         }
 
