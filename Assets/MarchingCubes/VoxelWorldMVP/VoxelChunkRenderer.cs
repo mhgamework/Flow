@@ -6,6 +6,10 @@ using System.Linq;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
+    /// <summary>
+    /// Responsible for rendering and physics of a single chunk of a VoxelWorld
+    /// Dynamically updates the model baed on the dirty feature of the voxel world chunks
+    /// </summary>
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshCollider))]
     [RequireComponent(typeof(MeshRenderer))]
@@ -100,7 +104,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                         //var outTriangles = new List<TRIANGLE>();
 
                         //s.Polygonise(gridvals, points, actualIsoSurface, vertices, p);
-                        s.Polygonise(gridvals, points, 0, vertices, p);
+                        throw new NotImplementedException("this is not ready");
+                        //s.Polygonise(gridvals, points, 0, vertices, p);
+
+
                         //outTriangles.ForEach(t =>
                         //{
                         //    vertices.Add(t.p[0]);

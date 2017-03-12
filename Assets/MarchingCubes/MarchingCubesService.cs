@@ -44,25 +44,28 @@ namespace Assets.MarchingCubes
            of totally below the isolevel.
         */
         Vector3[] vertlist = new Vector3[12];//vertlist[12];
-        public int Polygonise(double[] gridVals, Vector3[] gridP, double isolevel, List<Vector3> triangles, Point3 offset)
+        public int Polygonise(double[] gridVals, Color[] matVals, Vector3[] gridP, double isolevel, List<Vector3> triangles, Point3 offset, List<Color> colors)
         {
             int i;
             int ntriang;
             int cubeindex;
+
 
             /*
                Determine the index into the edge table which
                tells us which vertices are inside of the surface
             */
             cubeindex = 0;
-            if (gridVals[0] < isolevel) cubeindex |= 1;
-            if (gridVals[1] < isolevel) cubeindex |= 2;
-            if (gridVals[2] < isolevel) cubeindex |= 4;
-            if (gridVals[3] < isolevel) cubeindex |= 8;
-            if (gridVals[4] < isolevel) cubeindex |= 16;
-            if (gridVals[5] < isolevel) cubeindex |= 32;
-            if (gridVals[6] < isolevel) cubeindex |= 64;
-            if (gridVals[7] < isolevel) cubeindex |= 128;
+            var material = new Color();
+
+            if (gridVals[0] < isolevel) { cubeindex |= 1; material = matVals[0]; }
+            if (gridVals[1] < isolevel) { cubeindex |= 2; material = matVals[1]; }
+            if (gridVals[2] < isolevel) { cubeindex |= 4; material = matVals[2]; }
+            if (gridVals[3] < isolevel) { cubeindex |= 8; material = matVals[3]; }
+            if (gridVals[4] < isolevel) { cubeindex |= 16; material = matVals[4]; }
+            if (gridVals[5] < isolevel) { cubeindex |= 32; material = matVals[5]; }
+            if (gridVals[6] < isolevel) { cubeindex |= 64; material = matVals[6]; }
+            if (gridVals[7] < isolevel) { cubeindex |= 128; material = matVals[7]; }
 
             /* Cube is entirely in/out of the surface */
             if (edgeTable[cubeindex] == 0)
@@ -116,6 +119,7 @@ namespace Assets.MarchingCubes
                 triangles.Add(vertlist[triTableEntry[i]] + offset);
                 triangles.Add(vertlist[triTableEntry[i + 2]] + offset);
                 triangles.Add(vertlist[triTableEntry[i + 1]] + offset); // Swapped for facing
+                colors.Add(material);
                 ntriang++;
             }
 

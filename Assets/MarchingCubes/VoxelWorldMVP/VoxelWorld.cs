@@ -35,5 +35,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             return ret;
 
         }
+
+        public void ForChunksInRange(Point3 minInclusive, Point3 maxInclusive,Action<Point3,UniformVoxelData> act)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

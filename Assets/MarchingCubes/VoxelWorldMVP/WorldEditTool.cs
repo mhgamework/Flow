@@ -21,9 +21,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private void tryClick()
         {
             var dir = 0;
-            if (Input.GetKey(KeyCode.F))
+            if (Input.GetMouseButton(0))
                 dir = 1;
-            else if (Input.GetKey(KeyCode.R))
+            else if (Input.GetMouseButton(1))
                 dir = -1;
             else
                 return;
