@@ -51,7 +51,7 @@ public class MarchingCubesScript : MonoBehaviour
         {
             var normP = p.ToVector3() / (Resolution - 1);
             var voxel = Union(
-                sphereSdf(normP, sphereA, sphereRadius,Color.green), // colors not used by renderer
+                sphereSdf(normP, sphereA, sphereRadius, Color.green), // colors not used by renderer
                 sphereSdf(normP, sphereB, sphereRadius, Color.green),
                 sphereSdf(normP, sphereC, sphereRadius, Color.red),
                 sphereSdf(normP, sphereD, sphereRadius, Color.blue)
@@ -152,37 +152,42 @@ public class MarchingCubesScript : MonoBehaviour
 
         var points = Vertices.Select(v => v.ToVector3() * 0.99f).ToArray();
 
-        //var individualColors = new[] { Color.red, Color.blue, Color.green };
-        //// Voxelize per color
-        //foreach(var iColor in individualColors)
-        for (int x = 0; x < maxX; x++)
-            for (int y = 0; y < maxY; y++)
-                for (int z = 0; z < maxZ; z++)
-                {
-                    var p = new Point3(x, y, z);
-                    for (int i = 0; i < 8; i++)
+        var individualColors = new[] { Color.red, Color.blue, Color.green };
+        // Voxelize per color-
+        foreach (var iColor in individualColors)
+            for (int x = 0; x < maxX; x++)
+            {
+                for (int y = 0; y < maxY; y++)
+                    for (int z = 0; z < maxZ; z++)
                     {
-                        //var pos = Vertices[i] + p;
-                        //var diff = pos - (size.ToVector3() * 0.5f + offset*Mathf.Abs(Mathf.Sin(Time.realtimeSinceStartup)));
-                        //var val = diff.magnitude;
-                        //val =Mathf.Min(val, (pos - (size.ToVector3() * 0.5f - offset * Mathf.Abs(Mathf.Sin(Time.realtimeSinceStartup)))).magnitude);
-                        //cell.val[i] =val; //data.Get(Vertices[i] + p);
-                        gridvals[i] = data.Get(Vertices[i] + p);
-                        matvals[i] = dataMaterials.Get(Vertices[i] + p);
+                        var p = new Point3(x, y, z);
+                        for (int i = 0; i < 8; i++)
+                        {
+                            //var pos = Vertices[i] + p;
+                            //var diff = pos - (size.ToVector3() * 0.5f + offset*Mathf.Abs(Mathf.Sin(Time.realtimeSinceStartup)));
+                            //var val = diff.magnitude;
+                            //val =Mathf.Min(val, (pos - (size.ToVector3() * 0.5f - offset * Mathf.Abs(Mathf.Sin(Time.realtimeSinceStartup)))).magnitude);
+                            //cell.val[i] =val; //data.Get(Vertices[i] + p);
+                            gridvals[i] = data.Get(Vertices[i] + p);
+                            matvals[i] = dataMaterials.Get(Vertices[i] + p);
+                            if (matvals[i] != iColor)
+                                gridvals[i] = Math.Max(gridvals[i], -gridvals[i]); // Make air by mirroring around the isosurface level, should remain identical?
 
+                        }
+                        //var outTriangles = new List<TRIANGLE>();
+
+                        Color outColor;
+                        //s.Polygonise(gridvals, points, actualIsoSurface, vertices, p);
+                        s.Polygonise(gridvals, matvals, points, 0, vertices, p, materials);
+                        //outTriangles.ForEach(t =>
+                        //{
+                        //    vertices.Add(t.p[0]);
+                        //    vertices.Add(t.p[2]); // Invert culling
+                        //    vertices.Add(t.p[1]);
+                        //});
                     }
-                    //var outTriangles = new List<TRIANGLE>();
-
-                    Color outColor;
-                    //s.Polygonise(gridvals, points, actualIsoSurface, vertices, p);
-                    s.Polygonise(gridvals, matvals, points, 0, vertices, p, materials);
-                    //outTriangles.ForEach(t =>
-                    //{
-                    //    vertices.Add(t.p[0]);
-                    //    vertices.Add(t.p[2]); // Invert culling
-                    //    vertices.Add(t.p[1]);
-                    //});
-                }
+                //break;
+            }
 
 
 
