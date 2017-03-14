@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
@@ -12,8 +13,17 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// </summary>
     public class UniformVoxelData
     {
-
-        public Array3D<float> Data { get; internal set; }
+        public Array3D<VoxelData> Data { get; internal set; }
         public int LastChangeFrame { get; internal set; }   
+    }
+    public class VoxelData
+    {
+        public float Density;
+        public VoxelMaterial Material;
+
+    }
+    public class VoxelMaterial
+    {
+        public Color color;
     }
 }

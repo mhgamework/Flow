@@ -20,10 +20,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public UniformVoxelData Generate(Point3 start, Point3 chunkSize)
         {
             var ret = new UniformVoxelData();
-            ret.Data = new Array3D<float>(chunkSize);
+            ret.Data = new Array3D<VoxelData>(chunkSize);
             ret.Data.ForEach((v, p) =>
             {
-                ret.Data[p] = worldFunction(p + start);
+                ret.Data[p] = new VoxelData() { Density = worldFunction(p + start), Material = null };
             });
 
             return ret;

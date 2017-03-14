@@ -107,11 +107,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 var offset = p.Multiply(world.ChunkSize);
                 var localHit = raycast.Value.point - offset;
 
-                c.Data.ForEach((val, pos) =>
-                {
-                    c.Data[pos] = Mathf.Max(val, range - (pos - localHit).magnitude);
-                });
-                c.LastChangeFrame = Time.frameCount;
+                throw new System.Exception();
+                //c.Data.ForEach((val, pos) =>
+                //{
+                //    c.Data[pos] = Mathf.Max(val, range - (pos - localHit).magnitude);
+                //});
+                //c.LastChangeFrame = Time.frameCount;
 
             });
         }
