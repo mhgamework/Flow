@@ -116,7 +116,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                             for (int i = 0; i < 8; i++)
                             {
                                 gridvals[i] = data.Get(Vertices[i] + p).Density;
-                                matvals[i] = data.Get(Vertices[i] + p).Material.color;
+                                var material = data.Get(Vertices[i] + p).Material;
+                                matvals[i] = material != null ? material.color : new Color();
                                 if (matvals[i] != iColor)
                                     gridvals[i] = Math.Max(gridvals[i], -gridvals[i]); // Make air by mirroring around the isosurface level, should remain identical?
 

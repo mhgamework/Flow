@@ -10,9 +10,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// </summary>
     public class DelegateVoxelWorldGenerator : IWorldGenerator
     {
-        private readonly Func<Vector3, float> worldFunction;
+        private readonly Func<Vector3, VoxelData> worldFunction;
 
-        public DelegateVoxelWorldGenerator(Func<Vector3, float> worldFunction)
+        public DelegateVoxelWorldGenerator(Func<Vector3, VoxelData> worldFunction)
         {
             this.worldFunction = worldFunction;
         }
@@ -23,7 +23,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             ret.Data = new Array3D<VoxelData>(chunkSize);
             ret.Data.ForEach((v, p) =>
             {
-                ret.Data[p] = new VoxelData() { Density = worldFunction(p + start), Material = null };
+                ret.Data[p] = worldFunction(p + start);
             });
 
             return ret;

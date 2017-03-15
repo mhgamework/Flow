@@ -29,7 +29,6 @@ public class MarchingCubesTestScript : MonoBehaviour
 
     }
 
-
     // Use this for initialization
     void Start()
     {

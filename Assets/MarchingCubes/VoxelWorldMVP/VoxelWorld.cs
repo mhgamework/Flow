@@ -29,16 +29,26 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             UniformVoxelData ret;
             if (chunks.TryGetValue(chunkCoord, out ret)) return ret;
 
-            ret = generator.Generate(chunkCoord.Multiply(ChunkSize), ChunkSize+ new Point3(1,1,1));
+            ret = generator.Generate(chunkCoord.Multiply(ChunkSize), ChunkSize + new Point3(1, 1, 1));
             chunks.Add(chunkCoord, ret);
 
             return ret;
 
         }
 
-        public void ForChunksInRange(Point3 minInclusive, Point3 maxInclusive,Action<Point3,UniformVoxelData> act)
+        public void ForChunksInRange(Point3 minInclusive, Point3 maxInclusive, Action<Point3, UniformVoxelData> act)
         {
-            throw new NotImplementedException();
+            maxInclusive += new Point3(1, 1, 1); // Make exclusive :p
+            var inverseSize = new Vector3(1f / ChunkSize.X, 1f / ChunkSize.Y, 1f / ChunkSize.Z);
+            var minInclusiveChunk = Point3.Floor(minInclusive.ToVector3().Multiply(inverseSize));
+            var maxExclusiveChunk = Point3.Ceil(maxInclusive.ToVector3().Multiply(inverseSize));
+            for (int x = minInclusiveChunk.X; x < maxExclusiveChunk.X; x++)
+                for (int y = minInclusiveChunk.Y; y < maxExclusiveChunk.Y; y++)
+                    for (int z = minInclusiveChunk.Z; z < maxExclusiveChunk.Z; z++)
+                    {
+                        act(new Point3(x, y, z), GetChunk(new Point3(x, y, z)));
+                    }
+
         }
     }
 }

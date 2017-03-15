@@ -77,6 +77,10 @@ namespace DirectX11
         {
             return new Point3((int)Math.Floor(vector3.x), (int)Math.Floor(vector3.y), (int)Math.Floor(vector3.z));
         }
+        internal static Point3 Ceil(Vector3 vector3)
+        {
+            return new Point3((int)Math.Ceiling(vector3.x), (int)Math.Ceiling(vector3.y), (int)Math.Ceiling(vector3.z));
+        }
 
         public static implicit operator Vector3(Point3 p)
         {

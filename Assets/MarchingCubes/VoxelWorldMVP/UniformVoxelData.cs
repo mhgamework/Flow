@@ -21,6 +21,11 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public float Density;
         public VoxelMaterial Material;
 
+
+        public override string ToString()
+        {
+            return string.Format("Density: {0} - Material: {1}", Density, Material == null ? "NONE" : Material.color.ToString());
+        }
     }
     public class VoxelMaterial
     {
