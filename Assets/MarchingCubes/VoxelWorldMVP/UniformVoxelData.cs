@@ -13,8 +13,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// </summary>
     public class UniformVoxelData
     {
-        public Array3D<VoxelData> Data { get; internal set; }
-        public int LastChangeFrame { get; internal set; }   
+        public Array3D<VoxelData> Data { get;  set; }
+        public int LastChangeFrame { get;  set; }   
     }
     public class VoxelData
     {

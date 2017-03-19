@@ -17,7 +17,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     {
         //public Material VoxelMaterial;
         private UniformVoxelData chunkData;
-
+        public Material[] Materials;
 
         public void SetChunk(UniformVoxelData chunkData)
         {
@@ -37,25 +37,22 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         //public float OffsetFactor = 1;
         private MeshFilter meshFilter;
         private Mesh mesh;
+        private MeshRenderer renderer;
+        VoxelChunkMeshGenerator meshGenerator;
 
-        MarchingCubesService s = new MarchingCubesService();
-
-      
 
         private int lastUpdatedFrame = -1;
 
         // Use this for initialization
         void Start()
         {
+            meshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
             meshFilter = GetComponent<MeshFilter>();
             mesh = new Mesh();
             meshFilter.mesh = mesh;
-            //GetComponent<MeshRenderer>().material = VoxelMaterial;
+            renderer = GetComponent<MeshRenderer>();
 
         }
-
-        Point3[] Vertices = new Point3[] { new Point3(0, 0, 1), new Point3(1, 0, 1), new Point3(1, 0, 0), new Point3(0, 0, 0), new Point3(0, 1, 1), new Point3(1, 1, 1), new Point3(1, 1, 0), new Point3(0, 1, 0) };
-
 
         // Update is called once per frame
         void Update()
@@ -68,11 +65,19 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private void updateMesh()
         {
+
+            var colorDicts = new Dictionary<Color, int>();// Map from hardcoded colors to material ids
+            colorDicts.Add(Color.green, 0);
+            colorDicts.Add(Color.red, 1);
+            colorDicts.Add(Color.blue, 2);
+
             List<Vector3> doubledVertices;
             int numMeshes;
             List<int[]> indicesList;
-            generateMesh(out doubledVertices, out numMeshes, out indicesList);
+            List<Color> colors;
+            meshGenerator.generateMesh(chunkData.Data, out doubledVertices, out numMeshes, out indicesList,out colors);
 
+            mesh.Clear();
             mesh.SetVertices(doubledVertices);
             mesh.subMeshCount = numMeshes;
             for (int i = 0; i < indicesList.Count; i++)
@@ -82,70 +87,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             mesh.RecalculateBounds();
             mesh.RecalculateNormals();
+            
             GetComponent<MeshCollider>().sharedMesh = mesh;
+            renderer.materials = colors.Select(c => Materials[colorDicts[c]]).ToArray();
         }
 
-        private void generateMesh(out List<Vector3> doubledVertices, out int numMeshes, out List<int[]> indicesList)
-        {
-            var data = chunkData.Data;
-            var triangles = new List<int>();
-            var materials = new List<Color>();
-            var vertices = new List<Vector3>();
 
-            var gridvals = new double[8];
-            var matvals = new Color[8];
-
-            var maxX = data.Size.X - 1;//size.X - 2;
-            var maxY = data.Size.Y - 1;//size.Y - 2;
-            var maxZ = data.Size.Z - 1;//size.Z - 2;
-
-
-            var actualIsoSurface = 0;
-
-            var points = Vertices.Select(v => v.ToVector3() * 0.99f).ToArray(); // *0.99f to show edges :)
-
-            var individualColors = new[] { Color.red, Color.blue, Color.green };
-            // Voxelize per color-
-            foreach (var iColor in individualColors)
-                for (int x = 0; x < maxX; x++)
-                {
-                    for (int y = 0; y < maxY; y++)
-                        for (int z = 0; z < maxZ; z++)
-                        {
-                            var p = new Point3(x, y, z);
-                            for (int i = 0; i < 8; i++)
-                            {
-                                gridvals[i] = data.Get(Vertices[i] + p).Density;
-                                var material = data.Get(Vertices[i] + p).Material;
-                                matvals[i] = material != null ? material.color : new Color();
-                                if (matvals[i] != iColor)
-                                    gridvals[i] = Math.Max(gridvals[i], -gridvals[i]); // Make air by mirroring around the isosurface level, should remain identical?
-
-                            }
-                            Color outColor;
-                            s.Polygonise(gridvals, matvals, points, 0, vertices, p, materials);
-                        }
-                }
-
-
-
-            mesh.Clear();
-
-            // Double the vertices to include backfaces!!
-            doubledVertices = vertices.Concat(vertices).ToList();
-            var outMaterials = new List<Color>();
-            var groups = materials.Select((c, i) => new { mat = c, index = i * 3 }).GroupBy(f => f.mat);
-            numMeshes = groups.Count();
-            indicesList = new List<int[]>();
-            foreach (var matPair in groups)
-            {
-                var color = matPair.Key;
-                outMaterials.Add(color);
-                // Also adds the backface for easy debugging
-                var indices = matPair.SelectMany(f => new[] { f.index, f.index + 1, f.index + 2, vertices.Count + f.index, vertices.Count + f.index + 2, vertices.Count + f.index + 1 }).ToArray();
-                indicesList.Add(indices);
-            }
-        }
 
     }
 

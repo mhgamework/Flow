@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DirectX11;
@@ -22,6 +23,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private VoxelMaterial MaterialGreen = new VoxelWorldMVP.VoxelMaterial() { color = Color.green };
         private VoxelMaterial MaterialRed = new VoxelWorldMVP.VoxelMaterial() { color = Color.red };
+        private VoxelMaterial MaterialBlue = new VoxelWorldMVP.VoxelMaterial() { color = Color.blue };
+
+
+
+        public List<VoxelMaterial> VoxelMaterials;
+        public VoxelMaterial ActiveMaterial;
+        public float ActiveSize = 3;
 
         public void Start()
         {
@@ -31,11 +39,15 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             worldRenderer.createRenderers(new Point3(1, 1, 1) * Size, Materials.ToArray());
 
+            ActiveMaterial = MaterialGreen;
+            VoxelMaterials = new List<VoxelMaterial>(new[] { MaterialGreen, MaterialRed, MaterialBlue });
 
             tools.Add(KeyCode.Alpha0, new NullState());
-            tools.Add(KeyCode.Alpha1, new PlaceSphereState(world, MaterialRed));
+            tools.Add(KeyCode.Alpha1, new PlaceSphereState(this, world));
+            tools.Add(KeyCode.Alpha2, new PlaceSphereStateMidair(this, world));
 
             activeState = tools[KeyCode.Alpha1];
+
             activeState.Start();
 
             raycaster = new VoxelWorldRaycaster();
@@ -46,6 +58,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private Dictionary<KeyCode, IState> tools = new Dictionary<KeyCode, IState>();
         public void Update()
         {
+            if (Input.mouseScrollDelta.y != 0)
+                ActiveSize = changeSize(ActiveSize, Mathf.Sign(Input.mouseScrollDelta.y));
+
+            if (Input.GetKeyDown(KeyCode.KeypadPlus))
+                ActiveMaterial = changeMaterial(1);
+            if (Input.GetKeyDown(KeyCode.KeypadMinus))
+                ActiveMaterial = changeMaterial(-1);
+
+
+
             foreach (var k in tools)
             {
                 if (!Input.GetKeyDown(k.Key)) continue;
@@ -59,6 +81,15 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             activeState.Update(raycaster.raycast());
         }
 
+        private float changeSize(float currentSize, float v)
+        {
+            return Mathf.Clamp(currentSize + v, 1, 100);
+        }
+
+        private VoxelMaterial changeMaterial(int indexChange)
+        {
+            return VoxelMaterials[(VoxelMaterials.IndexOf(ActiveMaterial) + indexChange + VoxelMaterials.Count) % VoxelMaterials.Count];
+        }
 
         private VoxelData worldFunction(Vector3 arg1)
         {
@@ -88,16 +119,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     {
         private readonly VoxelWorld world;
 
-        private float range = 3;
-
         private WorldEditTool tool = new WorldEditTool();
 
-        private VoxelMaterial MaterialRed;
+        private VoxelWorldScript voxelWorldScript;
 
-        public PlaceSphereState(VoxelWorld world, VoxelMaterial materialRed)
+        public PlaceSphereState(VoxelWorldScript voxelWorldScript, VoxelWorld world)
         {
+            this.voxelWorldScript = voxelWorldScript;
             this.world = world;
-            this.MaterialRed = materialRed;
         }
 
         public void Stop()
@@ -108,42 +137,80 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             if (!raycast.HasValue) return;
 
-            var min = (raycast.Value.point - new Vector3(1, 1, 1) * range).ToFloored();
-            var max = (raycast.Value.point + new Vector3(1, 1, 1) * range).ToCeiled();
+            var range = voxelWorldScript.ActiveSize;
+            var material = voxelWorldScript.ActiveMaterial;
+
+            var point = raycast.Value.point;
+            tryPlaceSphere(range, material, point);
+
+        }
+
+        public void tryPlaceSphere(float range, VoxelMaterial material, Vector3 point)
+        {
+            var min = (point - new Vector3(1, 1, 1) * range).ToFloored();
+            var max = (point + new Vector3(1, 1, 1) * range).ToCeiled();
 
             if (Input.GetMouseButtonDown(0))
             {
                 world.ForChunksInRange(min, max, (p, c) =>
                 {
                     var offset = p.Multiply(world.ChunkSize);
-                    var localHit = raycast.Value.point - offset;
+                    var localHit = point - offset;
 
-                    tool.addSphere(c, localHit, range, MaterialRed);
+                    tool.addSphere(c, localHit, range, material);
                     c.LastChangeFrame = Time.frameCount;
 
                 });
 
-               
+
             }
             else if (Input.GetMouseButtonDown(1))
             {
                 world.ForChunksInRange(min, max, (p, c) =>
                 {
                     var offset = p.Multiply(world.ChunkSize);
-                    var localHit = raycast.Value.point - offset;
+                    var localHit = point - offset;
 
-                    tool.removeSphere(c, localHit, range, MaterialRed);
+                    tool.removeSphere(c, localHit, range, material);
                     c.LastChangeFrame = Time.frameCount;
 
                 });
             }
-
-
-         
         }
 
         public void Start()
         {
+        }
+    }
+
+    public class PlaceSphereStateMidair : IState
+    {
+        private VoxelWorldScript script;
+        private PlaceSphereState tool;
+        private VoxelWorld world;
+
+        public PlaceSphereStateMidair(VoxelWorldScript script, VoxelWorld world)
+        {
+            this.script = script;
+            this.world = world;
+            this.tool = new PlaceSphereState(script, world);
+        }
+
+        public void Start()
+        {
+        }
+
+        public void Stop()
+        {
+        }
+
+        public void Update(RaycastHit? raycast)
+        {
+            var ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+
+            var point = ray.origin + ray.direction * script.ActiveSize * 2f;
+
+            tool.tryPlaceSphere(script.ActiveSize, script.ActiveMaterial, point);
         }
     }
 
