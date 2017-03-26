@@ -13,7 +13,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// <summary>
     /// Unity component to bootstrap the sky islands voxel renderer
     /// </summary>
-    public class VoxelWorldScript : MonoBehaviour
+    public class UniformVoxelWorldScript : MonoBehaviour
     {
         private UniformVoxelWorldRenderer worldRenderer;
         private VoxelWorldRaycaster raycaster;
@@ -34,7 +34,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public void Start()
         {
 
-            var world = new VoxelWorld(new DelegateVoxelWorldGenerator(worldFunction), new Point3(16, 16, 16));
+            var world = new UniformVoxelWorld(new DelegateVoxelWorldGenerator(worldFunction), new Point3(16, 16, 16));
             worldRenderer = new UniformVoxelWorldRenderer(world, transform);
 
             worldRenderer.createRenderers(new Point3(1, 1, 1) * Size, Materials.ToArray());
@@ -117,13 +117,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
     class PlaceSphereState : IState
     {
-        private readonly VoxelWorld world;
+        private readonly UniformVoxelWorld world;
 
         private WorldEditTool tool = new WorldEditTool();
 
-        private VoxelWorldScript voxelWorldScript;
+        private UniformVoxelWorldScript voxelWorldScript;
 
-        public PlaceSphereState(VoxelWorldScript voxelWorldScript, VoxelWorld world)
+        public PlaceSphereState(UniformVoxelWorldScript voxelWorldScript, UniformVoxelWorld world)
         {
             this.voxelWorldScript = voxelWorldScript;
             this.world = world;
@@ -185,11 +185,11 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
     public class PlaceSphereStateMidair : IState
     {
-        private VoxelWorldScript script;
+        private UniformVoxelWorldScript script;
         private PlaceSphereState tool;
-        private VoxelWorld world;
+        private UniformVoxelWorld world;
 
-        public PlaceSphereStateMidair(VoxelWorldScript script, VoxelWorld world)
+        public PlaceSphereStateMidair(UniformVoxelWorldScript script, UniformVoxelWorld world)
         {
             this.script = script;
             this.world = world;

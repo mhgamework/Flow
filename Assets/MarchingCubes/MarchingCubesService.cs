@@ -57,8 +57,8 @@ namespace Assets.MarchingCubes
             */
             cubeindex = 0;
             var material = new Color();
-
-            if (gridVals[0] < isolevel) { cubeindex |= 1; material = matVals[0]; }
+            // Id, can cache the cubeindex if isolevel is fixed, which it is
+            if (gridVals[0] < isolevel) { cubeindex |= 1; material = matVals[0]; } // TODO material is not used here, i am doing a pass per material
             if (gridVals[1] < isolevel) { cubeindex |= 2; material = matVals[1]; }
             if (gridVals[2] < isolevel) { cubeindex |= 4; material = matVals[2]; }
             if (gridVals[3] < isolevel) { cubeindex |= 8; material = matVals[3]; }
@@ -424,6 +424,7 @@ namespace Assets.MarchingCubes
         */
         public Vector3 VertexInterp(double isolevel, Vector3 p1, Vector3 p2, double valp1, double valp2)
         {
+            //TODO isolevel is zero so optimization is pousibblee
             double mu;
             Vector3 p;
 

@@ -3,6 +3,7 @@ using System.Linq;
 using DirectX11;
 using MHGameWork.TheWizards.Graphics.SlimDX.DirectX11.Graphics;
 using UnityEngine;
+using MHGameWork.TheWizards.Graphics;
 
 namespace MHGameWork.TheWizards.DualContouring.Terrain
 {
@@ -41,6 +42,14 @@ namespace MHGameWork.TheWizards.DualContouring.Terrain
             this.factory = factory;
         }
 
+        public T Create(int size, Point3 pos = new Point3())
+        {
+            var ret = factory.Create(null, size, 0, pos);
+            ret.Initialize(null);
+
+            return ret;
+
+        }
 
         public T Create(int size, int leafCellSize, int depth = 0, Point3 pos = new Point3())
         {
@@ -56,35 +65,35 @@ namespace MHGameWork.TheWizards.DualContouring.Terrain
         }
 
         public delegate bool isVisibleDelegate(T node, out bool visitChildren, out Color color);
-        //public void DrawLines(T node, LineManager3D lm, isVisibleDelegate isVisible)
-        //{
-        //    bool visitChildren;
-        //    Color col;
-        //    if (isVisible(node, out visitChildren, out col))
-        //        DrawSingleNode(node, lm, col);
+        public void DrawLines(T node, LineManager3D lm, isVisibleDelegate isVisible)
+        {
+            bool visitChildren;
+            Color col;
+            if (isVisible(node, out visitChildren, out col))
+                DrawSingleNode(node, lm, col);
 
-        //    if (node.Children == null || !visitChildren) return;
-        //    for (int i = 0; i < 8; i++)
-        //    {
-        //        DrawLines(node.Children[i], lm, isVisible);
-        //    }
-        //}
-        //public void DrawLines(T node, LineManager3D lm, int maxDepth = int.MaxValue)
-        //{
-        //    if (node.Depth > maxDepth) return;
-        //    DrawSingleNode(node, lm, Color.Black);
-        //    if (node.Children == null) return;
-        //    for (int i = 0; i < 8; i++)
-        //    {
-        //        DrawLines(node.Children[i], lm, maxDepth);
-        //    }
-        //}
+            if (node.Children == null || !visitChildren) return;
+            for (int i = 0; i < 8; i++)
+            {
+                DrawLines(node.Children[i], lm, isVisible);
+            }
+        }
+        public void DrawLines(T node, LineManager3D lm, int maxDepth = int.MaxValue)
+        {
+            if (node.Depth > maxDepth) return;
+            DrawSingleNode(node, lm, Color.black);
+            if (node.Children == null) return;
+            for (int i = 0; i < 8; i++)
+            {
+                DrawLines(node.Children[i], lm, maxDepth);
+            }
+        }
 
-        //public void DrawSingleNode(T node, LineManager3D lm, Color col)
-        //{
-        //    lm.AddBox(new BoundingBox(node.LowerLeft.ToVector3(), (Vector3)node.LowerLeft.ToVector3() + node.Size * new Vector3(1)),
-        //              col);
-        //}
+        public void DrawSingleNode(T node, LineManager3D lm, Color col)
+        {
+            lm.AddBox(new Bounds(node.LowerLeft.ToVector3() + node.Size * 0.5f * Vector3.one, node.Size * Vector3.one),
+                      col);
+        }
 
         public void Split(T ret, bool recurse = false, int minSize = 1)
         {
@@ -119,15 +128,15 @@ namespace MHGameWork.TheWizards.DualContouring.Terrain
         }
 
         /// <summary>
-        /// Only used for old tests
+        /// EDIT: Was obsolete, but I dont know what the replacement for this was in the wizards voxel engine, so i will use it anyways
+        /// OLD: Only used for old tests
         /// </summary>
         /// <param name="node"></param>
         /// <param name="cameraPosition"></param>
         /// <param name="minNodeSize"></param>
-        [Obsolete]
         public void UpdateQuadtreeClipmaps(T node, Vector3 cameraPosition, int minNodeSize)
         {
-            var center = (Vector3)node.LowerLeft.ToVector3() +  Vector3.one * node.Size * 0.5f;
+            var center = (Vector3)node.LowerLeft.ToVector3() + Vector3.one * node.Size * 0.5f;
             var dist = Vector3.Distance(cameraPosition, center);
 
             // Should take into account the fact that if minNodeSize changes, the quality of far away nodes changes so the threshold maybe should change too

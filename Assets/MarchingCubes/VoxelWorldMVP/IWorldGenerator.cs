@@ -7,6 +7,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// </summary>
     public interface IWorldGenerator
     {
-        UniformVoxelData Generate(Point3 start, Point3 chunkSize);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="chunkSize"></param>
+        /// <param name="sampleResolution">space between each voxel</param>
+        /// <returns></returns>
+        UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution);
     }
 }

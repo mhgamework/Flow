@@ -17,13 +17,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             this.worldFunction = worldFunction;
         }
 
-        public UniformVoxelData Generate(Point3 start, Point3 chunkSize)
+        public UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution)
         {
             var ret = new UniformVoxelData();
             ret.Data = new Array3D<VoxelData>(chunkSize);
             ret.Data.ForEach((v, p) =>
             {
-                ret.Data[p] = worldFunction(p + start);
+                ret.Data[p] = worldFunction(p*sampleResolution + start);
             });
 
             return ret;
