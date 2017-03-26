@@ -40,7 +40,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             //worldRenderer.createRenderers(new Point3(1, 1, 1) * Size, Materials.ToArray());
 
             //ActiveMaterial = MaterialGreen;
-            //VoxelMaterials = new List<VoxelMaterial>(new[] { MaterialGreen, MaterialRed, MaterialBlue });
+            VoxelMaterials = new List<VoxelMaterial>(new[] { MaterialGreen, MaterialRed, MaterialBlue });
 
 
             //raycaster = new VoxelWorldRaycaster();

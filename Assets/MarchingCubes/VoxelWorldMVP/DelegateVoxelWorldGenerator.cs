@@ -10,11 +10,15 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// </summary>
     public class DelegateVoxelWorldGenerator : IWorldGenerator
     {
-        private readonly Func<Vector3, VoxelData> worldFunction;
+        private readonly Func<Vector3, int, VoxelData> worldFunction;
 
-        public DelegateVoxelWorldGenerator(Func<Vector3, VoxelData> worldFunction)
+        public DelegateVoxelWorldGenerator(Func<Vector3, int, VoxelData> worldFunction)
         {
             this.worldFunction = worldFunction;
+        }
+        public DelegateVoxelWorldGenerator(Func<Vector3, VoxelData> worldFunction)
+        {
+            this.worldFunction = (a, b) => worldFunction(a);
         }
 
         public UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution)
@@ -23,7 +27,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             ret.Data = new Array3D<VoxelData>(chunkSize);
             ret.Data.ForEach((v, p) =>
             {
-                ret.Data[p] = worldFunction(p*sampleResolution + start);
+                ret.Data[p] = worldFunction(p * sampleResolution + start, sampleResolution);
             });
 
             return ret;

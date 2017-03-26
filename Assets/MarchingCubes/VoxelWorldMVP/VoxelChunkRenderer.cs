@@ -28,6 +28,11 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             transform.position = chunkCoord.Multiply(chunkSize);
         }
+        public void SetWorldcoords(Vector3 lowerLeft, float scale)
+        {
+            transform.localScale = new Vector3(scale,scale,scale);
+            transform.position = lowerLeft;
+        }
 
 
 

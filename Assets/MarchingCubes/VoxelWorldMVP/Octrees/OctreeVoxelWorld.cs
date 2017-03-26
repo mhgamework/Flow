@@ -71,5 +71,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         //            }
 
         //}
+        public OctreeNode GetNode(Point3 nodeLowerLeft, int nodeDepth)
+        {
+            var data = generator.Generate(nodeLowerLeft, ChunkSize + new Point3(1,1,1), 1 << (this.depth - nodeDepth));
+
+            return new OctreeNode()
+            {
+                Depth = nodeDepth,
+                LowerLeft = nodeLowerLeft,
+                VoxelData = data
+            };
+        }
     }
 }
