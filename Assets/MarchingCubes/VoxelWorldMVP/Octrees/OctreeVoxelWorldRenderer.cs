@@ -61,9 +61,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private VoxelData sinWorld(Vector3 arg1, int samplingInterval)
         {
-            var dens = (Mathf.Sin(arg1.x * 0.01f) + Mathf.Cos(arg1.z * 0.01f)) * 50 - arg1.y + 100;
-            dens += (Mathf.Sin(arg1.x * 0.11f) + Mathf.Cos(arg1.z * 0.09f)) * 4.3f;
-            return new VoxelData() { Density = dens, Material = MaterialGreen };
+            double dens = (Math.Sin(arg1.x * 0.01) + Math.Cos(arg1.z * 0.01)) * 50 - arg1.y + 3000;
+            dens += (Math.Sin(arg1.x * 0.11) + Math.Cos(arg1.z * 0.09)) * 4.3;
+
+            //dens += (Math.Sin(arg1.x * 0.002) + Math.Cos(arg1.z * 0.0019)) * 651;
+            //dens += (Math.Sin(arg1.x * 0.00021) + Math.Cos(arg1.z * 0.0002)) * 3000;
+            return new VoxelData() { Density = (float)dens, Material = MaterialGreen };
         }
         private VoxelData worldFunction(Vector3 arg1, int samplingInterval)
         {
