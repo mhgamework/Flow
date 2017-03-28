@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using DirectX11;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
@@ -15,23 +16,46 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void addSphere(UniformVoxelData data, Vector3 position, float radius, VoxelMaterial material)
         {
-            data.Data.ForEach((v, p) => {
-                var sphere = SdfFunctions.Sphere(p.ToVector3(), position, radius);
-                // Min
-                if (v.Density < sphere) return;
-                v.Density = sphere;
-                v.Material = material;
+            var func = createAddSphereKernel(position, radius, material);
+
+            data.Data.ForEach((v, p) =>
+            {
+                data.Data[p] = func(v, p);
             });
         }
+
+        public static Func<VoxelData, Point3, VoxelData> createAddSphereKernel(Vector3 position, float radius, VoxelMaterial material)
+        {
+            Func<VoxelData, Point3, VoxelData> func = (v, p) =>
+            {
+                var sphere = SdfFunctions.Sphere(p.ToVector3(), position, radius);
+                // Min
+                if (v.Density < sphere) return v;
+                return new VoxelData(sphere, material);
+            };
+            return func;
+        }
+
         public void removeSphere(UniformVoxelData data, Vector3 position, float radius, VoxelMaterial material)
         {
-            data.Data.ForEach((v, p) => {
+            var func = createRemoveSphereKernel(position, radius);
+
+            data.Data.ForEach((v, p) =>
+            {
+                data.Data[p] = func(v, p);
+            });
+        }
+
+        public static Func<VoxelData, Point3, VoxelData> createRemoveSphereKernel(Vector3 position, float radius)
+        {
+            Func<VoxelData, Point3, VoxelData> func = (v, p) =>
+            {
                 var sphere = SdfFunctions.Sphere(p.ToVector3(), position, radius);
                 // d1-d2 = Max(d1,-d2) ??? reverse?
-                if (v.Density > -sphere) return;
-                v.Density = -sphere;
-                //v.Material = material;
-            });
+                if (v.Density > -sphere) return v;
+                return new VoxelData(-sphere, v.Material);
+            };
+            return func;
         }
 
 

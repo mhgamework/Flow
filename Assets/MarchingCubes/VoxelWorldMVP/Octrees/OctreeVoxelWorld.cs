@@ -49,13 +49,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             this.helper = new ClipMapsOctree<OctreeNode>();
         }
 
-        public void RunKernel1by1Single(Point3 minInclusive, Point3 maxInclusive, Func<Point3, VoxelData, VoxelData> act, int frame, OctreeNode data)
+        public void RunKernel1by1Single(Point3 minInclusive, Point3 maxInclusive, Func<VoxelData, Point3, VoxelData> act, int frame, OctreeNode data)
         {
             var resolution = getNodeResolution(data.Depth);
             var max = maxInclusive - data.LowerLeft;
             var start = minInclusive - data.LowerLeft;
-            for (int i = 0; i < 3; i++) max[i] = Math.Min(max[i]/resolution, ChunkSize[i]);//floor
-            for (int i = 0; i < 3; i++) start[i] = Math.Max((start[i]+resolution-1)/ resolution, 0); // ceil
+            for (int i = 0; i < 3; i++) max[i] = Math.Min(max[i] / resolution, ChunkSize[i]);//floor
+            for (int i = 0; i < 3; i++) start[i] = Math.Max((start[i] + resolution - 1) / resolution, 0); // ceil
             var grid = data.VoxelData.Data;
             for (int x = start.X; x <= max.X; x++)
                 for (int y = start.Y; y <= max.Y; y++)
@@ -63,14 +63,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                     {
                         var p = new Point3(x, y, z);
                         var val = grid.GetFast(x, y, z);
-                        grid[p] = act(new Point3(data.LowerLeft.X + resolution*x, data.LowerLeft.Y + resolution * y, data.LowerLeft.Z + resolution * z), val);
+                        grid[p] = act(val, new Point3(data.LowerLeft.X + resolution * x, data.LowerLeft.Y + resolution * y, data.LowerLeft.Z + resolution * z));
 
                     }
-
             data.VoxelData.LastChangeFrame = frame;
         }
 
-        public void RunKernel1by1(Point3 minInclusive, Point3 maxInclusive, Func<Point3, VoxelData, VoxelData> act, int frame)
+        public void RunKernel1by1(Point3 minInclusive, Point3 maxInclusive, Func<VoxelData, Point3, VoxelData> act, int frame)
         {
             helper.VisitTopDown(Root, n =>
             {
@@ -125,16 +124,38 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         //            }
 
         //}
+        public OctreeNode GetNode(Point3 nodeLowerLeft, int nodeDepth, OctreeNode node)
+        {
+            for (int i = 0; i < 3; i++)
+                if (nodeLowerLeft[i] > node.LowerLeft[i] + node.Size) return null;
+            for (int i = 0; i < 3; i++)
+                if (nodeLowerLeft[i] < node.LowerLeft[i]) return null;
+            
+            allocChunk(node);
+
+            if (nodeLowerLeft == node.LowerLeft && nodeDepth == node.Depth) return node;
+            if (nodeDepth == node.Depth) return null; // dont go deeper
+
+            for (int i = 0; i < 8; i++)
+            {
+                var ret = GetNode(nodeLowerLeft, nodeDepth, node.Children[i]);
+                if (ret != null) return ret;
+            }
+
+            return null;
+
+        }
         public OctreeNode GetNode(Point3 nodeLowerLeft, int nodeDepth)
         {
-            var data = generator.Generate(nodeLowerLeft, ChunkSize + new Point3(1, 1, 1), getNodeResolution(nodeDepth));
+            return GetNode(nodeLowerLeft, nodeDepth, Root);
+            //var data = generator.Generate(nodeLowerLeft, ChunkSize + new Point3(1, 1, 1), getNodeResolution(nodeDepth));
 
-            return new OctreeNode()
-            {
-                Depth = nodeDepth,
-                LowerLeft = nodeLowerLeft,
-                VoxelData = data
-            };
+            //return new OctreeNode()
+            //{
+            //    Depth = nodeDepth,
+            //    LowerLeft = nodeLowerLeft,
+            //    VoxelData = data
+            //};
         }
 
         private int getNodeResolution(int nodeDepth)

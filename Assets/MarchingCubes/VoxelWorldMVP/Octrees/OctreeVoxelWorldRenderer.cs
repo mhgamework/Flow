@@ -45,8 +45,11 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void Start()
         {
-            VoxelWorld = new OctreeVoxelWorld(new DelegateVoxelWorldGenerator(sinWorld), minNodeSize, WorldDepth);
+            //VoxelWorld = new OctreeVoxelWorld(new DelegateVoxelWorldGenerator(sinWorld), minNodeSize, WorldDepth);
+            VoxelWorld = new OctreeVoxelWorld(new ConstantVoxelWorldGenerator(int.MaxValue, null), minNodeSize, WorldDepth);
             root = helper.Create(VoxelWorld.Root.Size, VoxelWorld.Root.LowerLeft);
+            VoxelWorld.RunKernel1by1(new Point3(0, 0, 0), new Point3(16, 16, 16), WorldEditTool.createAddSphereKernel(new Vector3(8, 8, 8), 3f, MaterialRed), 1);
+            VoxelWorld.RunKernel1by1(new Point3(0, 0, 0), new Point3(64, 64, 64), WorldEditTool.createAddSphereKernel(new Vector3(40, 40, 40), 30f, MaterialGreen), 1);
         }
 
         private VoxelData LowerleftSphereWorldFunction(Vector3 arg1)
