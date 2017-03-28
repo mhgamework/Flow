@@ -5,7 +5,9 @@ using MHGameWork.TheWizards.DualContouring.Terrain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
+using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
@@ -18,6 +20,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private Dictionary<Point3, UniformVoxelData> chunks = new Dictionary<Point3, UniformVoxelData>();
         IWorldGenerator generator;
         private int depth;
+        private ClipMapsOctree<OctreeNode> helper;
 
         public Point3 ChunkSize { get; private set; }
 
@@ -42,6 +45,57 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             var maxSize = (int)Math.Pow(2, depth) * chunkSize;
 
             Root = helper.Create(maxSize, maxSize);
+
+            this.helper = new ClipMapsOctree<OctreeNode>();
+        }
+
+        public void RunKernel1by1Single(Point3 minInclusive, Point3 maxInclusive, Func<Point3, VoxelData, VoxelData> act, int frame, OctreeNode data)
+        {
+            var resolution = getNodeResolution(data.Depth);
+            var max = maxInclusive - data.LowerLeft;
+            var start = minInclusive - data.LowerLeft;
+            for (int i = 0; i < 3; i++) max[i] = Math.Min(max[i]/resolution, ChunkSize[i]);//floor
+            for (int i = 0; i < 3; i++) start[i] = Math.Max((start[i]+resolution-1)/ resolution, 0); // ceil
+            var grid = data.VoxelData.Data;
+            for (int x = start.X; x <= max.X; x++)
+                for (int y = start.Y; y <= max.Y; y++)
+                    for (int z = start.Z; z <= max.Z; z++)
+                    {
+                        var p = new Point3(x, y, z);
+                        var val = grid.GetFast(x, y, z);
+                        grid[p] = act(new Point3(data.LowerLeft.X + resolution*x, data.LowerLeft.Y + resolution * y, data.LowerLeft.Z + resolution * z), val);
+
+                    }
+
+            data.VoxelData.LastChangeFrame = frame;
+        }
+
+        public void RunKernel1by1(Point3 minInclusive, Point3 maxInclusive, Func<Point3, VoxelData, VoxelData> act, int frame)
+        {
+            helper.VisitTopDown(Root, n =>
+            {
+                for (int i = 0; i < 3; i++)
+                    if (n.LowerLeft[i] > maxInclusive[i]) // is outside
+                        return VisitOptions.SkipChildren;
+                for (int i = 0; i < 3; i++)
+                    if (n.LowerLeft[i] + n.Size < minInclusive[i]) // is outside
+                        return VisitOptions.SkipChildren;
+                // inside
+                allocChunk(n);
+                RunKernel1by1Single(minInclusive, maxInclusive, act, frame, n);
+
+                return VisitOptions.Continue;
+            });
+        }
+
+        private void allocChunk(OctreeNode octreeNode)
+        {
+            if (octreeNode.VoxelData != null) return;
+            octreeNode.VoxelData = generator.Generate(octreeNode.LowerLeft, ChunkSize + new Point3(1, 1, 1), 1 << (this.depth - octreeNode.Depth));
+            if (octreeNode.Depth == depth) return; // leaf node
+
+            helper.Split(octreeNode);
+
         }
 
 
@@ -73,7 +127,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         //}
         public OctreeNode GetNode(Point3 nodeLowerLeft, int nodeDepth)
         {
-            var data = generator.Generate(nodeLowerLeft, ChunkSize + new Point3(1,1,1), 1 << (this.depth - nodeDepth));
+            var data = generator.Generate(nodeLowerLeft, ChunkSize + new Point3(1, 1, 1), getNodeResolution(nodeDepth));
 
             return new OctreeNode()
             {
@@ -81,6 +135,21 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 LowerLeft = nodeLowerLeft,
                 VoxelData = data
             };
+        }
+
+        private int getNodeResolution(int nodeDepth)
+        {
+            return 1 << (this.depth - nodeDepth);
+        }
+
+        public OctreeNode GetChild(OctreeNode worldRoot, int childIndex)
+        {
+            if (worldRoot.Children == null) throw new InvalidOperationException("Has no children!");
+            var ret = worldRoot.Children[childIndex];
+            allocChunk(ret);
+
+            return ret;
+
         }
     }
 }

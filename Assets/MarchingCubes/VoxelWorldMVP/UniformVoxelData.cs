@@ -16,11 +16,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public Array3D<VoxelData> Data { get;  set; }
         public int LastChangeFrame { get;  set; }   
     }
-    public class VoxelData
+    public struct VoxelData
     {
         public float Density;
         public VoxelMaterial Material;
 
+        public VoxelData(float density, VoxelMaterial material)
+        {
+            Density = density;
+            Material = material;
+        }
 
         public override string ToString()
         {
