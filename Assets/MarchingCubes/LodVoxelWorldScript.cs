@@ -33,7 +33,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void Start()
         {
-
+            //VoxelWorld = new OctreeVoxelWorld(new DelegateVoxelWorldGenerator(sinWorld), minNodeSize, WorldDepth);
+            //var world = new OctreeVoxelWorld(new ConstantVoxelWorldGenerator(int.MaxValue, null), minNodeSize, WorldDepth);
+            var world = new OctreeVoxelWorld(new DelegateVoxelWorldGenerator(FlatWorldFunction), minNodeSize, WorldDepth);
+            
+            GetComponent<OctreeVoxelWorldRenderer>().Init(world);
+            GetComponent<VoxelWorldEditorScript>().Init(world);
+           
             //var world = new UniformVoxelWorld(new DelegateVoxelWorldGenerator(worldFunction), new Point3(16, 16, 16));
             //worldRenderer = new UniformVoxelWorldRenderer(world, transform);
 
@@ -47,8 +53,43 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         }
 
-        private VoxelData worldFunction(Vector3 arg1)
+        private int minNodeSize = 16;
+        public int WorldDepth = 3;
+        private VoxelData LowerleftSphereWorldFunction(Vector3 arg1)
         {
+            return new VoxelData()
+            {
+                Density = SdfFunctions.Sphere(arg1, new Vector3(0, 0, 0), minNodeSize * 3),
+                Material = MaterialGreen
+
+            };
+        }
+        private VoxelData FlatWorldFunction(Vector3 arg1)
+        {
+            return new VoxelData()
+            {
+                Density = arg1.y-10,
+                Material = MaterialGreen
+
+            };
+        }
+
+        private VoxelData sinWorld(Vector3 arg1, int samplingInterval)
+        {
+            double dens = (Math.Sin(arg1.x * 0.01) + Math.Cos(arg1.z * 0.01)) * 50 - arg1.y + 3000;
+            dens += (Math.Sin(arg1.x * 0.11) + Math.Cos(arg1.z * 0.09)) * 4.3;
+
+            //dens += (Math.Sin(arg1.x * 0.002) + Math.Cos(arg1.z * 0.0019)) * 651;
+            //dens += (Math.Sin(arg1.x * 0.00021) + Math.Cos(arg1.z * 0.0002)) * 3000;
+            return new VoxelData() { Density = (float)dens, Material = MaterialGreen };
+        }
+        private VoxelData worldFunction(Vector3 arg1, int samplingInterval)
+        {
+            if (samplingInterval > 5)
+            {
+                return new VoxelData() { Density = 1, Material = null };
+
+            }
             var repeat = 20;
             var radius = 7;
 
@@ -62,5 +103,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             return new Vector3(p.x % c.x, p.y % c.y, p.z % c.z);
         }
+
+       
     }
 }

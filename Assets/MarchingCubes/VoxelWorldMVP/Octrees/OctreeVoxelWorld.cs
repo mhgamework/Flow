@@ -15,7 +15,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// <summary>
     /// Holds data for entire voxel world
     /// </summary>
-    public class OctreeVoxelWorld
+    public class OctreeVoxelWorld : IEditableVoxelWorld
     {
         private Dictionary<Point3, UniformVoxelData> chunks = new Dictionary<Point3, UniformVoxelData>();
         IWorldGenerator generator;

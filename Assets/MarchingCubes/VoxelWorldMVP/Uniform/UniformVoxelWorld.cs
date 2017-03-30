@@ -11,7 +11,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// <summary>
     /// Holds data for entire voxel world
     /// </summary>
-    public class UniformVoxelWorld
+    public class UniformVoxelWorld : IEditableVoxelWorld
     {
         private Dictionary<Point3, UniformVoxelData> chunks = new Dictionary<Point3, UniformVoxelData>();
         IWorldGenerator generator;
@@ -29,7 +29,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             UniformVoxelData ret;
             if (chunks.TryGetValue(chunkCoord, out ret)) return ret;
 
-            ret = generator.Generate(chunkCoord.Multiply(ChunkSize), ChunkSize + new Point3(1, 1, 1),1);
+            ret = generator.Generate(chunkCoord.Multiply(ChunkSize), ChunkSize + new Point3(1, 1, 1), 1);
             chunks.Add(chunkCoord, ret);
 
             return ret;
@@ -49,6 +49,22 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                         act(new Point3(x, y, z), GetChunk(new Point3(x, y, z)));
                     }
 
+        }
+
+        public void RunKernel1by1(Point3 minInclusive, Point3 maxInclusive, Func<VoxelData, Point3, VoxelData> act, int frame)
+        {
+            ForChunksInRange(minInclusive, maxInclusive, (p, c) =>
+            {
+                var offset = p.Multiply(ChunkSize);
+                //var localHit = point - offset;
+
+                c.Data.ForEach((vx, px) =>
+                {
+                    c.Data[px] = act(vx, px + offset);
+                });
+                c.LastChangeFrame = frame;
+
+            });
         }
     }
 }
