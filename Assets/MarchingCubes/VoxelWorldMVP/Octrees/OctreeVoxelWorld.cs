@@ -54,7 +54,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             var resolution = getNodeResolution(data.Depth);
             var max = maxInclusive - data.LowerLeft;
             var start = minInclusive - data.LowerLeft;
-            for (int i = 0; i < 3; i++) max[i] = Math.Min(max[i] / resolution, ChunkSize[i]);//floor
+            for (int i = 0; i < 3; i++) max[i] = Math.Min(max[i] / resolution, ChunkSize[i] + 1/* One extra for lod stitching */);//floor
             for (int i = 0; i < 3; i++) start[i] = Math.Max((start[i] + resolution - 1) / resolution, 0); // ceil
             var grid = data.VoxelData.Data;
             for (int x = start.X; x <= max.X; x++)
@@ -77,7 +77,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                     if (n.LowerLeft[i] > maxInclusive[i]) // is outside
                         return VisitOptions.SkipChildren;
                 for (int i = 0; i < 3; i++)
-                    if (n.LowerLeft[i] + n.Size < minInclusive[i]) // is outside
+                    if (n.LowerLeft[i] + n.Size + 1 * getNodeResolution(n.Depth)/* one extra for lod stitching */ < minInclusive[i]) // is outside
                         return VisitOptions.SkipChildren;
                 // inside
                 allocChunk(n);
@@ -90,7 +90,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private void allocChunk(OctreeNode octreeNode)
         {
             if (octreeNode.VoxelData != null) return;
-            octreeNode.VoxelData = generator.Generate(octreeNode.LowerLeft, ChunkSize + new Point3(1, 1, 1), 1 << (this.depth - octreeNode.Depth));
+            octreeNode.VoxelData = generator.Generate(octreeNode.LowerLeft, ChunkSize + new Point3(1, 1, 1) + new Point3(1, 1, 1), 1 << (this.depth - octreeNode.Depth));
             if (octreeNode.Depth == depth) return; // leaf node
 
             helper.Split(octreeNode);
@@ -130,7 +130,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 if (nodeLowerLeft[i] > node.LowerLeft[i] + node.Size) return null;
             for (int i = 0; i < 3; i++)
                 if (nodeLowerLeft[i] < node.LowerLeft[i]) return null;
-            
+
             allocChunk(node);
 
             if (nodeLowerLeft == node.LowerLeft && nodeDepth == node.Depth) return node;
