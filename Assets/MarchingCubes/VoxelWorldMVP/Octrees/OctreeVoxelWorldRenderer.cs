@@ -19,15 +19,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// </summary>
     public class OctreeVoxelWorldRenderer : MonoBehaviour
     {
-        public Material[] Materials;
-        private VoxelMaterial MaterialGreen = new VoxelWorldMVP.VoxelMaterial() { color = Color.green };
-        private VoxelMaterial MaterialRed = new VoxelWorldMVP.VoxelMaterial() { color = Color.red };
-        private VoxelMaterial MaterialBlue = new VoxelWorldMVP.VoxelMaterial() { color = Color.blue };
+        public Material TemplateMaterial;
+        private Dictionary<Color, Material> materialsDictionary;
 
         public bool ShowOctree = false;
-
-
-        private Dictionary<Point3, VoxelChunkRenderer> chunks = new Dictionary<Point3, VoxelChunkRenderer>();
 
         public Transform Container;
 
@@ -37,25 +32,32 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private RenderOctreeNode root;
         private ClipMapsOctree<RenderOctreeNode> helper = new ClipMapsOctree<RenderOctreeNode>();
         private LineManager3D manager = new LineManager3D();
-     
+
 
         //private VoxelChunkMeshGenerator voxelChunkMeshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
 
         public void Start()
         {
-         
+
         }
 
-        public void Init(OctreeVoxelWorld world)
+        public void Init(OctreeVoxelWorld world, List<VoxelMaterial> voxelMaterials)
         {
             VoxelWorld = world;
             root = helper.Create(VoxelWorld.Root.Size, VoxelWorld.Root.LowerLeft);
-            
+
+            this.materialsDictionary = voxelMaterials.ToDictionary(v => v.color, c =>
+              {
+                  var mat = new Material(TemplateMaterial);
+                  mat.color = c.color;
+                  return mat;
+              });
+
         }
 
-     
 
-     
+
+
 
         public void Update()
         {
@@ -84,7 +86,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             var renderObject = new GameObject();
             var comp = renderObject.AddComponent<VoxelChunkRenderer>();
-            comp.Materials = Materials;
+            comp.MaterialsDictionary = materialsDictionary;
             comp.SetChunk(dataNode.VoxelData);
             comp.SetWorldcoords(node.LowerLeft, node.Size / 16.0f);// TOOD: DANGEROES
 

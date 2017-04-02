@@ -18,28 +18,27 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     {
         private VoxelWorldRaycaster raycaster;
 
-        private VoxelMaterial MaterialGreen = new VoxelWorldMVP.VoxelMaterial() { color = Color.green };
-        private VoxelMaterial MaterialRed = new VoxelWorldMVP.VoxelMaterial() { color = Color.red };
-        private VoxelMaterial MaterialBlue = new VoxelWorldMVP.VoxelMaterial() { color = Color.blue };
+        public IState activeState;
+        public Dictionary<KeyCode, IState> tools = new Dictionary<KeyCode, IState>();
+        private List<VoxelMaterial> VoxelMaterials;
+
+
 
         private IEditableVoxelWorld world;
 
-        public List<VoxelMaterial> VoxelMaterials;
         public VoxelMaterial ActiveMaterial;
         public float ActiveSize = 3;
 
         public void Start()
         {
-
-
         }
 
-        public void Init(IEditableVoxelWorld world)
+        public void Init(IEditableVoxelWorld world, List<VoxelMaterial> voxelMaterials)
         {
             this.world = world;
+            this.VoxelMaterials = voxelMaterials;
 
-            ActiveMaterial = MaterialGreen;
-            VoxelMaterials = new List<VoxelMaterial>(new[] { MaterialGreen, MaterialRed, MaterialBlue });
+            ActiveMaterial = VoxelMaterials[0];
 
             tools.Add(KeyCode.Alpha0, new NullState());
             tools.Add(KeyCode.Alpha1, new PlaceSphereState(this, world));
@@ -52,8 +51,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             raycaster = new VoxelWorldRaycaster();
         }
 
-        public IState activeState;
-        public Dictionary<KeyCode, IState> tools = new Dictionary<KeyCode, IState>();
+      
+
         public void Update()
         {
             if (this.world == null) return;
@@ -88,12 +87,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private VoxelMaterial changeMaterial(int indexChange)
         {
-            return VoxelMaterials[(VoxelMaterials.IndexOf(ActiveMaterial) + indexChange + VoxelMaterials.Count) % VoxelMaterials.Count];
-        }
-
-        private Vector3 mod(Vector3 p, Vector3 c)
-        {
-            return new Vector3(p.x % c.x, p.y % c.y, p.z % c.z);
+            return VoxelMaterials[(VoxelMaterials .IndexOf(ActiveMaterial) + indexChange + VoxelMaterials.Count) % VoxelMaterials.Count];
         }
     }
 

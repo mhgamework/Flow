@@ -39,7 +39,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             worldRenderer.createRenderers(new Point3(1, 1, 1) * Size, Materials.ToArray());
 
-            GetComponent<VoxelWorldEditorScript>().Init(world);
+            GetComponent<VoxelWorldEditorScript>().Init(world, new[] { MaterialGreen, MaterialRed, MaterialBlue }.ToList());
 
         }
 
@@ -47,7 +47,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private Dictionary<KeyCode, IState> tools = new Dictionary<KeyCode, IState>();
         public void Update()
         {
-         
+
         }
         private VoxelData worldFunction(Vector3 arg1)
         {

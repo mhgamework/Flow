@@ -21,18 +21,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public List<Material> Materials = new List<Material>();
         public int Size = 3;
 
-        private VoxelMaterial MaterialGreen = new VoxelWorldMVP.VoxelMaterial() { color = Color.green };
-        private VoxelMaterial MaterialRed = new VoxelWorldMVP.VoxelMaterial() { color = Color.red };
-        private VoxelMaterial MaterialBlue = new VoxelWorldMVP.VoxelMaterial() { color = Color.blue };
 
-
-
-        public List<VoxelMaterial> VoxelMaterials;
         public VoxelMaterial ActiveMaterial;
         public float ActiveSize = 3;
 
         public bool CreateDefaultObjects = true;
         public GenerationAlgorithm BaseGeneration;
+
+        public List<Color> MaterialColors;
+        private List<VoxelMaterial> VoxelMaterials;
+
 
         public enum GenerationAlgorithm
         {
@@ -45,10 +43,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void Start()
         {
+
+            // TODO: create Materials here, set on editor and set dictionary on renderer!
+            VoxelMaterials = MaterialColors.Select(c => new VoxelMaterial {color = c}).ToList();
+
             var world = new OctreeVoxelWorld(getGenerationAlgorithm(BaseGeneration), minNodeSize, WorldDepth);
 
-            GetComponent<OctreeVoxelWorldRenderer>().Init(world);
-            GetComponent<VoxelWorldEditorScript>().Init(world);
+            GetComponent<OctreeVoxelWorldRenderer>().Init(world,VoxelMaterials);
+            GetComponent<VoxelWorldEditorScript>().Init(world, VoxelMaterials);
 
             //var world = new UniformVoxelWorld(new DelegateVoxelWorldGenerator(worldFunction), new Point3(16, 16, 16));
             //worldRenderer = new UniformVoxelWorldRenderer(world, transform);
@@ -56,15 +58,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             //worldRenderer.createRenderers(new Point3(1, 1, 1) * Size, Materials.ToArray());
 
             //ActiveMaterial = MaterialGreen;
-            VoxelMaterials = new List<VoxelMaterial>(new[] { MaterialGreen, MaterialRed, MaterialBlue });
 
 
             //raycaster = new VoxelWorldRaycaster();
 
             if (CreateDefaultObjects)
             {
-                world.RunKernel1by1(new Point3(0, 0, 0), new Point3(16, 16, 16), WorldEditTool.createAddSphereKernel(new Vector3(8, 8, 8), 3f, MaterialRed), 1);
-                world.RunKernel1by1(new Point3(0, 0, 0), new Point3(64, 64, 64), WorldEditTool.createAddSphereKernel(new Vector3(40, 40, 40), 30f, MaterialGreen), 1);
+                world.RunKernel1by1(new Point3(0, 0, 0), new Point3(16, 16, 16), WorldEditTool.createAddSphereKernel(new Vector3(8, 8, 8), 3f, VoxelMaterials[0]), 1);
+                world.RunKernel1by1(new Point3(0, 0, 0), new Point3(64, 64, 64), WorldEditTool.createAddSphereKernel(new Vector3(40, 40, 40), 30f, VoxelMaterials[1]), 1);
             }
 
         }
@@ -95,7 +96,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             return new VoxelData()
             {
                 Density = SdfFunctions.Sphere(arg1, new Vector3(0, 0, 0), minNodeSize * 3),
-                Material = MaterialGreen
+                Material = VoxelMaterials[0]
 
             };
         }
@@ -104,7 +105,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             return new VoxelData()
             {
                 Density = arg1.y - 10,
-                Material = MaterialGreen
+                Material = VoxelMaterials[0]
 
             };
         }
@@ -117,7 +118,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             //dens += (Math.Sin(arg1.x * 0.002) + Math.Cos(arg1.z * 0.0019)) * 651;
             //dens += (Math.Sin(arg1.x * 0.00021) + Math.Cos(arg1.z * 0.0002)) * 3000;
-            return new VoxelData() { Density = (float)dens, Material = MaterialGreen };
+            return new VoxelData() { Density = (float)dens, Material = VoxelMaterials[0] };
         }
         private VoxelData worldFunction(Vector3 arg1, int samplingInterval, bool enableSampling)
         {
@@ -132,7 +133,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             var c = new Vector3(1, 1, 1) * repeat;
             var q = mod(arg1, c) - 0.5f * c;
             var s = q.magnitude - radius;
-            return new VoxelData() { Density = s, Material = MaterialGreen };
+            return new VoxelData() { Density = s, Material = VoxelMaterials[0] };
         }
 
         private Vector3 mod(Vector3 p, Vector3 c)

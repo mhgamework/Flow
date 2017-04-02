@@ -17,7 +17,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     {
         //public Material VoxelMaterial;
         private UniformVoxelData chunkData;
-        public Material[] Materials;
+        public Dictionary<Color, Material> MaterialsDictionary = new Dictionary<Color, Material>();
 
         public void SetChunk(UniformVoxelData chunkData)
         {
@@ -71,10 +71,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private void updateMesh()
         {
 
-            var colorDicts = new Dictionary<Color, int>();// Map from hardcoded colors to material ids
-            colorDicts.Add(Color.green, 0);
-            colorDicts.Add(Color.red, 1);
-            colorDicts.Add(Color.blue, 2);
+            //var colorDicts = new Dictionary<Color, int>();// Map from hardcoded colors to material ids
+            //colorDicts.Add(Color.green, 0);
+            //colorDicts.Add(Color.red, 1);
+            //colorDicts.Add(Color.blue, 2);
 
             List<Vector3> doubledVertices;
             int numMeshes;
@@ -94,7 +94,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             mesh.RecalculateNormals();
             
             GetComponent<MeshCollider>().sharedMesh = mesh;
-            renderer.materials = colors.Select(c => Materials[colorDicts[c]]).ToArray();
+            renderer.materials = colors.Select(c => MaterialsDictionary[c]).ToArray();
         }
 
 

@@ -34,7 +34,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                  var obj = new GameObject();
                  obj.transform.SetParent(container);
                  var subRenderer = obj.AddComponent<VoxelChunkRenderer>();
-                 subRenderer.Materials = voxelMaterial;
+                 subRenderer.MaterialsDictionary = voxelMaterial.ToDictionary(m => m.color, m =>m);
                  //subRenderer.VoxelMaterial = voxelMaterial;
                  subRenderer.SetChunk(world.GetChunk(p));
                  subRenderer.SetWorldcoords(p, world.ChunkSize);

@@ -14,7 +14,6 @@ namespace Assets.MarchingCubes
 
         public void Startup()
         {
-
         }
 
         public void Update()
