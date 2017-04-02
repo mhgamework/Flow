@@ -31,15 +31,25 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public VoxelMaterial ActiveMaterial;
         public float ActiveSize = 3;
 
+        public bool CreateDefaultObjects = true;
+        public GenerationAlgorithm BaseGeneration;
+
+        public enum GenerationAlgorithm
+        {
+            Empty,
+            Flat,
+            SinTerrain,
+            Spheres,
+            SpheresWithFiltering
+        }
+
         public void Start()
         {
-            //VoxelWorld = new OctreeVoxelWorld(new DelegateVoxelWorldGenerator(sinWorld), minNodeSize, WorldDepth);
-            //var world = new OctreeVoxelWorld(new ConstantVoxelWorldGenerator(int.MaxValue, null), minNodeSize, WorldDepth);
-            var world = new OctreeVoxelWorld(new DelegateVoxelWorldGenerator(FlatWorldFunction), minNodeSize, WorldDepth);
-            
+            var world = new OctreeVoxelWorld(getGenerationAlgorithm(BaseGeneration), minNodeSize, WorldDepth);
+
             GetComponent<OctreeVoxelWorldRenderer>().Init(world);
             GetComponent<VoxelWorldEditorScript>().Init(world);
-           
+
             //var world = new UniformVoxelWorld(new DelegateVoxelWorldGenerator(worldFunction), new Point3(16, 16, 16));
             //worldRenderer = new UniformVoxelWorldRenderer(world, transform);
 
@@ -51,6 +61,31 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             //raycaster = new VoxelWorldRaycaster();
 
+            if (CreateDefaultObjects)
+            {
+                world.RunKernel1by1(new Point3(0, 0, 0), new Point3(16, 16, 16), WorldEditTool.createAddSphereKernel(new Vector3(8, 8, 8), 3f, MaterialRed), 1);
+                world.RunKernel1by1(new Point3(0, 0, 0), new Point3(64, 64, 64), WorldEditTool.createAddSphereKernel(new Vector3(40, 40, 40), 30f, MaterialGreen), 1);
+            }
+
+        }
+
+        private IWorldGenerator getGenerationAlgorithm(GenerationAlgorithm generationAlgorithm)
+        {
+            switch (generationAlgorithm)
+            {
+                case GenerationAlgorithm.Empty:
+                    return new ConstantVoxelWorldGenerator(int.MaxValue, null);
+                case GenerationAlgorithm.Flat:
+                    return new DelegateVoxelWorldGenerator(FlatWorldFunction);
+                case GenerationAlgorithm.SinTerrain:
+                    return new DelegateVoxelWorldGenerator(sinWorld);
+                case GenerationAlgorithm.Spheres:
+                    return new DelegateVoxelWorldGenerator((a, b) => worldFunction(a, b, false));
+                case GenerationAlgorithm.SpheresWithFiltering:
+                    return new DelegateVoxelWorldGenerator((a, b) => worldFunction(a, b, true));
+                default:
+                    throw new InvalidOperationException();
+            }
         }
 
         private int minNodeSize = 16;
@@ -68,7 +103,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             return new VoxelData()
             {
-                Density = arg1.y-10,
+                Density = arg1.y - 10,
                 Material = MaterialGreen
 
             };
@@ -76,16 +111,17 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private VoxelData sinWorld(Vector3 arg1, int samplingInterval)
         {
-            double dens = (Math.Sin(arg1.x * 0.01) + Math.Cos(arg1.z * 0.01)) * 50 - arg1.y + 3000;
+            arg1 += new Vector3(300, 0, 300);
+            double dens = (Math.Sin(arg1.x * 0.01) + Math.Cos(arg1.z * 0.01)) * 50 - arg1.y + 200;
             dens += (Math.Sin(arg1.x * 0.11) + Math.Cos(arg1.z * 0.09)) * 4.3;
 
             //dens += (Math.Sin(arg1.x * 0.002) + Math.Cos(arg1.z * 0.0019)) * 651;
             //dens += (Math.Sin(arg1.x * 0.00021) + Math.Cos(arg1.z * 0.0002)) * 3000;
             return new VoxelData() { Density = (float)dens, Material = MaterialGreen };
         }
-        private VoxelData worldFunction(Vector3 arg1, int samplingInterval)
+        private VoxelData worldFunction(Vector3 arg1, int samplingInterval, bool enableSampling)
         {
-            if (samplingInterval > 5)
+            if (samplingInterval > 5 && enableSampling)
             {
                 return new VoxelData() { Density = 1, Material = null };
 
@@ -104,6 +140,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             return new Vector3(p.x % c.x, p.y % c.y, p.z % c.z);
         }
 
-       
+
     }
 }

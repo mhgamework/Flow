@@ -50,8 +50,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             VoxelWorld = world;
             root = helper.Create(VoxelWorld.Root.Size, VoxelWorld.Root.LowerLeft);
-            VoxelWorld.RunKernel1by1(new Point3(0, 0, 0), new Point3(16, 16, 16), WorldEditTool.createAddSphereKernel(new Vector3(8, 8, 8), 3f, MaterialRed), 1);
-            VoxelWorld.RunKernel1by1(new Point3(0, 0, 0), new Point3(64, 64, 64), WorldEditTool.createAddSphereKernel(new Vector3(40, 40, 40), 30f, MaterialGreen), 1);
+            
         }
 
      
