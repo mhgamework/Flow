@@ -52,8 +52,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             raycaster = new VoxelWorldRaycaster();
         }
 
-        private IState activeState;
-        private Dictionary<KeyCode, IState> tools = new Dictionary<KeyCode, IState>();
+        public IState activeState;
+        public Dictionary<KeyCode, IState> tools = new Dictionary<KeyCode, IState>();
         public void Update()
         {
             if (this.world == null) return;
@@ -97,11 +97,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         }
     }
 
-    internal interface IState
+    public interface IState
     {
         void Stop();
         void Update(RaycastHit? raycast);
         void Start();
+        string Name { get; }
     }
 
     class PlaceSphereState : IState
@@ -111,6 +112,11 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private WorldEditTool tool = new WorldEditTool();
 
         private VoxelWorldEditorScript voxelWorldScript;
+
+        public string Name
+        {
+            get { return "Add/Remove sphere"; }
+        }
 
         public PlaceSphereState(VoxelWorldEditorScript voxelWorldScript, IEditableVoxelWorld world)
         {
@@ -182,7 +188,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private VoxelWorldEditorScript script;
         private PlaceSphereState tool;
         private IEditableVoxelWorld world;
-
+        public string Name
+        {
+            get { return "Add/Remove sphere midair"; }
+        }
         public PlaceSphereStateMidair(VoxelWorldEditorScript script, IEditableVoxelWorld world)
         {
             this.script = script;
@@ -210,6 +219,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
     class NullState : IState
     {
+        public string Name
+        {
+            get { return "No tool"; }
+        }
         public void Stop()
         {
         }
