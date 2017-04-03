@@ -18,33 +18,32 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     {
         private UniformVoxelWorldRenderer worldRenderer;
 
-        public List<Material> Materials = new List<Material>();
+        public Material TemplateMaterial;
         public int Size = 3;
 
         private VoxelMaterial MaterialGreen = new VoxelWorldMVP.VoxelMaterial() { color = Color.green };
         private VoxelMaterial MaterialRed = new VoxelWorldMVP.VoxelMaterial() { color = Color.red };
         private VoxelMaterial MaterialBlue = new VoxelWorldMVP.VoxelMaterial() { color = Color.blue };
 
-
-
-        public List<VoxelMaterial> VoxelMaterials;
-        public VoxelMaterial ActiveMaterial;
-        public float ActiveSize = 3;
-
         public void Start()
         {
 
             var world = new UniformVoxelWorld(new DelegateVoxelWorldGenerator(worldFunction), new Point3(16, 16, 16));
             worldRenderer = new UniformVoxelWorldRenderer(world, transform);
+            var voxelMaterials = new[] { MaterialGreen, MaterialRed, MaterialBlue }.ToList();
 
-            worldRenderer.createRenderers(new Point3(1, 1, 1) * Size, Materials.ToArray());
+            worldRenderer.createRenderers(new Point3(1, 1, 1) * Size, voxelMaterials.Select(m =>
+            {
+                var ret = new Material(TemplateMaterial);
+                ret.color = m.color;
+                return ret;
+            }).ToArray());
 
-            GetComponent<VoxelWorldEditorScript>().Init(world, new[] { MaterialGreen, MaterialRed, MaterialBlue }.ToList());
+            GetComponent<VoxelWorldEditorScript>().Init(world, voxelMaterials);
 
         }
 
-        private IState activeState;
-        private Dictionary<KeyCode, IState> tools = new Dictionary<KeyCode, IState>();
+   
         public void Update()
         {
 

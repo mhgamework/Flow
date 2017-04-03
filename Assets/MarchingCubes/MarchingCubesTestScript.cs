@@ -13,14 +13,13 @@ using Assets.MarchingCubes.VoxelWorldMVP;
 /// </summary>
 public class MarchingCubesTestScript : MonoBehaviour
 {
-    public int Resolution = 30;
+   public int Resolution = 30;
 
-    public Vector3 RayPosition;
-    public Vector3 RayDirection;
-    public float PlacementSize = 3;
-    public float PlacementSpeed = 1;
+   
 
     public TestModeEnum TestMode;
+
+    public Material TemplateMaterial;
 
     public enum TestModeEnum
     {
@@ -34,7 +33,12 @@ public class MarchingCubesTestScript : MonoBehaviour
     {
 
         var voxelChunkRenderer = GetComponent<VoxelChunkRenderer>();
-
+        voxelChunkRenderer.MaterialsDictionary = new[] { Color.green, Color.red, Color.blue }.ToDictionary(c => c, c =>
+           {
+               var ret = new Material(TemplateMaterial);
+               ret.color = c;
+               return ret;
+           });
         var data = createChunkData();
 
         voxelChunkRenderer.SetChunk(data);
@@ -100,7 +104,7 @@ public class MarchingCubesTestScript : MonoBehaviour
 
         ret.Data.ForEach((v, p) => ret.Data[p] = new VoxelData() { Density = 1000 });// Set empty space
 
-        var scale = (float) (Resolution - 1);
+        var scale = (float)(Resolution - 1);
 
         var sphereRadius = 0.3f * scale;
         var sphereA = new Vector3(0, 0, 0) * scale;
