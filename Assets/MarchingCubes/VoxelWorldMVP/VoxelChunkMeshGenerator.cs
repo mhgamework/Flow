@@ -36,11 +36,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             var points = Vertices.Select(v => v.ToVector3() * 0.99f).ToArray(); // *0.99f to show edges :)
 
-            var individualColors = new[] { Color.red, Color.green, Color.blue };
+            //var individualColors = new[] { Color.red, Color.green, Color.blue };
             var firstColor = new Color();
             var firstColorFound = false;
             var theCurrentColor = new Color();
             var isMultiColor = false;
+
+            var cellColorList = new List<Color>();
 
             // Voxelize per color-
             //foreach (var iColor in individualColors)
@@ -53,10 +55,22 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
                         var p = new Point3(x, y, z);
                         // STart at -1, the first run is an extra run to check if the runs per color are neccessary
-                        for (int iColor = -1; iColor < individualColors.Length; iColor++)
+                        for (int iColor = -1; iColor < cellColorList.Count; iColor++)
                         {
+                            if (iColor == 0)
+                            {
+                                // Start of multi color algorithm
+                                // Sort the list first, so we can filter duplicates
+                                cellColorList.Sort((a, b) => a.GetHashCode() - b.GetHashCode()); //TODO could cause duplicate hash hits?, better just convert color to int somehow  
+                            }
                             if (iColor > -1)
-                                theCurrentColor = individualColors[iColor];
+                            {
+                                var nextColor = cellColorList[iColor];
+                                if (nextColor == theCurrentColor)
+                                    continue; // Color already handled (should be duplicate)
+
+                                theCurrentColor = cellColorList[iColor];
+                            }
                             if (iColor > -1 && theCurrentColor == firstColor)
                                 continue; // skip the first color, it is already visited
 
@@ -74,11 +88,24 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                                 }
                                 if (mat != theCurrentColor)
                                 {
+
+                                    if (iColor == -1) // Only build color list on first run
+                                    {
+                                        if (!isMultiColor)
+                                        {
+                                            // First indication of multicolor, start adding colors
+                                            cellColorList.Clear();
+                                        }
+                                        cellColorList.Add(mat);
+                                    }
+
                                     isMultiColor = true; // Maybe add if ( val < 0 ), because it is also possible that a voxel has a other material but is air?
                                     val = Math.Max(val, -val); // Make air by mirroring around the isosurface level, should remain identical?
                                 }
 
                                 gridvals[i] = val;
+                                // TODO: use thecurrentcolor here, since we are mimicking single color kernels, 
+                                // but not sure it matters i think matval is not used perhaps
                                 matvals[i] = mat;
                             }
                             Color outColor;

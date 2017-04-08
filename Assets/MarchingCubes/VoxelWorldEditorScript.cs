@@ -51,7 +51,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             raycaster = new VoxelWorldRaycaster();
         }
 
-      
+
 
         public void Update()
         {
@@ -60,9 +60,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             if (Input.mouseScrollDelta.y != 0)
                 ActiveSize = changeSize(ActiveSize, Mathf.Sign(Input.mouseScrollDelta.y));
 
-            if (Input.GetKeyDown(KeyCode.KeypadPlus))
+            if (Input.GetKeyDown(KeyCode.RightArrow))
+                ActiveSize = changeSize(ActiveSize, 1);
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
+                ActiveSize = changeSize(ActiveSize, -1);
+
+            if (Input.GetKeyDown(KeyCode.KeypadPlus) || Input.GetKeyDown(KeyCode.UpArrow))
                 ActiveMaterial = changeMaterial(1);
-            if (Input.GetKeyDown(KeyCode.KeypadMinus))
+            if (Input.GetKeyDown(KeyCode.KeypadMinus) || Input.GetKeyDown(KeyCode.DownArrow))
                 ActiveMaterial = changeMaterial(-1);
 
 
@@ -87,7 +92,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private VoxelMaterial changeMaterial(int indexChange)
         {
-            return VoxelMaterials[(VoxelMaterials .IndexOf(ActiveMaterial) + indexChange + VoxelMaterials.Count) % VoxelMaterials.Count];
+            return VoxelMaterials[(VoxelMaterials.IndexOf(ActiveMaterial) + indexChange + VoxelMaterials.Count) % VoxelMaterials.Count];
         }
     }
 
