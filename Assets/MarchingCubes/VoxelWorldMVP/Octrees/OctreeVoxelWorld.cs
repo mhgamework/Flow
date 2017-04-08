@@ -17,12 +17,17 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// </summary>
     public class OctreeVoxelWorld : IEditableVoxelWorld
     {
-        private Dictionary<Point3, UniformVoxelData> chunks = new Dictionary<Point3, UniformVoxelData>();
         IWorldGenerator generator;
         private int depth;
         private ClipMapsOctree<OctreeNode> helper;
 
-        public Point3 ChunkSize { get; private set; }
+        /// <summary>
+        /// Chunks data is bigger than actual chunk size, so they overlap for LOD
+        /// This value is here so that code depending on it breaks when we remove this behaviour
+        /// </summary>
+        public const int ChunkOversize = 1;
+        private int chunkSize;
+        public Point3 ChunkSize { get { return new Point3(chunkSize, chunkSize, chunkSize); } }
 
         public OctreeNode Root { get; set; }
 
@@ -36,7 +41,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public OctreeVoxelWorld(IWorldGenerator generator, int chunkSize, int depth)
         {
             this.generator = generator;
-            ChunkSize = new Point3(chunkSize, chunkSize, chunkSize);
+            this.chunkSize = chunkSize;
             this.depth = depth;
 
             Root = new OctreeNode();
@@ -158,7 +163,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             //};
         }
 
-        private int getNodeResolution(int nodeDepth)
+        public int getNodeResolution(int nodeDepth)
         {
             return 1 << (this.depth - nodeDepth);
         }

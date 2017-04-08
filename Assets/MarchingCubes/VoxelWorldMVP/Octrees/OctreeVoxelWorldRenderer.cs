@@ -33,6 +33,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private ClipMapsOctree<RenderOctreeNode> helper = new ClipMapsOctree<RenderOctreeNode>();
         private LineManager3D manager = new LineManager3D();
 
+        public float LODDistanceFactor = 1.2f;
+
 
         //private VoxelChunkMeshGenerator voxelChunkMeshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
 
@@ -62,7 +64,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public void Update()
         {
             if (VoxelWorld == null) return;
-            helper.UpdateQuadtreeClipmaps(root, Camera.main.transform.position, VoxelWorld.ChunkSize.X);
+            helper.UpdateQuadtreeClipmaps(root, Camera.main.transform.position, VoxelWorld.ChunkSize.X, LODDistanceFactor);
             if (ShowOctree)
                 helper.DrawLines(root, manager);
 
@@ -88,7 +90,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             var comp = renderObject.AddComponent<VoxelChunkRenderer>();
             comp.MaterialsDictionary = materialsDictionary;
             comp.SetChunk(dataNode.VoxelData);
-            comp.SetWorldcoords(node.LowerLeft, node.Size / 16.0f);// TOOD: DANGEROES
+            comp.SetWorldcoords(node.LowerLeft, node.Size /  (float)(VoxelWorld.ChunkSize.X));// TOOD: DANGEROES
 
             comp.transform.SetParent(transform);
             node.RenderObject = comp;

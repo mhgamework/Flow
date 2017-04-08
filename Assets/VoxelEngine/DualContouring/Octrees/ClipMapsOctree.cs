@@ -134,13 +134,14 @@ namespace MHGameWork.TheWizards.DualContouring.Terrain
         /// <param name="node"></param>
         /// <param name="cameraPosition"></param>
         /// <param name="minNodeSize"></param>
-        public void UpdateQuadtreeClipmaps(T node, Vector3 cameraPosition, int minNodeSize)
+        /// <param name="distanceFactor"></param>
+        public void UpdateQuadtreeClipmaps(T node, Vector3 cameraPosition, int minNodeSize, float distanceFactor = 1.2f)
         {
             var center = (Vector3)node.LowerLeft.ToVector3() + Vector3.one * node.Size * 0.5f;
             var dist = Vector3.Distance(cameraPosition, center);
 
             // Should take into account the fact that if minNodeSize changes, the quality of far away nodes changes so the threshold maybe should change too
-            if (dist > node.Size * 1.2f)
+            if (dist > node.Size * distanceFactor)
             {
                 // This is a valid node size at this distance, so remove all children
                 Merge(node);
@@ -154,7 +155,7 @@ namespace MHGameWork.TheWizards.DualContouring.Terrain
 
                 for (int i = 0; i < 8; i++)
                 {
-                    UpdateQuadtreeClipmaps(node.Children[i], cameraPosition, minNodeSize);
+                    UpdateQuadtreeClipmaps(node.Children[i], cameraPosition, minNodeSize, distanceFactor);
                 }
             }
         }

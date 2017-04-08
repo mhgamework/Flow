@@ -34,7 +34,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             var actualIsoSurface = 0;
 
-            var points = Vertices.Select(v => v.ToVector3() * 0.99f).ToArray(); // *0.99f to show edges :)
+            var points = Vertices.Select(v => v.ToVector3() ).ToArray(); // *0.99f to show edges :)
 
             //var individualColors = new[] { Color.red, Color.green, Color.blue };
             var firstColor = new Color();

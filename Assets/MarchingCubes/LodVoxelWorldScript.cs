@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
+using Assets.MarchingCubes.VoxelWorldMVP.Persistence;
 using DirectX11;
 using MHGameWork.TheWizards;
 using MHGameWork.TheWizards.DualContouring;
@@ -31,6 +33,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public List<Color> MaterialColors;
         private List<VoxelMaterial> VoxelMaterials;
 
+        public VoxelWorldAsset SavedWorld;
+
+        public int SavedRevertVersions = 0;
+
 
         public enum GenerationAlgorithm
         {
@@ -45,11 +51,19 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
 
             // TODO: create Materials here, set on editor and set dictionary on renderer!
-            VoxelMaterials = MaterialColors.Select(c => new VoxelMaterial {color = c}).ToList();
+            VoxelMaterials = MaterialColors.Select(c => new VoxelMaterial { color = c }).ToList();
 
-            var world = new OctreeVoxelWorld(getGenerationAlgorithm(BaseGeneration), minNodeSize, WorldDepth);
+            if (SavedWorld == null)
+            {
+                SavedWorld = OctreeWorldSerializer.CreateAsset(minNodeSize);
+            }
 
-            GetComponent<OctreeVoxelWorldRenderer>().Init(world,VoxelMaterials);
+            var generationAlgorithm = getGenerationAlgorithm(BaseGeneration);
+            var persistence = new PersistenceWorldGenerator(generationAlgorithm, SavedWorld,SavedRevertVersions);
+
+            var world = new OctreeVoxelWorld(persistence, minNodeSize, WorldDepth);
+
+            GetComponent<OctreeVoxelWorldRenderer>().Init(world, VoxelMaterials);
             GetComponent<VoxelWorldEditorScript>().Init(world, VoxelMaterials);
 
             //var world = new UniformVoxelWorld(new DelegateVoxelWorldGenerator(worldFunction), new Point3(16, 16, 16));
@@ -62,12 +76,29 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             //raycaster = new VoxelWorldRaycaster();
 
+            worldSerializer = new OctreeWorldSerializer(world, SavedWorld);
+
             if (CreateDefaultObjects)
             {
                 world.RunKernel1by1(new Point3(0, 0, 0), new Point3(16, 16, 16), WorldEditTool.createAddSphereKernel(new Vector3(8, 8, 8), 3f, VoxelMaterials[0]), 1);
                 world.RunKernel1by1(new Point3(0, 0, 0), new Point3(64, 64, 64), WorldEditTool.createAddSphereKernel(new Vector3(40, 40, 40), 30f, VoxelMaterials[1]), 1);
             }
 
+        }
+
+        public void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                save();
+            }
+        }
+
+        private int lastSaveFrame = 1;
+        private void save()
+        {
+            worldSerializer.Save(lastSaveFrame);
+            lastSaveFrame = Time.frameCount;
         }
 
         private IWorldGenerator getGenerationAlgorithm(GenerationAlgorithm generationAlgorithm)
@@ -89,8 +120,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             }
         }
 
-        private int minNodeSize = 16;
+        public int minNodeSize = 16;
         public int WorldDepth = 3;
+        private OctreeWorldSerializer worldSerializer;
+
         private VoxelData LowerleftSphereWorldFunction(Vector3 arg1)
         {
             return new VoxelData()
