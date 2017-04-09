@@ -35,12 +35,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public float LODDistanceFactor = 1.2f;
 
+        private AsyncLRUCache<RenderOctreeNode,object> renderDataCache;
+        public int RenderCacheSize = 100;
+
 
         //private VoxelChunkMeshGenerator voxelChunkMeshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
 
         public void Start()
         {
-
+            renderDataCache = new AsyncLRUCache<RenderOctreeNode, object>(RenderCacheSize);
+            
         }
 
         public void Init(OctreeVoxelWorld world, List<VoxelMaterial> voxelMaterials)
@@ -59,6 +63,72 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
 
 
+        /// <summary>
+        /// Walk the tree, request chunks that should be visible from the cache, and built a tree using what is available in the cache
+        /// </summary>
+        public bool UpdateQuadtreeClipmaps(RenderOctreeNode node, Vector3 cameraPosition, int minNodeSize, float distanceFactor = 1.2f)
+        {
+            var center = (Vector3)node.LowerLeft.ToVector3() + Vector3.one * node.Size * 0.5f;
+            var dist = Vector3.Distance(cameraPosition, center);
+
+            // This node might be needed request it in cache
+            var renderDataOrNull = renderDataCache.Get(node);
+
+
+            // Should take into account the fact that if minNodeSize changes, the quality of far away nodes changes so the threshold maybe should change too
+            if (dist > node.Size * distanceFactor)
+            {
+                // This is a valid node size at this distance, so remove all children
+                helper.Merge(node);
+
+                return trySetRenderData(node, renderDataOrNull);
+            }
+            else
+            {
+                if (node.Children == null)
+                    helper.Split(node, false, minNodeSize);
+
+                if (node.Children == null)
+                {
+                    // Minlevel
+                    return trySetRenderData(node, renderDataOrNull);
+                }
+            }
+
+            var areChildrenHoleless = true;
+            for (int i = 0; i < 8; i++)
+            {
+                areChildrenHoleless &= UpdateQuadtreeClipmaps(node.Children[i], cameraPosition, minNodeSize, distanceFactor);
+            }
+            if (areChildrenHoleless) return true;
+            // Going to try and use this lod level or one up the tree
+            // First disable all children since not complete; Is this costly? I think this only happens in case suddenly a very low resolution mesh is needed, not sure how often that happens
+            for (int i = 0; i < 8; i++)
+                clearRenderInfo(node.Children[i]);
+
+            return trySetRenderData(node, renderDataOrNull);
+
+        }
+
+        private void clearRenderInfo(RenderOctreeNode node)
+        {
+            throw new NotImplementedException();
+            //node.SetRenderData(null);
+            if (node.Children == null) return;
+            for (int i = 0; i < 8; i++)
+                clearRenderInfo(node.Children[i]);
+        }
+
+
+        public bool trySetRenderData(RenderOctreeNode node,object renderDataOrNull)
+        {
+            throw new NotImplementedException();
+
+            if (renderDataOrNull == null) return false; // Cant render
+            //node.SetRenderData(renderDataOrNull);
+            return true;
+        }
+
 
 
         public void Update()
@@ -70,9 +140,15 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             helper.VisitTopDown(root, node =>
             {
-                createRenderObject(node);
+                applyToRenderer(node);
+                //createRenderObject(node);
             });
 
+        }
+
+        private void applyToRenderer(RenderOctreeNode node)
+        {
+            throw new NotImplementedException();
         }
 
         private void createRenderObject(RenderOctreeNode node)
@@ -90,7 +166,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             var comp = renderObject.AddComponent<VoxelChunkRenderer>();
             comp.MaterialsDictionary = materialsDictionary;
             comp.SetChunk(dataNode.VoxelData);
-            comp.SetWorldcoords(node.LowerLeft, node.Size /  (float)(VoxelWorld.ChunkSize.X));// TOOD: DANGEROES
+            comp.SetWorldcoords(node.LowerLeft, node.Size / (float)(VoxelWorld.ChunkSize.X));// TOOD: DANGEROES
 
             comp.transform.SetParent(transform);
             node.RenderObject = comp;

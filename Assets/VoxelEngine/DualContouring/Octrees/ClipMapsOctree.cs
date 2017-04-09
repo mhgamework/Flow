@@ -128,6 +128,7 @@ namespace MHGameWork.TheWizards.DualContouring.Terrain
         }
 
         /// <summary>
+        /// EDIT: This is like a template implementation for clipmapping, I have already copied this twice to add more advanced rendering logic
         /// EDIT: Was obsolete, but I dont know what the replacement for this was in the wizards voxel engine, so i will use it anyways
         /// OLD: Only used for old tests
         /// </summary>
