@@ -2,10 +2,13 @@
 using DirectX11;
 using MHGameWork.TheWizards.DualContouring.Terrain;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using MHGameWork.TheWizards.Graphics;
+using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
@@ -35,16 +38,35 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public float LODDistanceFactor = 1.2f;
 
-        private AsyncLRUCache<RenderOctreeNode,object> renderDataCache;
+        private AsyncLRUCache<NodeAndVersion, VoxelChunkRenderer> renderDataCache;
         public int RenderCacheSize = 100;
 
+        private VoxelChunkMeshGenerator meshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
+
+        public Transform ChunkCache;
+        public Transform VisibleChunks;
 
         //private VoxelChunkMeshGenerator voxelChunkMeshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
 
+        private Thread t;
+        private int stopped;
         public void Start()
         {
-            renderDataCache = new AsyncLRUCache<RenderOctreeNode, object>(RenderCacheSize);
-            
+            renderDataCache = new AsyncLRUCache<NodeAndVersion, VoxelChunkRenderer>(RenderCacheSize, removeCachedData);
+            t = new Thread(anderProcessorProgrammake);
+            stopped = 0;
+            t.Start();
+
+        }
+
+        private void removeCachedData(NodeAndVersion node, VoxelChunkRenderer data)
+        {
+            Destroy(data.gameObject);
+        }
+
+        public void OnDestroy()
+        {
+            Interlocked.Increment(ref stopped);
         }
 
         public void Init(OctreeVoxelWorld world, List<VoxelMaterial> voxelMaterials)
@@ -66,13 +88,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         /// <summary>
         /// Walk the tree, request chunks that should be visible from the cache, and built a tree using what is available in the cache
         /// </summary>
-        public bool UpdateQuadtreeClipmaps(RenderOctreeNode node, Vector3 cameraPosition, int minNodeSize, float distanceFactor = 1.2f)
+        public bool UpdateQuadtreeClipmaps(RenderOctreeNode node, Vector3 cameraPosition, int minNodeSize, ref int numRequestedFromCache, float distanceFactor = 1.2f)
         {
             var center = (Vector3)node.LowerLeft.ToVector3() + Vector3.one * node.Size * 0.5f;
             var dist = Vector3.Distance(cameraPosition, center);
 
             // This node might be needed request it in cache
-            var renderDataOrNull = renderDataCache.Get(node);
+            var renderDataOrNull = renderDataCache.Get(new NodeAndVersion(node, getNode(node).VoxelData.LastChangeFrame));
+            numRequestedFromCache++;
 
 
             // Should take into account the fact that if minNodeSize changes, the quality of far away nodes changes so the threshold maybe should change too
@@ -98,7 +121,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             var areChildrenHoleless = true;
             for (int i = 0; i < 8; i++)
             {
-                areChildrenHoleless &= UpdateQuadtreeClipmaps(node.Children[i], cameraPosition, minNodeSize, distanceFactor);
+                areChildrenHoleless &= UpdateQuadtreeClipmaps(node.Children[i], cameraPosition, minNodeSize, ref numRequestedFromCache, distanceFactor);
             }
             if (areChildrenHoleless) return true;
             // Going to try and use this lod level or one up the tree
@@ -112,31 +135,133 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private void clearRenderInfo(RenderOctreeNode node)
         {
-            throw new NotImplementedException();
-            //node.SetRenderData(null);
+            if (node.RenderObject != null)
+            {
+                node.RenderObject.gameObject.SetActive(false);
+                node.RenderObject.transform.SetParent(ChunkCache);
+            }
+            node.RenderObject = null;
+
             if (node.Children == null) return;
             for (int i = 0; i < 8; i++)
                 clearRenderInfo(node.Children[i]);
         }
 
 
-        public bool trySetRenderData(RenderOctreeNode node,object renderDataOrNull)
+        public bool trySetRenderData(RenderOctreeNode node, VoxelChunkRenderer renderDataOrNull)
         {
-            throw new NotImplementedException();
-
             if (renderDataOrNull == null) return false; // Cant render
+
+            if (node.RenderObject != null)
+            {
+                if (node.RenderObject == renderDataOrNull) return true; // Already ok
+                node.RenderObject.gameObject.SetActive(false);
+                node.RenderObject.transform.SetParent(ChunkCache);
+            }
+
+            // Warn this is comfusing because the unity component is actually an entire game object
+
+
+            //if (node.Children != null)
+            //{
+            //    node.DestroyRenderObject(); // not a leaf
+            //    return; // Only leafs
+            //}
+            //if (node.RenderObject != null) return; // already generated
+
+            //var dataNode = VoxelWorld.GetNode(node.LowerLeft, node.Depth);
+
+            //var renderObject = new GameObject();
+            //var comp = renderObject.AddComponent<VoxelChunkRenderer>();
+            var comp = renderDataOrNull;
+            comp.MaterialsDictionary = materialsDictionary;
+            //comp.SetChunk(dataNode.VoxelData);
+            comp.SetWorldcoords(node.LowerLeft, node.Size / (float)(VoxelWorld.ChunkSize.X));// TOOD: DANGEROES
+
+            comp.transform.SetParent(VisibleChunks);
+            node.RenderObject = comp;
+            comp.gameObject.SetActive(true);
+
+
             //node.SetRenderData(renderDataOrNull);
             return true;
         }
 
+        private class NodeAndVersion
+        {
+            public RenderOctreeNode Node;
+            public int ChangedFrame;
+
+            public NodeAndVersion(RenderOctreeNode node, int changedFrame)
+            {
+                Node = node;
+                ChangedFrame = changedFrame;
+            }
+
+            protected bool Equals(NodeAndVersion other)
+            {
+                return Equals(Node, other.Node) && ChangedFrame == other.ChangedFrame;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != this.GetType()) return false;
+                return Equals((NodeAndVersion)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return ((Node != null ? Node.GetHashCode() : 0) * 397) ^ ChangedFrame;
+                }
+            }
+        }
+
+        private OctreeNode getNode(RenderOctreeNode f)
+        {
+            return VoxelWorld.GetNode(f.LowerLeft, f.Depth);
+        }
 
 
         public void Update()
         {
             if (VoxelWorld == null) return;
-            helper.UpdateQuadtreeClipmaps(root, Camera.main.transform.position, VoxelWorld.ChunkSize.X, LODDistanceFactor);
+            int numRequested = 0;
+            UpdateQuadtreeClipmaps(root, Camera.main.transform.position, VoxelWorld.ChunkSize.X, ref numRequested, LODDistanceFactor);
             if (ShowOctree)
                 helper.DrawLines(root, manager);
+
+
+            Debug.Log("Requested: " + numRequested + " Missing: " + renderDataCache.GetMissingData().Count());
+
+            var tasks = renderDataCache.GetMissingData().Take(10).Select(f => new Task
+            {
+                node = f,
+                chunkData = getNode(f.Node).VoxelData.Data
+            }).ToArray();
+
+            workingQueue.Enqueue(tasks);
+            Result result;
+            while (resultsQueue.TryDequeue(out result))
+            {
+                var render = createRenderObject(result.node, result.data);
+
+                renderDataCache.AddData(result.node, render);
+            }
+
+            //if (toRender != null)
+            //{
+            //    var dataNode = VoxelWorld.GetNode(toRender.LowerLeft, toRender.Depth);
+
+            //    var data = VoxelChunkRenderer.generateMesh(meshGenerator, dataNode.VoxelData.Data);
+
+            //    var render = createRenderObject(data);
+
+            //    renderDataCache.AddData(toRender, render);
+            //}
 
             helper.VisitTopDown(root, node =>
             {
@@ -146,30 +271,71 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         }
 
-        private void applyToRenderer(RenderOctreeNode node)
+        public void anderProcessorProgrammake()
         {
-            throw new NotImplementedException();
+            Task[] tasks = new Task[0];
+            int i = 0;
+            while (stopped == 0)
+            {
+                Task[] nTasks;
+                while (workingQueue.TryDequeue(out nTasks))
+                {
+                    i = 0;
+                    tasks = nTasks;
+                }
+                if (tasks.Length <= i)
+                {
+                    Debug.Log("Idling");
+
+                    Thread.Sleep(10);
+                    continue;
+                }
+                var task = tasks[i];
+                i++;
+
+
+                var data = VoxelChunkRenderer.generateMesh(meshGenerator, task.chunkData); // DANGEROES multithreaded
+                resultsQueue.Enqueue(new Result
+                {
+                    data = data,
+                    node = task.node
+                });
+
+            }
         }
 
-        private void createRenderObject(RenderOctreeNode node)
+
+        private ConcurrentQueue<Task[]> workingQueue = new ConcurrentQueue<Task[]>();
+        private ConcurrentQueue<Result> resultsQueue = new ConcurrentQueue<Result>();
+
+        private struct Task
         {
-            if (node.Children != null)
-            {
-                node.DestroyRenderObject(); // not a leaf
-                return; // Only leafs
-            }
-            if (node.RenderObject != null) return; // already generated
+            public NodeAndVersion node;
+            public Array3D<VoxelData> chunkData;
+        }
+        private struct Result
+        {
+            public VoxelChunkRenderer.MeshData data;
+            public NodeAndVersion node;
+        }
 
-            var dataNode = VoxelWorld.GetNode(node.LowerLeft, node.Depth);
+        private void applyToRenderer(RenderOctreeNode node)
+        {
+            // Not sure if needed
+        }
 
+        private VoxelChunkRenderer createRenderObject(NodeAndVersion node, VoxelChunkRenderer.MeshData meshData)
+        {
             var renderObject = new GameObject();
+            renderObject.name = "Node " + node.ChangedFrame + " " + node.Node.LowerLeft + " " + node.Node.Size + " V: " + meshData.doubledVertices.Count;
             var comp = renderObject.AddComponent<VoxelChunkRenderer>();
+            comp.AutomaticallyGenerateMesh = false;
             comp.MaterialsDictionary = materialsDictionary;
-            comp.SetChunk(dataNode.VoxelData);
-            comp.SetWorldcoords(node.LowerLeft, node.Size / (float)(VoxelWorld.ChunkSize.X));// TOOD: DANGEROES
+            comp.setMeshToUnity(meshData);
+            comp.transform.SetParent(ChunkCache);
 
-            comp.transform.SetParent(transform);
-            node.RenderObject = comp;
+            renderObject.SetActive(false);
+            return comp;
 
 
         }

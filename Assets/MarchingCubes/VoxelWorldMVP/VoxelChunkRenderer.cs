@@ -3,12 +3,16 @@ using DirectX11;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
     /// <summary>
     /// Responsible for rendering and physics of a single chunk of a VoxelWorld
     /// Dynamically updates the renderer based on the dirty feature of the voxel world chunks
+    /// 
+    /// The class has two modes, one where it is self sufficiently updating the voxel data, another where it is used by external update mechanisms. 
+    /// This is switched with AutomaticallyGenerateMesh;
     /// </summary>
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshCollider))]
@@ -30,12 +34,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         }
         public void SetWorldcoords(Vector3 lowerLeft, float scale)
         {
-            transform.localScale = new Vector3(scale,scale,scale);
+            transform.localScale = new Vector3(scale, scale, scale);
             transform.position = lowerLeft;
         }
 
-
-
+        /// <summary>
+        /// Used to make this component autonomously track the voxel data or a subcomponent of external systems.
+        /// </summary>
+        public bool AutomaticallyGenerateMesh = true;
 
         //public int IsoSurface = 40;
         //public int Resolution = 30;
@@ -45,7 +51,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private MeshRenderer renderer;
         VoxelChunkMeshGenerator meshGenerator;
 
-
+        private MeshData lastMeshData = null;
         private int lastUpdatedFrame = -1;
 
         // Use this for initialization
@@ -62,41 +68,69 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         // Update is called once per frame
         void Update()
         {
+            if (!AutomaticallyGenerateMesh)
+            {
+                if (lastMeshData != null)
+                    setMeshToUnity(lastMeshData);
+                lastMeshData = null;
+                return;
+            }
             if (chunkData == null) return;
             if (lastUpdatedFrame >= chunkData.LastChangeFrame) return;
-            updateMesh();
+            var data = generateMesh(meshGenerator, chunkData.Data);
+
+            setMeshToUnity(data);
             lastUpdatedFrame = Time.frameCount;
         }
 
-        private void updateMesh()
+
+
+        public void setMeshToUnity(MeshData data)
         {
+            if (mesh == null)
+            {
+                lastMeshData = data;
+                return;
+            }
+            mesh.Clear();
+            mesh.SetVertices(data.doubledVertices);
+            mesh.subMeshCount = data.numMeshes;
+            for (int i = 0; i < data.indicesList.Count; i++)
+                mesh.SetIndices(data.indicesList[i], MeshTopology.Triangles, i);
 
-            //var colorDicts = new Dictionary<Color, int>();// Map from hardcoded colors to material ids
-            //colorDicts.Add(Color.green, 0);
-            //colorDicts.Add(Color.red, 1);
-            //colorDicts.Add(Color.blue, 2);
+            // NOTE MATERIALS ARE SET FROM unity editor and do not respect the colors!! ( They should match )
 
+            mesh.RecalculateBounds();
+            mesh.RecalculateNormals();
+
+            GetComponent<MeshCollider>().sharedMesh = mesh;
+            renderer.materials = data.colors.Select(c => MaterialsDictionary[c]).ToArray();
+        }
+
+        public static MeshData generateMesh(VoxelChunkMeshGenerator meshGenerator, Array3D<VoxelData> chunkData)
+        {
             List<Vector3> doubledVertices;
             int numMeshes;
             List<int[]> indicesList;
             List<Color> colors;
-            meshGenerator.generateMesh(chunkData.Data, out doubledVertices, out numMeshes, out indicesList,out colors);
+            meshGenerator.generateMesh(chunkData, out doubledVertices, out numMeshes, out indicesList, out colors);
 
-            mesh.Clear();
-            mesh.SetVertices(doubledVertices);
-            mesh.subMeshCount = numMeshes;
-            for (int i = 0; i < indicesList.Count; i++)
-                mesh.SetIndices(indicesList[i], MeshTopology.Triangles, i);
-
-            // NOTE MATERIALS ARE SET FROM unity editor and do not respect the colors!!
-
-            mesh.RecalculateBounds();
-            mesh.RecalculateNormals();
-            
-            GetComponent<MeshCollider>().sharedMesh = mesh;
-            renderer.materials = colors.Select(c => MaterialsDictionary[c]).ToArray();
+            return new MeshData()
+            {
+                doubledVertices = doubledVertices,
+                numMeshes = numMeshes,
+                indicesList = indicesList,
+                colors = colors
+            };
         }
 
+        public class MeshData
+        {
+            public List<Vector3> doubledVertices;
+            public int numMeshes;
+            public List<int[]> indicesList;
+            public List<Color> colors;
+        }
 
 
     }

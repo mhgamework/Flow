@@ -26,7 +26,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
         {
             if (RenderObject != null)
             {
-                GameObject.Destroy(RenderObject.gameObject);
+                RenderObject.gameObject.SetActive(false);
+                RenderObject.gameObject.transform.SetParent(null);
+                //GameObject.Destroy(RenderObject.gameObject);
             }
             RenderObject = null;
         }
