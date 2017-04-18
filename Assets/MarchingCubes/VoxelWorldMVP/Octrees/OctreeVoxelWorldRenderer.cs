@@ -38,35 +38,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public float LODDistanceFactor = 1.2f;
 
-        private AsyncLRUCache<NodeAndVersion, VoxelChunkRenderer> renderDataCache;
-        public int RenderCacheSize = 100;
-
         private VoxelChunkMeshGenerator meshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
-
-        public Transform ChunkCache;
-        public Transform VisibleChunks;
-
+        private int stopped;
         //private VoxelChunkMeshGenerator voxelChunkMeshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
 
-        private Thread t;
-        private int stopped;
         public void Start()
         {
-            renderDataCache = new AsyncLRUCache<NodeAndVersion, VoxelChunkRenderer>(RenderCacheSize, removeCachedData);
-            t = new Thread(anderProcessorProgrammake);
-            stopped = 0;
-            t.Start();
 
-        }
-
-        private void removeCachedData(NodeAndVersion node, VoxelChunkRenderer data)
-        {
-            Destroy(data.gameObject);
-        }
-
-        public void OnDestroy()
-        {
-            Interlocked.Increment(ref stopped);
         }
 
         public void Init(OctreeVoxelWorld world, List<VoxelMaterial> voxelMaterials)
@@ -85,106 +63,148 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
 
 
-        /// <summary>
-        /// Walk the tree, request chunks that should be visible from the cache, and built a tree using what is available in the cache
-        /// </summary>
-        public bool UpdateQuadtreeClipmaps(RenderOctreeNode node, Vector3 cameraPosition, int minNodeSize, ref int numRequestedFromCache, float distanceFactor = 1.2f)
+        public void UpdateClipmaps(RenderOctreeNode node, Vector3 cameraPosition, int minNodeSize, List<RenderOctreeNode> outDirtyNodes,
+            List<RenderOctreeNode> outMissingRenderDataNodes, float distanceFactor = 1.2f, bool parentDirty = true)
+        {
+            if (isQualityGoodEnough(node, cameraPosition, distanceFactor))
+            {
+                node.ShouldRender = true;
+                checkDirty(node, outDirtyNodes, outMissingRenderdataNodes, parentDirty);
+                return;
+            }
+
+            if (node.Children == null)
+                helper.Split(node, false, minNodeSize);
+
+            if (node.Children == null)
+            {
+                // Minlevel
+                node.ShouldRender = true;
+                checkDirty(node, outDirtyNodes, outMissingRenderdataNodes, parentDirty);
+                return;
+            }
+
+            // Should not render
+            node.ShouldRender = false;
+            parentDirty = checkDirty(node, outDirtyNodes, outMissingRenderdataNodes, parentDirty);
+
+            for (int i = 0; i < 8; i++)
+                UpdateClipmaps(node.Children[i], cameraPosition, minNodeSize, outDirtyNodes, outMissingRenderDataNodes, distanceFactor, parentDirty);
+        }
+
+        private static bool isQualityGoodEnough(RenderOctreeNode node, Vector3 cameraPosition, float distanceFactor)
         {
             var center = (Vector3)node.LowerLeft.ToVector3() + Vector3.one * node.Size * 0.5f;
             var dist = Vector3.Distance(cameraPosition, center);
 
-            // This node might be needed request it in cache
-            var renderDataOrNull = renderDataCache.Get(new NodeAndVersion(node, getNode(node).VoxelData.LastChangeFrame));
-            numRequestedFromCache++;
-
-
             // Should take into account the fact that if minNodeSize changes, the quality of far away nodes changes so the threshold maybe should change too
-            if (dist > node.Size * distanceFactor)
-            {
-                // This is a valid node size at this distance, so remove all children
-                helper.Merge(node);
-
-                return trySetRenderData(node, renderDataOrNull);
-            }
-            else
-            {
-                if (node.Children == null)
-                    helper.Split(node, false, minNodeSize);
-
-                if (node.Children == null)
-                {
-                    // Minlevel
-                    return trySetRenderData(node, renderDataOrNull);
-                }
-            }
-
-            var areChildrenHoleless = true;
-            for (int i = 0; i < 8; i++)
-            {
-                areChildrenHoleless &= UpdateQuadtreeClipmaps(node.Children[i], cameraPosition, minNodeSize, ref numRequestedFromCache, distanceFactor);
-            }
-            if (areChildrenHoleless) return true;
-            // Going to try and use this lod level or one up the tree
-            // First disable all children since not complete; Is this costly? I think this only happens in case suddenly a very low resolution mesh is needed, not sure how often that happens
-            for (int i = 0; i < 8; i++)
-                clearRenderInfo(node.Children[i]);
-
-            return trySetRenderData(node, renderDataOrNull);
-
+            var qualityGoodEnough = dist > node.Size * distanceFactor;
+            return qualityGoodEnough;
         }
 
-        private void clearRenderInfo(RenderOctreeNode node)
+        public bool checkDirty(RenderOctreeNode node, List<RenderOctreeNode> outDirtyNodes, List<RenderOctreeNode> outMissingRenderDataNodes, bool parentDirty)
         {
-            if (node.RenderObject != null)
-            {
-                node.RenderObject.gameObject.SetActive(false);
-                node.RenderObject.transform.SetParent(ChunkCache);
-            }
-            node.RenderObject = null;
+            var hasRenderable = node.RenderObject != null && node.LastRenderFrame == getNode(node).VoxelData.LastChangeFrame;
+            if (hasRenderable == node.ShouldRender) return false; // Done, unchanged
+            outMissingRenderDataNodes.Add(node);
+            if (parentDirty) return false;
 
-            if (node.Children == null) return;
-            for (int i = 0; i < 8; i++)
-                clearRenderInfo(node.Children[i]);
+            outDirtyNodes.Add(node); // Needs collapse
+            return true;
         }
 
-
-        public bool trySetRenderData(RenderOctreeNode node, VoxelChunkRenderer renderDataOrNull)
+        List<RenderOctreeNode> outDirtyNodes = new List<RenderOctreeNode>();
+        List<RenderOctreeNode> outMissingRenderdataNodes = new List<RenderOctreeNode>();
+        private Dictionary<OctreeNode, VoxelChunkRenderer.MeshData> cache = new Dictionary<OctreeNode, VoxelChunkRenderer.MeshData>();
+        public void Update()
         {
-            if (renderDataOrNull == null) return false; // Cant render
+            if (VoxelWorld == null) return;
 
-            if (node.RenderObject != null)
-            {
-                if (node.RenderObject == renderDataOrNull) return true; // Already ok
-                node.RenderObject.gameObject.SetActive(false);
-                node.RenderObject.transform.SetParent(ChunkCache);
-            }
+            UpdateClipmaps(root, Camera.main.transform.position, VoxelWorld.ChunkSize.X, outDirtyNodes,
+                outMissingRenderdataNodes, LODDistanceFactor);
 
-            // Warn this is comfusing because the unity component is actually an entire game object
+            // TODO async scheduling and processing, copy from lru
+
+            foreach (var dirty in outDirtyNodes)
+                tryCleanup(dirty);
 
 
-            //if (node.Children != null)
+            //UpdateQuadtreeClipmaps(root, Camera.main.transform.position, VoxelWorld.ChunkSize.X, LODDistanceFactor);
+            if (ShowOctree)
+                helper.DrawLines(root, manager);
+
+            //helper.VisitTopDown(root, node =>
             //{
-            //    node.DestroyRenderObject(); // not a leaf
-            //    return; // Only leafs
-            //}
-            //if (node.RenderObject != null) return; // already generated
+            //    createRenderObject(node);
+            //});
 
-            //var dataNode = VoxelWorld.GetNode(node.LowerLeft, node.Depth);
+        }
 
-            //var renderObject = new GameObject();
-            //var comp = renderObject.AddComponent<VoxelChunkRenderer>();
+        private void tryCleanup(RenderOctreeNode dirty)
+        {
+            // still not ok
+            var hasRenderables = checkLeafsReady(dirty);
+            if (!hasRenderables) return;
+            removeRenderable(dirty);
+            activateRenderables(dirty);
+        }
+
+        private bool checkLeafsReady(RenderOctreeNode node)
+        {
+
+            if (node.ShouldRender) return hasRenderable(node);
+            if (node.Children == null) return true;
+            var ret = true;
+            for (int i = 0; i < 8; i++)
+            {
+                ret &= checkLeafsReady(node.Children[i]);
+            }
+            return ret;
+        }
+        public void removeRenderable(RenderOctreeNode node)
+        {
+            node.RenderObject.gameObject.SetActive(false);
+            node.RenderObject = null;
+        }
+        public void activateRenderables(RenderOctreeNode node)
+        {
+            if (node.ShouldRender)
+            {
+                if (node.RenderObject != null)
+                    throw new InvalidOperationException(
+                        "Not possible, if the parent is dirty and the holeless invariant holds, this should be null");
+                var mesh = cache[getNode(node)];
+                node.RenderObject = createREnderDAta(node, mesh);
+                activateRenderdata(node, node.RenderObject);
+            }
+        }
+        public bool hasRenderable(RenderOctreeNode node)
+        {
+            return cache.ContainsKey(getNode(node));
+        }
+        public void activateRenderdata(RenderOctreeNode node, VoxelChunkRenderer renderDataOrNull)
+        {
             var comp = renderDataOrNull;
             comp.MaterialsDictionary = materialsDictionary;
-            //comp.SetChunk(dataNode.VoxelData);
             comp.SetWorldcoords(node.LowerLeft, node.Size / (float)(VoxelWorld.ChunkSize.X));// TOOD: DANGEROES
 
-            comp.transform.SetParent(VisibleChunks);
-            node.RenderObject = comp;
+            comp.transform.SetParent(transform);
             comp.gameObject.SetActive(true);
+        }
+        private VoxelChunkRenderer createREnderDAta(RenderOctreeNode node, VoxelChunkRenderer.MeshData meshData)
+        {
+            var renderObject = new GameObject();
+            renderObject.name = "Node " + node.LastRenderFrame + " " + node.LowerLeft + " " + node.Size + " V: " + meshData.doubledVertices.Count;
+            var comp = renderObject.AddComponent<VoxelChunkRenderer>();
+            comp.AutomaticallyGenerateMesh = false;
+            comp.MaterialsDictionary = materialsDictionary;
+            comp.setMeshToUnity(meshData);
+            comp.transform.SetParent(transform);
+
+            renderObject.SetActive(false);
+            return comp;
 
 
-            //node.SetRenderData(renderDataOrNull);
-            return true;
         }
 
         private class NodeAndVersion
@@ -222,53 +242,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private OctreeNode getNode(RenderOctreeNode f)
         {
-            return VoxelWorld.GetNode(f.LowerLeft, f.Depth);
-        }
-
-
-        public void Update()
-        {
-            if (VoxelWorld == null) return;
-            int numRequested = 0;
-            UpdateQuadtreeClipmaps(root, Camera.main.transform.position, VoxelWorld.ChunkSize.X, ref numRequested, LODDistanceFactor);
-            if (ShowOctree)
-                helper.DrawLines(root, manager);
-
-
-            Debug.Log("Requested: " + numRequested + " Missing: " + renderDataCache.GetMissingData().Count());
-
-            var tasks = renderDataCache.GetMissingData().Take(10).Select(f => new Task
-            {
-                node = f,
-                chunkData = getNode(f.Node).VoxelData.Data
-            }).ToArray();
-
-            workingQueue.Enqueue(tasks);
-            Result result;
-            while (resultsQueue.TryDequeue(out result))
-            {
-                var render = createRenderObject(result.node, result.data);
-
-                renderDataCache.AddData(result.node, render);
-            }
-
-            //if (toRender != null)
-            //{
-            //    var dataNode = VoxelWorld.GetNode(toRender.LowerLeft, toRender.Depth);
-
-            //    var data = VoxelChunkRenderer.generateMesh(meshGenerator, dataNode.VoxelData.Data);
-
-            //    var render = createRenderObject(data);
-
-            //    renderDataCache.AddData(toRender, render);
-            //}
-
-            helper.VisitTopDown(root, node =>
-            {
-                applyToRenderer(node);
-                //createRenderObject(node);
-            });
-
+            if (f.DataNode == null)
+                f.DataNode = VoxelWorld.GetNode(f.LowerLeft, f.Depth);
+            return f.DataNode;
         }
 
         public void anderProcessorProgrammake()
@@ -310,34 +286,15 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private struct Task
         {
-            public NodeAndVersion node;
+            public RenderOctreeNode node;
             public Array3D<VoxelData> chunkData;
         }
         private struct Result
         {
             public VoxelChunkRenderer.MeshData data;
-            public NodeAndVersion node;
+            public RenderOctreeNode node;
         }
 
-        private void applyToRenderer(RenderOctreeNode node)
-        {
-            // Not sure if needed
-        }
 
-        private VoxelChunkRenderer createRenderObject(NodeAndVersion node, VoxelChunkRenderer.MeshData meshData)
-        {
-            var renderObject = new GameObject();
-            renderObject.name = "Node " + node.ChangedFrame + " " + node.Node.LowerLeft + " " + node.Node.Size + " V: " + meshData.doubledVertices.Count;
-            var comp = renderObject.AddComponent<VoxelChunkRenderer>();
-            comp.AutomaticallyGenerateMesh = false;
-            comp.MaterialsDictionary = materialsDictionary;
-            comp.setMeshToUnity(meshData);
-            comp.transform.SetParent(ChunkCache);
-
-            renderObject.SetActive(false);
-            return comp;
-
-
-        }
     }
 }

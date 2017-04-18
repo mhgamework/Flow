@@ -15,7 +15,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
         public Point3 LowerLeft { get; set; }
         public int Size { get; set; }
         public VoxelChunkRenderer RenderObject { get; set; }
-
+        public OctreeNode DataNode { get; set; }
+        public bool ShouldRender { get; set; }
+        public int LastRenderFrame { get; set; }
 
         public void Destroy()
         {
