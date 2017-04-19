@@ -49,7 +49,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private MeshFilter meshFilter;
         private Mesh mesh;
         private MeshRenderer renderer;
-        VoxelChunkMeshGenerator meshGenerator;
+        VoxelChunkMeshGenerator meshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
 
         private MeshData lastMeshData = null;
         private int lastUpdatedFrame = -1;
@@ -57,11 +57,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         // Use this for initialization
         void Start()
         {
-            meshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
-            meshFilter = GetComponent<MeshFilter>();
-            mesh = new Mesh();
-            meshFilter.mesh = mesh;
-            renderer = GetComponent<MeshRenderer>();
+            if (meshFilter == null)
+                meshFilter = GetComponent<MeshFilter>();
+
+            if (mesh == null)
+            {
+                mesh = new Mesh();
+                meshFilter.mesh = mesh;
+            }
+            if (renderer == null)
+                renderer = GetComponent<MeshRenderer>();
 
         }
 
@@ -87,11 +92,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void setMeshToUnity(MeshData data)
         {
-            if (mesh == null)
-            {
-                lastMeshData = data;
-                return;
-            }
+            Start();
+            //if (mesh == null)
+            //{
+            //    lastMeshData = data;
+            //    return;
+            //}
             mesh.Clear();
             mesh.SetVertices(data.doubledVertices);
             mesh.subMeshCount = data.numMeshes;
