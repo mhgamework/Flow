@@ -73,6 +73,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             {
                 node.ShouldRender = true;
                 checkDirty(node, outDirtyNodes, outMissingRenderdataNodes, parentDirty);
+                if (node.Children!= null)
+                    for (int i = 0; i < 8; i++)
+                        setNotShouldRenderRecursive(node.Children[i]);
                 return;
             }
 
@@ -95,6 +98,15 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 UpdateClipmaps(node.Children[i], cameraPosition, minNodeSize, outDirtyNodes, outMissingRenderDataNodes, distanceFactor, parentDirty);
         }
 
+        private void setNotShouldRenderRecursive(RenderOctreeNode node)
+        {
+            node.ShouldRender = false;
+            if (node.Children == null) return;
+            for (int i = 0; i < 8; i++)
+                setNotShouldRenderRecursive(node.Children[i]);
+
+        }
+
         private static bool isQualityGoodEnough(RenderOctreeNode node, Vector3 cameraPosition, float distanceFactor)
         {
             var center = (Vector3)node.LowerLeft.ToVector3() + Vector3.one * node.Size * 0.5f;
@@ -107,13 +119,18 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public bool checkDirty(RenderOctreeNode node, List<RenderOctreeNode> outDirtyNodes, List<RenderOctreeNode> outMissingRenderDataNodes, bool parentDirty)
         {
-            var hasRenderable = hasCorrectRenderable(node);
-            if (hasRenderable == node.ShouldRender) return false; // Done, unchanged
-            outMissingRenderDataNodes.Add(node);
-            if (parentDirty) return false;
+            // Not dirty when
+            if (node.ShouldRender && hasCorrectRenderable(node)) return false;
+            if (!node.ShouldRender && node.RenderObject == null) return false;
 
-            outDirtyNodes.Add(node); // Needs collapse
+            // Dirty!
+            if (node.ShouldRender) outMissingRenderDataNodes.Add(node);
+
+            if (!parentDirty) 
+                outDirtyNodes.Add(node);// root-est dirty node
+
             return true;
+
         }
 
         private bool hasCorrectRenderable(RenderOctreeNode node)
@@ -141,7 +158,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             // subtle invariant, if a node is in the cache, it will not be in the async working queue. only way node is missprocessed is when it is in process while sending new requests which should be fine
 
             foreach (var dirty in outDirtyNodes)
-                if (checkAllRenderablesInCache(dirty))
+                if (checkAllRenderablesAvailable(dirty))
                     transìtion(dirty);
 
 
@@ -194,15 +211,15 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 helper.Merge(node);
         }
 
-        private bool checkAllRenderablesInCache(RenderOctreeNode node)
+        private bool checkAllRenderablesAvailable(RenderOctreeNode node)
         {
 
-            if (node.ShouldRender) return cache.ContainsKey(getNode(node));
+            if (node.ShouldRender) return cache.ContainsKey(getNode(node)) || hasCorrectRenderable(node);
             if (node.Children == null) return true;
             var ret = true;
             for (int i = 0; i < 8; i++)
             {
-                ret &= checkAllRenderablesInCache(node.Children[i]);
+                ret &= checkAllRenderablesAvailable(node.Children[i]);
             }
             return ret;
         }
@@ -231,6 +248,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             if (node.RenderObject != null)
                 throw new InvalidOperationException();
+            if (!cache.ContainsKey(getNode(node)))
+            {
+                throw new InvalidOperationException();
+            }
             var result = cache[getNode(node)];
             cache.Remove(getNode(node));
             node.RenderObject = createREnderDAta(node, result);
