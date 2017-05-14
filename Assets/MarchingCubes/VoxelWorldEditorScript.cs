@@ -16,6 +16,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// </summary>
     public class VoxelWorldEditorScript : MonoBehaviour
     {
+        public GameObject SphereGizmo;
         private VoxelWorldRaycaster raycaster;
 
         public IState activeState;
@@ -41,8 +42,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             ActiveMaterial = VoxelMaterials[0];
 
             tools.Add(KeyCode.Alpha0, new NullState());
-            tools.Add(KeyCode.Alpha1, new PlaceSphereState(this, world));
-            tools.Add(KeyCode.Alpha2, new PlaceSphereStateMidair(this, world));
+            tools.Add(KeyCode.Alpha1, new PlaceSphereState(this, world, SphereGizmo));
+            tools.Add(KeyCode.Alpha2, new PlaceSphereStateMidair(this, world,SphereGizmo));
+            tools.Add(KeyCode.Alpha3, new ReplaceMaterialTool(this, world,SphereGizmo));
 
             activeState = tools[KeyCode.Alpha1];
 
@@ -94,6 +96,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             return VoxelMaterials[(VoxelMaterials.IndexOf(ActiveMaterial) + indexChange + VoxelMaterials.Count) % VoxelMaterials.Count];
         }
+
+        public void OnDrawGizmos()
+        {
+            if (activeState != null)
+                activeState.OnDrawGizmos();
+        }
     }
 
     public interface IState
@@ -102,25 +110,29 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         void Update(RaycastHit? raycast);
         void Start();
         string Name { get; }
+        void OnDrawGizmos();
     }
 
     class PlaceSphereState : IState
     {
         private readonly IEditableVoxelWorld world;
+        private readonly GameObject sphereGizmo;
 
         private WorldEditTool tool = new WorldEditTool();
 
         private VoxelWorldEditorScript voxelWorldScript;
+        private Vector3 point;
 
         public string Name
         {
             get { return "Add/Remove sphere"; }
         }
 
-        public PlaceSphereState(VoxelWorldEditorScript voxelWorldScript, IEditableVoxelWorld world)
+        public PlaceSphereState(VoxelWorldEditorScript voxelWorldScript, IEditableVoxelWorld world, GameObject sphereGizmo)
         {
             this.voxelWorldScript = voxelWorldScript;
             this.world = world;
+            this.sphereGizmo = sphereGizmo;
         }
 
         public void Stop()
@@ -134,7 +146,11 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             var range = voxelWorldScript.ActiveSize;
             var material = voxelWorldScript.ActiveMaterial;
 
-            var point = raycast.Value.point;
+            point = raycast.Value.point;
+
+            sphereGizmo.transform.position = point;
+            sphereGizmo.transform.localScale = Vector3.one * range;
+
             tryPlaceSphere(range, material, point);
 
         }
@@ -180,6 +196,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public void Start()
         {
         }
+
+        public void OnDrawGizmos()
+        {
+        }
     }
 
     public class PlaceSphereStateMidair : IState
@@ -187,15 +207,19 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private VoxelWorldEditorScript script;
         private PlaceSphereState tool;
         private IEditableVoxelWorld world;
+        private readonly GameObject sphereGizmo;
+        private Vector3 point;
+
         public string Name
         {
             get { return "Add/Remove sphere midair"; }
         }
-        public PlaceSphereStateMidair(VoxelWorldEditorScript script, IEditableVoxelWorld world)
+        public PlaceSphereStateMidair(VoxelWorldEditorScript script, IEditableVoxelWorld world, GameObject sphereGizmo)
         {
             this.script = script;
             this.world = world;
-            this.tool = new PlaceSphereState(script, world);
+            this.sphereGizmo = sphereGizmo;
+            this.tool = new PlaceSphereState(script, world,sphereGizmo);
         }
 
         public void Start()
@@ -210,9 +234,63 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             var ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
-            var point = ray.origin + ray.direction * script.ActiveSize * 2f;
+            point = ray.origin + ray.direction * script.ActiveSize * 2f;
+            sphereGizmo.transform.position = point;
+            sphereGizmo.transform.localScale = Vector3.one * script.ActiveSize;
+            tool.tryPlaceSphere(script.ActiveSize, script.ActiveMaterial, point);
+        }
+
+        public void OnDrawGizmos()
+        {
+            Gizmos.DrawSphere(point, script.ActiveSize);
+
+        }
+    }
+
+    public class ReplaceMaterialTool : IState
+    {
+        private VoxelWorldEditorScript script;
+        private PlaceSphereState tool;
+        private IEditableVoxelWorld world;
+        private readonly GameObject sphereGizmo;
+        private Vector3 point;
+
+        public string Name
+        {
+            get { return "Change Material"; }
+        }
+        public ReplaceMaterialTool(VoxelWorldEditorScript script, IEditableVoxelWorld world, GameObject sphereGizmo)
+        {
+            this.script = script;
+            this.world = world;
+            this.sphereGizmo = sphereGizmo;
+            //this.tool = new PlaceSphereState(script, world);
+        }
+
+        public void Start()
+        {
+        }
+
+        public void Stop()
+        {
+        }
+
+        public void Update(RaycastHit? raycast)
+        {
+            var ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+
+            point = ray.origin + ray.direction * script.ActiveSize * 2f;
+
+            sphereGizmo.transform.position = point;
+            sphereGizmo.transform.localScale = Vector3.one * script.ActiveSize;
 
             tool.tryPlaceSphere(script.ActiveSize, script.ActiveMaterial, point);
+
+        }
+
+        public void OnDrawGizmos()
+        {
+            Gizmos.DrawSphere(point, script.ActiveSize);
         }
     }
 
@@ -232,6 +310,11 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void Start()
         {
+        }
+
+        public void OnDrawGizmos()
+        {
+
         }
     }
 }
