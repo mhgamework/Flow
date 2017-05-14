@@ -92,6 +92,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             });
         }
 
+        public void RunKernelXbyXUnrolled(Point3 minInclusive, Point3 maxInclusive, Func<VoxelData[], Point3, VoxelData> act, int kernelSize, int frame)
+        {
+            throw new NotImplementedException();
+        }
+
+
         private void allocChunk(OctreeNode octreeNode)
         {
             if (octreeNode.VoxelData != null) return;
@@ -177,5 +183,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             return ret;
 
         }
+
+     
     }
 }
