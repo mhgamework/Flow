@@ -14,6 +14,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 {
     /// <summary>
     /// Holds data for entire voxel world
+    /// Could improve octree by just using hasmap instead of sparse tree structure, OR BOTH
     /// </summary>
     public class OctreeVoxelWorld : IEditableVoxelWorld
     {
@@ -94,7 +95,105 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void RunKernelXbyXUnrolled(Point3 minInclusive, Point3 maxInclusive, Func<VoxelData[], Point3, VoxelData> act, int kernelSize, int frame)
         {
-            throw new NotImplementedException();
+            var diff = maxInclusive - minInclusive + new Point3(1, 1, 1);
+            VoxelData[] data = new VoxelData[diff.X * diff.Y * diff.Z];
+
+            var visited = new List<OctreeNode>();
+
+            helper.VisitTopDown(Root, n =>
+            {
+                for (int i = 0; i < 3; i++)
+                    if (n.LowerLeft[i] > maxInclusive[i]) // is outside
+                        return VisitOptions.SkipChildren;
+                for (int i = 0; i < 3; i++)
+                    if (n.LowerLeft[i] + n.Size + 1 * getNodeResolution(n.Depth)/* one extra for lod stitching */ < minInclusive[i]) // is outside
+                        return VisitOptions.SkipChildren;
+                // inside
+                allocChunk(n);
+                visited.Add(n);
+                if (getNodeResolution(n.Depth) == 1)
+                {
+                    var max = maxInclusive - n.LowerLeft;
+                    var start = minInclusive - n.LowerLeft;
+                    for (int i = 0; i < 3; i++) max[i] = Math.Min(max[i], ChunkSize[i] + 1/* One extra for lod stitching */);//floor
+                    for (int i = 0; i < 3; i++) start[i] = Math.Max(start[i], 0); // ceil
+                    var grid = n.VoxelData.Data;
+                    for (int x = start.X; x <= max.X; x++)
+                        for (int y = start.Y; y <= max.Y; y++)
+                            for (int z = start.Z; z <= max.Z; z++)
+                            {
+                                var p = new Point3(x, y, z);
+                                var val = grid.GetFast(x, y, z);
+                                data[flatten(p + n.LowerLeft-minInclusive, diff)] = val;
+                                //grid[p] = act(val, new Point3(n.LowerLeft.X + x, n.LowerLeft.Y + y, n.LowerLeft.Z + z));
+
+                            }
+                    n.VoxelData.LastChangeFrame = frame;
+                }
+
+                return VisitOptions.Continue;
+            });
+
+
+            var pass = new VoxelData[kernelSize];
+            // Run kernel
+            for (int x = minInclusive.X + kernelSize; x <= maxInclusive.X - kernelSize; x++)
+                for (int y = minInclusive.Y + kernelSize; y <= maxInclusive.Y - kernelSize; y++)
+                    for (int z = minInclusive.Z + kernelSize; z <= maxInclusive.Z - kernelSize; z++)
+                    {
+                        for (int i = -kernelSize; i <= kernelSize; i++)
+                        {
+                            pass[i + kernelSize] = data[flatten(new Point3(x + i, y, z)-minInclusive, diff)];
+                        }
+                        data[flatten(new Point3(x, y, z), diff)] = act(pass, new Point3(x, y, z));
+                    }
+            for (int x = minInclusive.X + kernelSize; x <= maxInclusive.X - kernelSize; x++)
+                for (int y = minInclusive.Y + kernelSize; y <= maxInclusive.Y - kernelSize; y++)
+                    for (int z = minInclusive.Z + kernelSize; z <= maxInclusive.Z - kernelSize; z++)
+                    {
+                        for (int i = -kernelSize; i <= kernelSize; i++)
+                        {
+                            pass[i + kernelSize] = data[flatten(new Point3(x, y + i, z) - minInclusive, diff)];
+                        }
+                        data[flatten(new Point3(x, y, z), diff)] = act(pass, new Point3(x, y, z));
+                    }
+            for (int x = minInclusive.X + kernelSize; x <= maxInclusive.X - kernelSize; x++)
+                for (int y = minInclusive.Y + kernelSize; y <= maxInclusive.Y - kernelSize; y++)
+                    for (int z = minInclusive.Z + kernelSize; z <= maxInclusive.Z - kernelSize; z++)
+                    {
+                        for (int i = -kernelSize; i <= kernelSize; i++)
+                        {
+                            pass[i + kernelSize] = data[flatten(new Point3(x, y, z + i) - minInclusive, diff)];
+                        }
+                        data[flatten(new Point3(x, y, z), diff)] = act(pass, new Point3(x, y, z));
+                    }
+
+
+            //visited.Sort((a, b) => a.Depth - b.Depth);
+
+            foreach (var l in visited)
+            {
+                var resolution = getNodeResolution(l.Depth);
+                var max = maxInclusive - l.LowerLeft;
+                var start = minInclusive - l.LowerLeft;
+                for (int i = 0; i < 3; i++) max[i] = Math.Min(max[i] / resolution, ChunkSize[i] + 1/* One extra for lod stitching */);//floor
+                for (int i = 0; i < 3; i++) start[i] = Math.Max((start[i] + resolution - 1) / resolution, 0); // ceil
+                var grid = l.VoxelData.Data;
+                for (int x = start.X; x <= max.X; x++)
+                    for (int y = start.Y; y <= max.Y; y++)
+                        for (int z = start.Z; z <= max.Z; z++)
+                        {
+                            var p = new Point3(x, y, z);
+                            grid[p] = data[flatten(new Point3(l.LowerLeft.X + resolution * x, l.LowerLeft.Y + resolution * y, l.LowerLeft.Z + resolution * z) - minInclusive, diff)];
+
+                        }
+                l.VoxelData.LastChangeFrame = frame;
+            }
+        }
+
+        private int flatten(Point3 v, Point3 size)
+        {
+            return v.X + size.X * (v.Y + size.Y * v.Z);
         }
 
 
@@ -184,6 +283,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         }
 
-     
+
     }
 }

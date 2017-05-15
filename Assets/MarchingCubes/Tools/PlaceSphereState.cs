@@ -47,13 +47,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         }
 
-        public void tryPlaceSphere(float range, VoxelMaterial material, Vector3 point)
+        public void tryPlaceSphere(float range, VoxelMaterial material, Vector3 point,bool continuous = false)
         {
             var min = (point - new Vector3(1, 1, 1) * range).ToFloored();
             var max = (point + new Vector3(1, 1, 1) * range).ToCeiled();
             var radius = new Point3(1, 1, 1) * (int)Math.Ceiling(range);
 
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0) || (continuous && Input.GetMouseButton(0)))
             {
                 world.RunKernel1by1(point.ToFloored() - radius, point.ToCeiled() + radius, WorldEditTool.createAddSphereKernel(point, range, material), Time.frameCount);
 
@@ -69,7 +69,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
 
             }
-            else if (Input.GetMouseButtonDown(1))
+            else if (Input.GetMouseButtonDown(1) || (continuous && Input.GetMouseButton(1)))
             {
                 world.RunKernel1by1(point.ToFloored() - radius, point.ToCeiled() + radius, WorldEditTool.createRemoveSphereKernel(point, range), Time.frameCount);
 

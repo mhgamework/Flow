@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using DirectX11;
+using MHGameWork.TheWizards;
 using MHGameWork.TheWizards.DualContouring;
 using UnityEditor;
 using UnityEngine;
@@ -43,8 +46,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             tools.Add(KeyCode.Alpha1, new PlaceSphereState(this, world, SphereGizmo));
             tools.Add(KeyCode.Alpha2, new PlaceSphereStateMidair(this, world, SphereGizmo));
             tools.Add(KeyCode.Alpha3, new ReplaceMaterialTool(this, world, SphereGizmo));
-            tools.Add(KeyCode.Alpha4, new FlattenTool(this, world, SphereGizmo,PlaneGizmo));
-            tools.Add(KeyCode.Alpha5, new DrawOnPlaneTool(this, world, SphereGizmo,PlaneGizmo));
+            tools.Add(KeyCode.Alpha4, new FlattenTool(this, world, SphereGizmo, PlaneGizmo));
+            tools.Add(KeyCode.Alpha5, new DrawOnPlaneTool(this, world, SphereGizmo, PlaneGizmo));
+            tools.Add(KeyCode.Alpha6, new SmoothTool(this, world, SphereGizmo));
 
             activeState = tools[KeyCode.Alpha1];
 
@@ -58,6 +62,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public void Update()
         {
             if (this.world == null) return;
+
+            //addMovingSphere();
+
 
             if (Input.mouseScrollDelta.y != 0)
                 ActiveSize = changeSize(ActiveSize, Mathf.Sign(Input.mouseScrollDelta.y));
@@ -85,6 +92,23 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             }
 
             activeState.Update(raycaster.raycast());
+        }
+
+        private void addMovingSphere()
+        {
+            var range = ActiveSize;
+            var pos = 8 + 16 * 5;
+            var point = new Vector3(pos + Mathf.Sin(Time.realtimeSinceStartup) * range,
+                pos + Mathf.Cos(Time.realtimeSinceStartup) * range, pos);
+            var material = ActiveMaterial;
+            var radius = new Point3(1, 1, 1) * (int) Math.Ceiling(ActiveSize);
+
+            world.RunKernel1by1(point.ToFloored() - radius, point.ToCeiled() + radius, (data, p) =>
+            {
+                data.Material = material;
+                data.Density = (p - point).magnitude - range;
+                return data;
+            }, Time.frameCount);
         }
 
         private float changeSize(float currentSize, float v)

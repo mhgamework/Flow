@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
@@ -17,6 +18,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             get { return "Smooth"; }
         }
+
         public SmoothTool(VoxelWorldEditorScript script, IEditableVoxelWorld world, GameObject sphereGizmo)
         {
             this.script = script;
@@ -43,19 +45,21 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             sphereGizmo.transform.localScale = Vector3.one * script.ActiveSize;
             var range = script.ActiveSize;
             var material = script.ActiveMaterial;
-            var radius = new Point3(1, 1, 1) * (int)Math.Ceiling(script.ActiveSize);
+            var radius = new Point3(1, 1, 1) * (int) Math.Ceiling(script.ActiveSize);
 
             if (Input.GetMouseButtonDown(0))
             {
-                world.RunKernel1by1(point.ToFloored() - radius, point.ToCeiled() + radius, (data, p) =>
+                world.RunKernelXbyXUnrolled(point.ToFloored() - radius, point.ToCeiled() + radius, (data, p) =>
                 {
+                    var val = data[1];
                     if ((p - point).magnitude <= range)
                     {
-                        data.Material = material;
-                        return data;
+                        val.Material = material;
+                        val.Density = data.Sum(f => f.Density) * (1 / 3f);
+                        return val;
                     }
-                    return data;
-                }, Time.frameCount);
+                    return val;
+                }, 3, Time.frameCount);
 
 
 

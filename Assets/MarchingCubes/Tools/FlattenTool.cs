@@ -58,16 +58,17 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             if (Input.GetMouseButtonDown(0))
             {
-              
+
                 var range = script.ActiveSize;
                 var material = script.ActiveMaterial;
                 var radius = new Point3(1, 1, 1) * (int)Math.Ceiling(script.ActiveSize);
 
                 world.RunKernel1by1(localPoint.ToFloored() - radius, localPoint.ToCeiled() + radius, (data, p) =>
                 {
-                    if ((p - localPoint).magnitude <= range)
+                    if ((p - localPoint).magnitude <= range)// && data.Density >  0)
                     {
-                        //data.Material = material;
+                        if (data.Material == null || data.Material.color.Equals(new Color()))
+                            data.Material = material;
                         data.Density = new Plane(flatNormal, flatPoint).GetDistanceToPoint(p);
                         return data;
                     }

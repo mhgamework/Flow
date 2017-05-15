@@ -10,6 +10,7 @@ using System.Threading;
 using MHGameWork.TheWizards.Graphics;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
@@ -148,18 +149,25 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             outDirtyNodes.Clear();
             outMissingRenderdataNodes.Clear();
 
+            Profiler.BeginSample("UpdateClipmaps");
+
             UpdateClipmaps(root, Camera.main.transform.position, VoxelWorld.ChunkSize.X, outDirtyNodes,
                 outMissingRenderdataNodes, LODDistanceFactor);
 
-            Debug.Log("Dirty: " + outDirtyNodes.Count + " Missing: " + outMissingRenderdataNodes.Count + " Cache: " + cache.Count);
+            Profiler.EndSample();
+
+            //Debug.Log("Dirty: " + outDirtyNodes.Count + " Missing: " + outMissingRenderdataNodes.Count + " Cache: " + cache.Count);
 
             processAsyncMessages(outMissingRenderdataNodes.Where(n => !cache.ContainsKey(getNode(n))).ToArray());
 
             // subtle invariant, if a node is in the cache, it will not be in the async working queue. only way node is missprocessed is when it is in process while sending new requests which should be fine
+            Profiler.BeginSample("Transition");
 
             foreach (var dirty in outDirtyNodes)
                 if (checkAllRenderablesAvailable(dirty))
                     transìtion(dirty);
+
+            Profiler.EndSample();
 
 
             //UpdateQuadtreeClipmaps(root, Camera.main.transform.position, VoxelWorld.ChunkSize.X, LODDistanceFactor);
@@ -270,6 +278,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         }
         private VoxelChunkRenderer createREnderDAta(RenderOctreeNode node, Result result)
         {
+            Profiler.BeginSample("SetToUnity");
+
             var renderObject = new GameObject();
             renderObject.name = "Node " + result.Frame + " " + node.LowerLeft + " " + node.Size + " V: " + result.data.doubledVertices.Count;
             var comp = renderObject.AddComponent<VoxelChunkRenderer>();
@@ -277,7 +287,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             comp.MaterialsDictionary = materialsDictionary;
             comp.setMeshToUnity(result.data);
             comp.transform.SetParent(transform);
-
+            Profiler.EndSample();
             //renderObject.SetActive(false);
             return comp;
 
