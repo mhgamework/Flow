@@ -4,6 +4,7 @@ using System.Linq;
 using DirectX11;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 {
@@ -16,11 +17,53 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
         private readonly VoxelWorldAsset _asset;
         private readonly int _skipVersions;
 
-        public PersistenceWorldGenerator(IWorldGenerator decorated, VoxelWorldAsset asset,int skipVersions)
+        private List<Dictionary<PosAndResolution, SerializedChunk>> optimizedVersions;
+
+        public PersistenceWorldGenerator(IWorldGenerator decorated, VoxelWorldAsset asset, int skipVersions)
         {
             _decorated = decorated;
             _asset = asset;
             _skipVersions = skipVersions;
+
+            // Build and optimized map
+            optimizedVersions = asset.Versions.Select(v =>
+            {
+                var ret = new Dictionary<PosAndResolution, SerializedChunk>();
+                v.Chunks.ForEach(a => ret.Add(new PosAndResolution(a.LowerLeft, a.RelativeResolution), a));
+                return ret;
+            }).Reverse().ToList();
+
+        }
+
+        private struct PosAndResolution
+        {
+            public Point3 Lowerleft;
+            public int Resolution;
+
+            public PosAndResolution(Point3 lowerleft, int resolution)
+            {
+                Lowerleft = lowerleft;
+                Resolution = resolution;
+            }
+
+            public bool Equals(PosAndResolution other)
+            {
+                return Lowerleft.Equals(other.Lowerleft) && Resolution == other.Resolution;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                return obj is PosAndResolution && Equals((PosAndResolution)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return (Lowerleft.GetHashCode() * 397) ^ Resolution;
+                }
+            }
         }
 
         public UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution)
@@ -34,19 +77,20 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
             var relativeResolution = sampleResolution;
 
 
-            var chunk = ((IEnumerable<SerializedVersion>)_asset.Versions).Reverse().Skip(_skipVersions)
-                .SelectMany(l => l.Chunks).Select(f =>
+            // Optimized chunks is already reversed
+            var theChunk = optimizedVersions.Skip(_skipVersions).Select(version =>
                 {
-                    //Debug.Log(f.LowerLeft);
-                    return f;
-                })
-                .FirstOrDefault(c => c.LowerLeft == start && c.RelativeResolution == relativeResolution);
+                    SerializedChunk chunk;
+                    if (version.TryGetValue(new PosAndResolution(start, relativeResolution), out chunk)) return chunk;
+                    return null;
+                }
+            ).FirstOrDefault(f => f != null);
 
-            if (chunk != null)
+            if (theChunk != null)
             {
                 //Debug.Log("Loaded chunk " + start + " " + chunkSize + " " + relativeResolution);
 
-                return toChunkData(chunk);
+                return toChunkData(theChunk);
             }
             // This should mean that there is no change in the chunk data for this sector so use the world generator
             //Debug.Log("Unable to load chunk " + start + " " + chunkSize + " " + relativeResolution);
@@ -56,6 +100,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 
         private UniformVoxelData toChunkData(SerializedChunk chunk)
         {
+            Profiler.BeginSample("toCHunkData");
             var d = new UniformVoxelData();
             d.LastChangeFrame = 0;
             var size = _asset.ChunkSize + _asset.ChunkOversize;
@@ -72,6 +117,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
                 };
             });
 
+
+            Profiler.EndSample();
             return d;
 
         }

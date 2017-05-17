@@ -9,6 +9,7 @@ using System.Net;
 using System.Text;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
@@ -200,10 +201,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private void allocChunk(OctreeNode octreeNode)
         {
             if (octreeNode.VoxelData != null) return;
+            Profiler.BeginSample("AllocChunk");
             octreeNode.VoxelData = generator.Generate(octreeNode.LowerLeft, ChunkSize + new Point3(1, 1, 1) + new Point3(1, 1, 1), 1 << (this.depth - octreeNode.Depth));
-            if (octreeNode.Depth == depth) return; // leaf node
+            Profiler.EndSample();
 
+            if (octreeNode.Depth == depth) return; // leaf node
+            Profiler.BeginSample("AllocChunk-split");
             helper.Split(octreeNode);
+            Profiler.EndSample();
 
         }
 

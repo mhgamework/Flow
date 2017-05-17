@@ -43,7 +43,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             sphereGizmo.transform.position = point;
             sphereGizmo.transform.localScale = Vector3.one * range;
 
-            tryPlaceSphere(range, material, point);
+            tryPlaceSphere(range, material, point,true);
 
         }
 

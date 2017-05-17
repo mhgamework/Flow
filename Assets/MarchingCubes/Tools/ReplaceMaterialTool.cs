@@ -45,7 +45,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             var material = script.ActiveMaterial;
             var radius = new Point3(1, 1, 1) * (int)Math.Ceiling(script.ActiveSize);
 
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButton(0))
             {
                 world.RunKernel1by1(point.ToFloored() - radius, point.ToCeiled() + radius, (data, p) =>
                 {

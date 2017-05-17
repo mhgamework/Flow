@@ -146,8 +146,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             if (VoxelWorld == null) return;
 
+            Profiler.BeginSample("Clear");
+
             outDirtyNodes.Clear();
             outMissingRenderdataNodes.Clear();
+
+            Profiler.EndSample();
 
             Profiler.BeginSample("UpdateClipmaps");
 
@@ -157,8 +161,15 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             Profiler.EndSample();
 
             //Debug.Log("Dirty: " + outDirtyNodes.Count + " Missing: " + outMissingRenderdataNodes.Count + " Cache: " + cache.Count);
+            Profiler.BeginSample("BuildTasks");
 
-            processAsyncMessages(outMissingRenderdataNodes.Where(n => !cache.ContainsKey(getNode(n))).ToArray());
+            buildTaskList = outMissingRenderdataNodes.Where(n => !cache.ContainsKey(getNode(n))).ToArray();
+            Profiler.EndSample();
+
+            Profiler.BeginSample("Async");
+
+            processAsyncMessages(buildTaskList);
+            Profiler.EndSample();
 
             // subtle invariant, if a node is in the cache, it will not be in the async working queue. only way node is missprocessed is when it is in process while sending new requests which should be fine
             Profiler.BeginSample("Transition");
@@ -371,6 +382,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private ConcurrentQueue<Task[]> workingQueue = new ConcurrentQueue<Task[]>();
         private ConcurrentQueue<Result> resultsQueue = new ConcurrentQueue<Result>();
+        private RenderOctreeNode[] buildTaskList;
 
         private struct Task
         {

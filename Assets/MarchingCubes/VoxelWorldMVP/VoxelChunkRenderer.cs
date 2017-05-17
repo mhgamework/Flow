@@ -109,6 +109,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             mesh.RecalculateBounds();
             mesh.RecalculateNormals();
 
+            //GetComponent<MeshCollider>().enabled = false;
             GetComponent<MeshCollider>().sharedMesh = mesh;
             renderer.materials = data.colors.Select(c => MaterialsDictionary[c]).ToArray();
         }
