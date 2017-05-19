@@ -57,6 +57,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         // Use this for initialization
         void Start()
         {
+            initialize();
+
+        }
+
+        public void initialize()
+        {
             if (meshFilter == null)
                 meshFilter = GetComponent<MeshFilter>();
 
@@ -67,7 +73,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             }
             if (renderer == null)
                 renderer = GetComponent<MeshRenderer>();
-
         }
 
         // Update is called once per frame
@@ -111,7 +116,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             //GetComponent<MeshCollider>().enabled = false;
             GetComponent<MeshCollider>().sharedMesh = mesh;
-            renderer.materials = data.colors.Select(c => MaterialsDictionary[c]).ToArray();
+            renderer.sharedMaterials = data.colors.Select(c => MaterialsDictionary[c]).ToArray();
         }
 
         public static MeshData generateMesh(VoxelChunkMeshGenerator meshGenerator, Array3D<VoxelData> chunkData)

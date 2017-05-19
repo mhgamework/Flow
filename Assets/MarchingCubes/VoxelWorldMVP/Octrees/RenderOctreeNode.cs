@@ -19,6 +19,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
         public bool ShouldRender { get; set; }
         public int LastRenderFrame { get; set; }
 
+        public VoxelChunkRendererPool pool;
+
         public void Destroy()
         {
             DestroyRenderObject();
@@ -28,8 +30,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
         {
             if (RenderObject != null)
             {
-                RenderObject.gameObject.SetActive(false);
-                RenderObject.gameObject.transform.SetParent(null);
+                //RenderObject.gameObject.SetActive(false);
+                pool.ReleaseChunk(RenderObject);
+                //RenderObject.gameObject.transform.SetParent(null);
                 //GameObject.Destroy(RenderObject.gameObject);
             }
             RenderObject = null;

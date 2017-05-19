@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 using Assets.MarchingCubes.VoxelWorldMVP.Persistence;
 using Assets.UnityAdditions;
@@ -83,3 +84,4 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
         }
     }
 }
+#endif

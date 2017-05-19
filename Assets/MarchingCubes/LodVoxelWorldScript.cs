@@ -7,7 +7,6 @@ using Assets.MarchingCubes.VoxelWorldMVP.Persistence;
 using DirectX11;
 using MHGameWork.TheWizards;
 using MHGameWork.TheWizards.DualContouring;
-using UnityEditor;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
@@ -97,9 +96,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private int lastSaveFrame = 1;
         private void save()
         {
+#if UNITY_EDITOR
             worldSerializer.Save(lastSaveFrame);
+#endif
             lastSaveFrame = Time.frameCount;
         }
+
 
         private IWorldGenerator getGenerationAlgorithm(GenerationAlgorithm generationAlgorithm)
         {

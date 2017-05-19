@@ -35,9 +35,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         // Set by some script
         public OctreeVoxelWorld VoxelWorld;
+        public VoxelChunkRendererPool ChunkPool;
 
         private RenderOctreeNode root;
-        private ClipMapsOctree<RenderOctreeNode> helper = new ClipMapsOctree<RenderOctreeNode>();
+        private ClipMapsOctree<RenderOctreeNode> helper;
         private LineManager3D manager = new LineManager3D();
 
         public float LODDistanceFactor = 1.2f;
@@ -55,8 +56,27 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             debugText = DebugText.Instance;
         }
 
+        public class RenderOctreeNodeFactory : ClipMapsOctree<RenderOctreeNode>.EmptyConstructorFactory
+        {
+            private VoxelChunkRendererPool chunkpool;
+
+            public RenderOctreeNodeFactory(VoxelChunkRendererPool chunkpool)
+            {
+                this.chunkpool = chunkpool;
+            }
+
+            public override RenderOctreeNode Create(RenderOctreeNode parent, int size, int depth, Point3 pos)
+            {
+                var ret =  base.Create(parent, size, depth, pos);
+                ret.pool = chunkpool;
+                return ret;
+            }
+        }
+
         public void Init(OctreeVoxelWorld world, List<VoxelMaterial> voxelMaterials)
         {
+            helper = new ClipMapsOctree<RenderOctreeNode>(new RenderOctreeNodeFactory(ChunkPool));
+
             VoxelWorld = world;
             root = helper.Create(VoxelWorld.Root.Size, VoxelWorld.Root.LowerLeft);
 
@@ -266,12 +286,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void removeRenderable(RenderOctreeNode node)
         {
-            if (node.RenderObject != null)
-            {
-                node.RenderObject.gameObject.SetActive(false);
-                Destroy(node.RenderObject.gameObject);
-            }
-            node.RenderObject = null;
+            node.DestroyRenderObject();
+            //if (node.RenderObject != null)
+            //{
+            //    node.RenderObject.gameObject.SetActive(false);
+            //    Destroy(node.RenderObject.gameObject);
+            //}
+            //node.RenderObject = null;
         }
 
         public void activateRenderable(RenderOctreeNode node)
@@ -301,16 +322,21 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private VoxelChunkRenderer createREnderDAta(RenderOctreeNode node, Result result)
         {
+            Profiler.BeginSample("RequestChunk");
+
+            var comp = ChunkPool.RequestChunk();
+
+            Profiler.EndSample();
+
             Profiler.BeginSample("SetToUnity");
 
-            var renderObject = new GameObject();
-            renderObject.name = "Node " + result.Frame + " " + node.LowerLeft + " " + node.Size + " V: " +
-                                result.data.doubledVertices.Count;
-            var comp = renderObject.AddComponent<VoxelChunkRenderer>();
+
             comp.AutomaticallyGenerateMesh = false;
             comp.MaterialsDictionary = materialsDictionary;
             comp.setMeshToUnity(result.data);
             comp.transform.SetParent(transform);
+            comp.gameObject.SetActive(true);
+
             Profiler.EndSample();
             //renderObject.SetActive(false);
             return comp;
@@ -388,15 +414,17 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             }
         }
 
+        private VoxelChunkRenderer.MeshData firstData;
         private Result generateMeshTask(Task task, Stopwatch w)
         {
             w.Reset();
             w.Start();
-            var data = VoxelChunkRenderer.generateMesh(meshGenerator, task.chunkData); // DANGEROES multithreaded
+            //if (firstData == null)
+            firstData = VoxelChunkRenderer.generateMesh(meshGenerator, task.chunkData); // DANGEROES multithreaded
             w.Stop();
             return new Result
             {
-                data = data,
+                data = firstData,
                 Frame = task.Frame,
                 node = task.node
             };

@@ -23,11 +23,11 @@ namespace MHGameWork.TheWizards.DualContouring.Terrain
 
         public class EmptyConstructorFactory : IOctreeNodeFactory<T>
         {
-            public void Destroy(T node)
+            public virtual void Destroy(T node)
             {
             }
 
-            public T Create(T parent, int size, int depth, Point3 pos)
+            public virtual T Create(T parent, int size, int depth, Point3 pos)
             {
                 var ret = Activator.CreateInstance<T>();
                 ret.Size = size;
