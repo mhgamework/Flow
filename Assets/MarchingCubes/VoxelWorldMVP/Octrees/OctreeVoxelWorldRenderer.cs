@@ -165,7 +165,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         List<RenderOctreeNode> outDirtyNodes = new List<RenderOctreeNode>();
         List<RenderOctreeNode> outMissingRenderdataNodes = new List<RenderOctreeNode>();
         private Dictionary<OctreeNode, Result> cache = new Dictionary<OctreeNode, Result>();
-
+        private List<RenderOctreeNode> buildTaskList = new List<RenderOctreeNode>();
         public void Update()
         {
             if (VoxelWorld == null) return;
@@ -187,9 +187,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             //Debug.Log("Dirty: " + outDirtyNodes.Count + " Missing: " + outMissingRenderdataNodes.Count + " Cache: " + cache.Count);
             Profiler.BeginSample("BuildTasks");
 
-            buildTaskList = outMissingRenderdataNodes.Where(n => !cache.ContainsKey(getNode(n))).ToArray();
+            buildTaskList.Clear();
+            for (int i = 0; i < outMissingRenderdataNodes.Count; i++)
+            {
+                var c = outMissingRenderdataNodes[i];
+                if (cache.ContainsKey(getNode(c))) continue;
+                buildTaskList.Add(c);
+            }
+
             Profiler.EndSample();
-            debugText.SetText("Tasks: ", buildTaskList.Length.ToString());
+            debugText.SetText("Tasks: ", buildTaskList.Count.ToString());
             Profiler.BeginSample("Async");
 
             processAsyncMessages(buildTaskList);
@@ -215,9 +222,11 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             //});
         }
 
-        private void processAsyncMessages(RenderOctreeNode[] newTaskList)
+        private void processAsyncMessages(List<RenderOctreeNode> newTaskList)
         {
-            var tasks = newTaskList.Select(f => new Task
+            var tasks = newTaskList
+                //.Take(4)
+                .Select(f => new Task
             {
                 node = f,
                 Frame = getNode(f).VoxelData.LastChangeFrame,
@@ -407,7 +416,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                     i++;
 
                     var result = generateMeshTask(task, w);
-                    Debug.Log(w.ElapsedMilliseconds);
+                    //Debug.Log(w.ElapsedMilliseconds);
                     resultsQueue.Enqueue(result);
                 }
           
@@ -433,7 +442,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private ConcurrentQueue<Task[]> workingQueue = new ConcurrentQueue<Task[]>();
         private ConcurrentQueue<Result> resultsQueue = new ConcurrentQueue<Result>();
-        private RenderOctreeNode[] buildTaskList;
         private DebugText debugText;
 
         private struct Task

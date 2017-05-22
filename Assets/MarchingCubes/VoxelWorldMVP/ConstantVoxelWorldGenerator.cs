@@ -19,8 +19,11 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             this.material = material;
         }
 
+        private UniformVoxelData first = null;
+
         public UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution)
         {
+            //if (first!= null) return first;
             var ret = new UniformVoxelData();
             ret.Data = new Array3D<VoxelData>(chunkSize);
             ret.Data.ForEach((v, p) =>
@@ -31,7 +34,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                     Density = density
                 };
             });
-
+            //first = ret;
             return ret;
         }
     }

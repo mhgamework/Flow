@@ -68,7 +68,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 
         public UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution)
         {
-
             //UnityEngine.Debug.Log(chunkSize.ToString() + " " + _asset.ChunkSize + " " + _asset.ChunkOversize);
             for (int i = 0; i < 3; i++)
                 if (chunkSize[i] != _asset.ChunkOversize + _asset.ChunkSize) // Should be multiple of the chunk size in the asset, minus the LOD overflow
@@ -76,20 +75,17 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 
             var relativeResolution = sampleResolution;
 
+            SerializedChunk theChunk = null;
 
             // Optimized chunks is already reversed
-            var theChunk = optimizedVersions.Skip(_skipVersions).Select(version =>
-                {
-                    SerializedChunk chunk;
-                    if (version.TryGetValue(new PosAndResolution(start, relativeResolution), out chunk)) return chunk;
-                    return null;
-                }
-            ).FirstOrDefault(f => f != null);
+            for (int i = _skipVersions; i < optimizedVersions.Count; i++)
+            {
+                if (optimizedVersions[i].TryGetValue(new PosAndResolution(start, relativeResolution), out theChunk)) break;
+            }
 
             if (theChunk != null)
             {
                 //Debug.Log("Loaded chunk " + start + " " + chunkSize + " " + relativeResolution);
-
                 return toChunkData(theChunk);
             }
             // This should mean that there is no change in the chunk data for this sector so use the world generator
@@ -100,6 +96,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 
         private UniformVoxelData toChunkData(SerializedChunk chunk)
         {
+
             Profiler.BeginSample("toCHunkData");
             var d = new UniformVoxelData();
             d.LastChangeFrame = 0;
@@ -119,6 +116,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 
 
             Profiler.EndSample();
+
             return d;
 
         }
