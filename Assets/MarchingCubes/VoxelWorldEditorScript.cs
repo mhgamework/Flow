@@ -48,6 +48,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             tools.Add(KeyCode.Alpha4, new FlattenTool(this, world, SphereGizmo, PlaneGizmo));
             tools.Add(KeyCode.Alpha5, new DrawOnPlaneTool(this, world, SphereGizmo, PlaneGizmo));
             tools.Add(KeyCode.Alpha6, new SmoothTool(this, world, SphereGizmo));
+            tools.Add(KeyCode.Alpha7, new DepositTool(this, world, SphereGizmo));
 
             activeState = tools[KeyCode.Alpha1];
 

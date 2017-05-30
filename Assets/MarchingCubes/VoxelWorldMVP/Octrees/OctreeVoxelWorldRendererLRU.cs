@@ -357,7 +357,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 var task = tasks[i];
                 i++;
 
-
                 var data = VoxelChunkRenderer.generateMesh(meshGenerator, task.chunkData); // DANGEROES multithreaded
                 resultsQueue.Enqueue(new Result
                 {
