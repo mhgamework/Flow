@@ -2,18 +2,11 @@
 using DirectX11;
 using MHGameWork.TheWizards.DualContouring.Terrain;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using MHGameWork.TheWizards.Graphics;
-using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
 using UnityEngine.Profiling;
-using MHGameWork.TheWizards.DualContouring;
-using Debug = UnityEngine.Debug;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
@@ -43,16 +36,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public float LODDistanceFactor = 1.2f;
 
-        private VoxelChunkMeshGenerator meshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
-        private int stopped;
-        //private VoxelChunkMeshGenerator voxelChunkMeshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
-        private Thread t;
+ 
 
         public void Start()
         {
-            t = new Thread(anderProcessorProgrammake);
-            stopped = 0;
-            t.Start();
+            concurrentVoxelGenerator.Start();
+         
             debugText = DebugText.Instance;
         }
 
@@ -162,10 +151,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             return node.RenderObject != null && node.LastRenderFrame == getNode(node).VoxelData.LastChangeFrame;
         }
 
+        private ConcurrentVoxelGenerator concurrentVoxelGenerator = new ConcurrentVoxelGenerator();
+
         List<RenderOctreeNode> outDirtyNodes = new List<RenderOctreeNode>();
         List<RenderOctreeNode> outMissingRenderdataNodes = new List<RenderOctreeNode>();
-        private Dictionary<OctreeNode, Result> cache = new Dictionary<OctreeNode, Result>();
-        private List<RenderOctreeNode> buildTaskList = new List<RenderOctreeNode>();
+        //private Dictionary<OctreeNode, Result> cache = new Dictionary<OctreeNode, Result>();
+        private List<ConcurrentVoxelGenerator.Task> tempTaskList = new List<ConcurrentVoxelGenerator.Task>();
         public void Update()
         {
             if (VoxelWorld == null) return;
@@ -185,21 +176,23 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             Profiler.EndSample();
 
             //Debug.Log("Dirty: " + outDirtyNodes.Count + " Missing: " + outMissingRenderdataNodes.Count + " Cache: " + cache.Count);
-            Profiler.BeginSample("BuildTasks");
-
-            buildTaskList.Clear();
-            for (int i = 0; i < outMissingRenderdataNodes.Count; i++)
-            {
-                var c = outMissingRenderdataNodes[i];
-                if (cache.ContainsKey(getNode(c))) continue;
-                buildTaskList.Add(c);
-            }
-
-            Profiler.EndSample();
-            debugText.SetText("Tasks: ", buildTaskList.Count.ToString());
+            debugText.SetText("Tasks: ", outMissingRenderdataNodes.Count.ToString());   
             Profiler.BeginSample("Async");
 
-            processAsyncMessages(buildTaskList);
+            foreach (var f in outMissingRenderdataNodes)
+            {
+                tempTaskList.Add(new ConcurrentVoxelGenerator.Task
+                {
+                    node = f,
+                    dataNode = getNode(f),
+                    Frame = getNode(f).VoxelData.LastChangeFrame,
+                    chunkData = getNode(f).VoxelData.Data
+                });
+            }
+
+            concurrentVoxelGenerator.SetRequestedChunks(tempTaskList);
+
+            //processAsyncMessages(buildTaskList);
             Profiler.EndSample();
 
             // subtle invariant, if a node is in the cache, it will not be in the async working queue. only way node is missprocessed is when it is in process while sending new requests which should be fine
@@ -222,36 +215,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             //});
         }
 
-        private void processAsyncMessages(List<RenderOctreeNode> newTaskList)
-        {
-            var tasks = newTaskList
-                //.Take(4)
-                .Select(f => new Task
-            {
-                node = f,
-                Frame = getNode(f).VoxelData.LastChangeFrame,
-                chunkData = getNode(f).VoxelData.Data
-            }).ToArray();
-
-
-
-            //tasks.ForEach(t =>
-            //{
-            //    var resultf = generateMeshTask(t);
-            //    cache[getNode(resultf.node)] = resultf;
-            //});
-            //return;
-
-            workingQueue.Enqueue(tasks);
-            Result result;
-            while (resultsQueue.TryDequeue(out result))
-            {
-                //var render = createRenderObject(result.node, result.data);
-
-                cache[getNode(result.node)] = result;
-            }
-        }
-
+     
         private void transìtion(RenderOctreeNode node)
         {
             if (!node.ShouldRender && node.RenderObject != null)
@@ -273,7 +237,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private bool checkAllRenderablesAvailable(RenderOctreeNode node)
         {
-            if (node.ShouldRender) return cache.ContainsKey(getNode(node)) || hasCorrectRenderable(node);
+            if (node.ShouldRender) return concurrentVoxelGenerator.HasNodeData(getNode(node)) || hasCorrectRenderable(node);
             if (node.Children == null) return true;
             var ret = true;
             for (int i = 0; i < 8; i++)
@@ -308,12 +272,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             if (node.RenderObject != null)
                 throw new InvalidOperationException();
-            if (!cache.ContainsKey(getNode(node)))
+            if (!concurrentVoxelGenerator.HasNodeData(getNode(node)))
             {
                 throw new InvalidOperationException();
             }
-            var result = cache[getNode(node)];
-            cache.Remove(getNode(node));
+            var result = concurrentVoxelGenerator.GetNodeData(getNode(node));
+            concurrentVoxelGenerator.RemoveNodeData(getNode(node));
             node.RenderObject = createREnderDAta(node, result);
             node.LastRenderFrame = result.Frame;
             activateRenderdata(node, node.RenderObject);
@@ -329,7 +293,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             //comp.gameObject.SetActive(true);
         }
 
-        private VoxelChunkRenderer createREnderDAta(RenderOctreeNode node, Result result)
+        private VoxelChunkRenderer createREnderDAta(RenderOctreeNode node, ConcurrentVoxelGenerator.Result result)
         {
             Profiler.BeginSample("RequestChunk");
 
@@ -391,71 +355,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             return f.DataNode;
         }
 
-        public void anderProcessorProgrammake()
-        {
-            var w = new Stopwatch();
-
-            Task[] tasks = new Task[0];
-            int i = 0;
-            while (stopped == 0)
-            {
-                Task[] nTasks;
-                while (workingQueue.TryDequeue(out nTasks))
-                {
-                    i = 0;
-                    tasks = nTasks;
-                }
-                if (tasks.Length <= i)
-                {
-                    Thread.Sleep(0);
-                    continue;
-                }
-                for (int j = 0; j < 20 && i < tasks.Length ; j++)
-                {
-                    var task = tasks[i];
-                    i++;
-
-                    var result = generateMeshTask(task, w);
-                    //Debug.Log(w.ElapsedMilliseconds);
-                    resultsQueue.Enqueue(result);
-                }
-          
-            }
-        }
-
-        private VoxelChunkRenderer.MeshData firstData;
-        private Result generateMeshTask(Task task, Stopwatch w)
-        {
-            w.Reset();
-            w.Start();
-            //if (firstData == null)
-            firstData = VoxelChunkRenderer.generateMesh(meshGenerator, task.chunkData); // DANGEROES multithreaded
-            w.Stop();
-            return new Result
-            {
-                data = firstData,
-                Frame = task.Frame,
-                node = task.node
-            };
-        }
+     
 
 
-        private ConcurrentQueue<Task[]> workingQueue = new ConcurrentQueue<Task[]>();
-        private ConcurrentQueue<Result> resultsQueue = new ConcurrentQueue<Result>();
+    
         private DebugText debugText;
 
-        private struct Task
-        {
-            public RenderOctreeNode node;
-            public int Frame;
-            public Array3D<VoxelData> chunkData;
-        }
-
-        private struct Result
-        {
-            public VoxelChunkRenderer.MeshData data;
-            public int Frame;
-            public RenderOctreeNode node;
-        }
+      
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using DirectX11;
-using NUnit.Framework.Internal;
 using UnityEngine;
 
 namespace Assets.MarchingCubes

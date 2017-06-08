@@ -2,7 +2,6 @@
 using DirectX11;
 using MHGameWork.TheWizards.DualContouring.Terrain;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,9 +57,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public void Start()
         {
             renderDataCache = new AsyncLRUCache<NodeAndVersion, VoxelChunkRenderer>(RenderCacheSize, removeCachedData);
-            t = new Thread(anderProcessorProgrammake);
-            stopped = 0;
-            t.Start();
+            throw new NotImplementedException();
+            //t = new Thread(anderProcessorProgrammake);
+            //stopped = 0;
+            //t.Start();
 
         }
 
@@ -305,15 +305,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                     chunkData = getNode(f.Node).VoxelData.Data
                 }).ToArray();
 
-            workingQueue.Enqueue(tasks);
-            Result result;
-            Profiler.BeginSample("createRenderObject");
-            while (resultsQueue.TryDequeue(out result))
-            {
-                var render = createRenderObject(result.node, result.data);
+            throw new NotImplementedException();
+            //workingQueue.Enqueue(tasks);
+            //Result result;
+            //Profiler.BeginSample("createRenderObject");
+            //while (resultsQueue.TryDequeue(out result))
+            //{
+            //    var render = createRenderObject(result.node, result.data);
 
-                renderDataCache.AddData(result.node, render);
-            }
+            //    renderDataCache.AddData(result.node, render);
+            //}
             Profiler.EndSample();
 
             //if (toRender != null)
@@ -335,41 +336,41 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         }
 
-        public void anderProcessorProgrammake()
-        {
-            Task[] tasks = new Task[0];
-            int i = 0;
-            while (stopped == 0)
-            {
-                Task[] nTasks;
-                while (workingQueue.TryDequeue(out nTasks))
-                {
-                    i = 0;
-                    tasks = nTasks;
-                }
-                if (tasks.Length <= i)
-                {
-                    Debug.Log("Idling");
+        //public void anderProcessorProgrammake()
+        //{
+        //    Task[] tasks = new Task[0];
+        //    int i = 0;
+        //    while (stopped == 0)
+        //    {
+        //        Task[] nTasks;
+        //        while (workingQueue.TryDequeue(out nTasks))
+        //        {
+        //            i = 0;
+        //            tasks = nTasks;
+        //        }
+        //        if (tasks.Length <= i)
+        //        {
+        //            Debug.Log("Idling");
 
-                    Thread.Sleep(10);
-                    continue;
-                }
-                var task = tasks[i];
-                i++;
+        //            Thread.Sleep(10);
+        //            continue;
+        //        }
+        //        var task = tasks[i];
+        //        i++;
 
-                var data = VoxelChunkRenderer.generateMesh(meshGenerator, task.chunkData); // DANGEROES multithreaded
-                resultsQueue.Enqueue(new Result
-                {
-                    data = data,
-                    node = task.node
-                });
+        //        var data = VoxelChunkRenderer.generateMesh(meshGenerator, task.chunkData); // DANGEROES multithreaded
+        //        resultsQueue.Enqueue(new Result
+        //        {
+        //            data = data,
+        //            node = task.node
+        //        });
 
-            }
-        }
+        //    }
+        //}
 
 
-        private ConcurrentQueue<Task[]> workingQueue = new ConcurrentQueue<Task[]>();
-        private ConcurrentQueue<Result> resultsQueue = new ConcurrentQueue<Result>();
+        //private ConcurrentQueue<Task[]> workingQueue = new ConcurrentQueue<Task[]>();
+        //private ConcurrentQueue<Result> resultsQueue = new ConcurrentQueue<Result>();
 
         private struct Task
         {
