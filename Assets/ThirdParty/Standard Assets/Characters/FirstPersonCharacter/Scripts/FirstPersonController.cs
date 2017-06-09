@@ -126,7 +126,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 m_MoveDir += Physics.gravity*m_GravityMultiplier*Time.fixedDeltaTime;
             }
             m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
-
+            Debug.Log(m_MoveDir);
             ProgressStepCycle(speed);
             UpdateCameraPosition(speed);
 
@@ -140,6 +140,15 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_AudioSource.Play();
         }
 
+
+        public void AddMoveDir(Vector3 v)
+        {
+            m_MoveDir += v;
+        }
+        public Vector3 GetVelocity()
+        {
+            return m_MoveDir;
+        }
 
         private void ProgressStepCycle(float speed)
         {
