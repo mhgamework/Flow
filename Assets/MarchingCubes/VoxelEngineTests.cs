@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Assets.MarchingCubes.Persistence;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using DirectX11;
@@ -14,10 +15,21 @@ namespace Assets.MarchingCubes
             Debug.Log("Start of tests");
             //TestVoxelWorld_GetVoxelDataArray();
             //TestVoxelWorld_SetVoxelDataArray();
+            TestColorToInt();
             TestVoxelWorld_SetVoxelDataArray_Padding();
             //TestVoxelWorld_TestKernel3();
             //TestVoxelWorld_TestKernel3_2();
             Debug.Log("End of tests");
+        }
+
+        public void TestColorToInt()
+        {
+            AreEqual(Color.black, Color.black.ToInt32().ToColor());
+            AreEqual(Color.red, Color.red.ToInt32().ToColor());
+            AreEqual(Color.green, Color.green.ToInt32().ToColor());
+            AreEqual(Color.blue, Color.blue.ToInt32().ToColor());
+            AreEqual(Color.white, Color.white.ToInt32().ToColor());
+            AreEqual(new Color(0.4f, 0.8f, 0.3f), new Color(0.4f, 0.8f, 0.3f).ToInt32().ToColor());
         }
 
         public void TestVoxelWorld_GetVoxelDataArray()
@@ -138,11 +150,11 @@ namespace Assets.MarchingCubes
             allNodes.Add(world.GetNode(new Point3(2, 2, 2), 1));
 
 
-            var data = new VoxelData[3*3*3];
-            data[1+3+9] = new VoxelData(999, null);
+            var data = new VoxelData[3 * 3 * 3];
+            data[1 + 3 + 9] = new VoxelData(999, null);
             data[0] = new VoxelData(777, null);
 
-            world.setVoxelDataArray(new Point3(0, 0, 0), new Point3(2, 2, 2), 123, allNodes, data,1);
+            world.setVoxelDataArray(new Point3(0, 0, 0), new Point3(2, 2, 2), 123, allNodes, data, 1);
 
             AreEqual(999, world.GetNode(new Point3(0, 0, 0), 1).VoxelData.Data[new Point3(1, 1, 1)].Density);
 
@@ -206,21 +218,25 @@ namespace Assets.MarchingCubes
                 }), 2, 1);
 
 
-            world.RunKernelXbyXUnrolled(new Point3(1,1, 1), new Point3(3, 3, 3), (input, p) =>
-            {
-                var d = 0f;
-                for (int i = 0; i < 3; i++)
-                {
-                    d += input[i].Density;
-                }
-                return new VoxelData(d / 3f, null);
-            }, 3, 123);
+            world.RunKernelXbyXUnrolled(new Point3(1, 1, 1), new Point3(3, 3, 3), (input, p) =>
+             {
+                 var d = 0f;
+                 for (int i = 0; i < 3; i++)
+                 {
+                     d += input[i].Density;
+                 }
+                 return new VoxelData(d / 3f, null);
+             }, 3, 123);
 
             // 27/27
             AreEqual(1f, world.GetNode(new Point3(0, 0, 0), 1).VoxelData.Data[new Point3(1, 1, 1)].Density);
 
         }
 
+        private void AreEqual(object p0, object dataLength)
+        {
+            if (!p0.Equals( dataLength)) throw new Exception("Not equal1 " + p0 + " - " + dataLength);
+        }
         private void AreEqual(int p0, int dataLength)
         {
             if (p0 != dataLength) throw new Exception("Not equal1 " + p0 + " - " + dataLength);

@@ -116,7 +116,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             //GetComponent<MeshCollider>().enabled = false;
             GetComponent<MeshCollider>().sharedMesh = mesh;
-            renderer.sharedMaterials = data.colors.Select(c => MaterialsDictionary[c]).ToArray();
+            renderer.sharedMaterials = data.colors.Select(c =>
+            {
+                Material val;
+                if (MaterialsDictionary.TryGetValue(c, out val)) return val;
+                return MaterialsDictionary[Color.black];// Return black, this is confusing
+            }).ToArray();
         }
 
         public static MeshData generateMesh(VoxelChunkMeshGenerator meshGenerator, Array3D<VoxelData> chunkData)

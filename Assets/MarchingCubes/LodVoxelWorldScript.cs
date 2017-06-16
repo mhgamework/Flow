@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.MarchingCubes.Persistence;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using Assets.MarchingCubes.VoxelWorldMVP.Persistence;
 using DirectX11;
@@ -29,6 +30,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public List<Color> MaterialColors;
         private List<VoxelMaterial> VoxelMaterials;
 
+        private IWorldSerializer worldSerializer;
         public VoxelWorldAsset SavedWorld;
 
         public int SavedRevertVersions = 0;
@@ -45,36 +47,28 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void Start()
         {
-
             // TODO: create Materials here, set on editor and set dictionary on renderer!
             VoxelMaterials = MaterialColors.Select(c => new VoxelMaterial { color = c }).ToList();
 
+            worldSerializer = new RuntimeWorldSerializer();
+
+#if UNITY_EDITOR
+            //worldSerializer = new EditorWorldSerializer();
+#endif
+            SavedWorld = worldSerializer.LoadAsset(SavedWorld);
             if (SavedWorld == null)
             {
-#if UNITY_EDITOR
-                SavedWorld = OctreeWorldSerializer.CreateAsset(minNodeSize);
-#else
-                
-  SavedWorld = new VoxelWorldAsset();
-                SavedWorld.ChunkSize = minNodeSize + 1; // Because the corner has an extra voxel !!
-                SavedWorld.ChunkOversize = OctreeVoxelWorld.ChunkOversize;
-                SavedWorld.Versions = new List<SerializedVersion>();
-                SavedWorld.Versions.Add(new SerializedVersion()
-                {
-                    Chunks = new List<SerializedChunk>(),
-                    SavedDate = new DateTime()
-                });
-#endif
-
+                SavedWorld = worldSerializer.CreateAsset(minNodeSize);
             }
 
             var generationAlgorithm = getGenerationAlgorithm(BaseGeneration);
             var persistence = new PersistenceWorldGenerator(generationAlgorithm, SavedWorld, SavedRevertVersions);
 
-            var world = new OctreeVoxelWorld(persistence, minNodeSize, WorldDepth);
+            world = new OctreeVoxelWorld(persistence, minNodeSize, WorldDepth);
 
             GetComponent<OctreeVoxelWorldRenderer>().Init(world, VoxelMaterials);
             GetComponent<VoxelWorldEditorScript>().Init(world, VoxelMaterials);
+            GetComponent<VoxelAutoSaver>().Init(world, VoxelMaterials);
 
             //var world = new UniformVoxelWorld(new DelegateVoxelWorldGenerator(worldFunction), new Point3(16, 16, 16));
             //worldRenderer = new UniformVoxelWorldRenderer(world, transform);
@@ -85,15 +79,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
 
             //raycaster = new VoxelWorldRaycaster();
-#if UNITY_EDITOR
-            worldSerializer = new OctreeWorldSerializer(world, SavedWorld);
-#endif
             if (CreateDefaultObjects)
             {
-                world.RunKernel1by1(new Point3(0, 0, 0), new Point3(16, 16, 16), WorldEditTool.createAddSphereKernel(new Vector3(8, 8, 8), 3f, VoxelMaterials[0]), 1);
-                world.RunKernel1by1(new Point3(0, 0, 0), new Point3(64, 64, 64), WorldEditTool.createAddSphereKernel(new Vector3(40, 40, 40), 30f, VoxelMaterials[1]), 1);
+                world.RunKernel1by1(new Point3(0, 0, 0), new Point3(16, 16, 16),
+                    WorldEditTool.createAddSphereKernel(new Vector3(8, 8, 8), 3f, VoxelMaterials[0]), 1);
+                world.RunKernel1by1(new Point3(0, 0, 0), new Point3(64, 64, 64),
+                    WorldEditTool.createAddSphereKernel(new Vector3(40, 40, 40), 30f, VoxelMaterials[1]), 1);
             }
-
         }
 
         public void Update()
@@ -105,10 +97,11 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         }
 
         private int lastSaveFrame = 1;
+
         private void save()
         {
 #if UNITY_EDITOR
-            worldSerializer.Save(lastSaveFrame);
+            worldSerializer.Save(lastSaveFrame, SavedWorld, world);
 #endif
             lastSaveFrame = Time.frameCount;
         }
@@ -135,9 +128,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public int minNodeSize = 16;
         public int WorldDepth = 3;
-#if UNITY_EDITOR
-        private OctreeWorldSerializer worldSerializer;
-#endif
+        private OctreeVoxelWorld world;
+
 
         private VoxelData LowerleftSphereWorldFunction(Vector3 arg1)
         {
@@ -145,16 +137,15 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             {
                 Density = SdfFunctions.Sphere(arg1, new Vector3(0, 0, 0), minNodeSize * 3),
                 Material = VoxelMaterials[0]
-
             };
         }
+
         private VoxelData FlatWorldFunction(Vector3 arg1)
         {
             return new VoxelData()
             {
                 Density = arg1.y - 10,
                 Material = VoxelMaterials[0]
-
             };
         }
 
@@ -168,12 +159,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             //dens += (Math.Sin(arg1.x * 0.00021) + Math.Cos(arg1.z * 0.0002)) * 3000;
             return new VoxelData() { Density = (float)dens, Material = VoxelMaterials[0] };
         }
+
         private VoxelData worldFunction(Vector3 arg1, int samplingInterval, bool enableSampling)
         {
             if (samplingInterval > 5 && enableSampling)
             {
                 return new VoxelData() { Density = 1, Material = null };
-
             }
             var repeat = 20;
             var radius = 7;
@@ -188,7 +179,5 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             return new Vector3(p.x % c.x, p.y % c.y, p.z % c.z);
         }
-
-
     }
 }
