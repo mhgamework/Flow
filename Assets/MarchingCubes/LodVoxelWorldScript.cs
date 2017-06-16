@@ -100,10 +100,21 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private void save()
         {
+            StartCoroutine(saveCoroutine().GetEnumerator());
+        }
+
+        private IEnumerable<YieldInstruction> saveCoroutine()
+        {
+            OverlayPanel.Instance.Show("Saving World...");
+            yield return null;
 #if UNITY_EDITOR
             worldSerializer.Save(lastSaveFrame, SavedWorld, world);
 #endif
             lastSaveFrame = Time.frameCount;
+            yield return null;
+
+            OverlayPanel.Instance.Hide("Saved!", 2);
+
         }
 
 
