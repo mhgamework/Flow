@@ -264,6 +264,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         }
 
+        public void ResetChunk(OctreeNode octreeNode,int frame)
+        {
+            octreeNode.VoxelData = generator.Generate(octreeNode.LowerLeft, ChunkSize + new Point3(1, 1, 1) + new Point3(1, 1, 1), 1 << (this.depth - octreeNode.Depth));
+            octreeNode.VoxelData.LastChangeFrame = frame;
+        }
+
 
         //public UniformVoxelData GetChunk(Point3 chunkCoord)
         //{

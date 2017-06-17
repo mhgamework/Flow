@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Assets.MarchingCubes.Persistence;
+using Assets.MarchingCubes.Procedural;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using Assets.MarchingCubes.VoxelWorldMVP.Persistence;
 using DirectX11;
+using MHGameWork.TheWizards.DualContouring.Terrain;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
@@ -35,6 +37,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public int SavedRevertVersions = 0;
 
+        public bool loadFromDisk = true;
+        public bool debugRegenerate = false;
+
 
         public enum GenerationAlgorithm
         {
@@ -42,21 +47,21 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             Flat,
             SinTerrain,
             Spheres,
-            SpheresWithFiltering
+            SpheresWithFiltering,
+            Perlin
         }
 
         public void Start()
         {
             // TODO: create Materials here, set on editor and set dictionary on renderer!
             VoxelMaterials = MaterialColors.Select(c => new VoxelMaterial {color = c}).ToList();
-
+            worldgentemptestthing = FindObjectOfType<ProceduralGenerationTest>();
             worldSerializer = new RuntimeWorldSerializer();
 
 #if UNITY_EDITOR
             //worldSerializer = new EditorWorldSerializer();
 #endif
-
-            StartCoroutine(loadWorld().GetEnumerator());
+                StartCoroutine(loadWorld().GetEnumerator());
         }
 
         private IEnumerable<YieldInstruction> loadWorld()
@@ -64,7 +69,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             yield return null;
             OverlayPanel.Instance.Show("Loading world...");
             yield return null;
-            SavedWorld = worldSerializer.LoadAsset(SavedWorld);
+            if (loadFromDisk)
+            {
+                SavedWorld = worldSerializer.LoadAsset(SavedWorld);
+            }
             if (SavedWorld == null)
             {
                 SavedWorld = worldSerializer.CreateAsset(minNodeSize);
@@ -108,6 +116,18 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             { 
                 save();
             }
+            if (debugRegenerate || worldgentemptestthing.debugRegenerate)
+            {
+                debugRegenerate = false;
+                worldgentemptestthing.debugRegenerate = false;
+
+                new ClipMapsOctree<OctreeNode>().VisitTopDown(world.Root, n =>
+                {
+                    //if (!first) return;
+                    if (n.VoxelData == null) return; // Non initialized chunk, not loaded yet
+                    world.ResetChunk(n, Time.frameCount);
+                });
+            }
         }
 
         private int lastSaveFrame = 1;
@@ -144,14 +164,18 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                     return new DelegateVoxelWorldGenerator((a, b) => worldFunction(a, b, false));
                 case GenerationAlgorithm.SpheresWithFiltering:
                     return new DelegateVoxelWorldGenerator((a, b) => worldFunction(a, b, true));
+                case GenerationAlgorithm.Perlin:
+                    return new TestPerlinWorldGenerator(FindObjectOfType<ProceduralGenerationTest>(), VoxelMaterials[0]);
                 default:
                     throw new InvalidOperationException();
             }
         }
 
+
         public int minNodeSize = 16;
         public int WorldDepth = 3;
         private OctreeVoxelWorld world;
+        private ProceduralGenerationTest worldgentemptestthing;
 
 
         private VoxelData LowerleftSphereWorldFunction(Vector3 arg1)
