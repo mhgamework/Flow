@@ -48,13 +48,22 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public void Start()
         {
             // TODO: create Materials here, set on editor and set dictionary on renderer!
-            VoxelMaterials = MaterialColors.Select(c => new VoxelMaterial { color = c }).ToList();
+            VoxelMaterials = MaterialColors.Select(c => new VoxelMaterial {color = c}).ToList();
 
             worldSerializer = new RuntimeWorldSerializer();
 
 #if UNITY_EDITOR
             //worldSerializer = new EditorWorldSerializer();
 #endif
+
+            StartCoroutine(loadWorld().GetEnumerator());
+        }
+
+        private IEnumerable<YieldInstruction> loadWorld()
+        {
+            yield return null;
+            OverlayPanel.Instance.Show("Loading world...");
+            yield return null;
             SavedWorld = worldSerializer.LoadAsset(SavedWorld);
             if (SavedWorld == null)
             {
@@ -86,12 +95,17 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 world.RunKernel1by1(new Point3(0, 0, 0), new Point3(64, 64, 64),
                     WorldEditTool.createAddSphereKernel(new Vector3(40, 40, 40), 30f, VoxelMaterials[1]), 1);
             }
+
+            yield return null;
+            OverlayPanel.Instance.Hide("Welcome to Flow.",3f);
+
         }
+
 
         public void Update()
         {
             if (Input.GetKeyDown(KeyCode.Return))
-            {
+            { 
                 save();
             }
         }
@@ -107,9 +121,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             OverlayPanel.Instance.Show("Saving World...");
             yield return null;
-#if UNITY_EDITOR
             worldSerializer.Save(lastSaveFrame, SavedWorld, world);
-#endif
             lastSaveFrame = Time.frameCount;
             yield return null;
 

@@ -19,6 +19,7 @@ namespace Assets.MarchingCubes
 
         public void Update()
         {
+            if (EditorScript.ActiveMaterial == null) return;
             SizeText.text = "Size: " + EditorScript.ActiveSize;
             MaterialPanel.color = EditorScript.ActiveMaterial.color;
 

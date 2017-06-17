@@ -8,7 +8,6 @@ using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using Assets.UnityAdditions;
 using DirectX11;
 using MHGameWork.TheWizards.DualContouring.Terrain;
-using UnityEditor;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
