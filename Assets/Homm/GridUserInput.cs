@@ -30,6 +30,11 @@ namespace Assets.Homm
             HeroFigure.transform.position = toCellCenter(HeroPos);
 
             var path = CalculatePath(HeroPos, SelectedGridcell);
+            if (path == null)
+            {
+                Debug.Log("No path!");
+                return;
+            }
             path.RemoveAt(path.Count - 1);
             for (int i = 0; i < Math.Max(path.Count, PathCells.Count); i++)
             {
@@ -50,6 +55,7 @@ namespace Assets.Homm
 
         public void OnPointerClick(PointerEventData eventData)
         {
+            if (eventData.button != 0) return;
             Debug.Log("Clicked!");
             var pos = eventData.pointerCurrentRaycast.worldPosition;
             var targetCell = pointToCell(pos);
@@ -136,6 +142,14 @@ namespace Assets.Homm
 
         private Point3[] points = new Point3[]
         {
+            new Point3(-1, 0, 0),
+            new Point3(0, 0, 1),
+            new Point3(1, 0, 0),
+            new Point3(0, 0,-1),
+        };
+
+        private Point3[] points2 = new Point3[]
+        {
             new Point3(-1, 0, -1),
             new Point3(0, 0, -1),
             new Point3(1, 0, -1),
@@ -146,11 +160,30 @@ namespace Assets.Homm
             new Point3(1, 0, 1),
         };
 
+        private bool[] tempNeighbours = new bool[4];
         private IEnumerable<Point3> getNeighbours(Point3 current)
         {
             for (int i = 0; i < points.Length; i++)
             {
-                yield return current + points[i];
+                var n = current + points[i];
+                var walkable = grid.Get(n).IsWalkable;
+                tempNeighbours[i] = walkable;
+                if (walkable)
+                    yield return n;
+            }
+            for (int i = 0; i < points.Length; i++)
+            {
+                var next = (i + 1) % 4;
+                if (tempNeighbours[i] && tempNeighbours[next])
+                {
+                    // We can walk both sides, so we can attempt diagonal walk
+                    var n = current + points[i] + points[next];
+
+                    var walkable = grid.Get(n).IsWalkable;
+                    if (walkable)
+                        yield return n;
+
+                }
             }
         }
 
