@@ -1,4 +1,6 @@
 ﻿using DirectX11;
+using MHGameWork.TheWizards;
+using UnityEngine;
 
 namespace Assets.Homm
 {
@@ -27,6 +29,29 @@ namespace Assets.Homm
         public Cell Get(Point3 p)
         {
             return Get(p.X, p.Z);
+        }
+
+
+        public Point3 pointToCell(Vector3 worldPos)
+        {
+            return worldPos.ToFloored();
+        }
+
+        public Vector3 toCellCenter(Point3 selectedGridcell)
+        {
+            return selectedGridcell.ToVector3() + new Vector3(0.5f, 0, 0.5f);
+        }
+
+        public void RegisterInteractable(ICellInteractable interactable, Vector3 worldPos)
+        {
+            var cell = pointToCell(worldPos);
+            Get(cell).Interactables.Add(interactable);
+        }
+
+        public void UnRegisterInteractable(ICellInteractable interactable, Vector3 worldPos)
+        {
+            var cell = pointToCell(worldPos);
+            Get(cell).Interactables.Remove(interactable);
         }
     }
 }
