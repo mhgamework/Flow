@@ -6,6 +6,7 @@ namespace Assets.Homm
 {
     public class ResourceCell : MonoBehaviour, ICellInteractable
     {
+        public string HoverDescription = "";
         public string Description;
 
         private Grid grid;
@@ -24,7 +25,8 @@ namespace Assets.Homm
             {
                 grid = HommMain.Instance.Grid;
                 grid.RegisterInteractable(this,transform.position);
-
+                var cell = grid.pointToCell(transform.position);
+                grid.Get(cell).Description = HoverDescription;
             }
         }
 

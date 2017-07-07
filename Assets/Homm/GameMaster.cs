@@ -36,23 +36,10 @@ namespace Assets.Homm
         {
             var w = playerState.Wizard;
 
-            while (w.MoveStep())
-            {
-                yield return new WaitForSeconds(StepSpeed);
-            }
+            foreach (var f in w.MoveStep(StepSpeed))
+                yield return f;
 
-            var cell = main.Grid.Get(w.Location);
-            if (cell.Interactables.Any())
-            {
-                if (cell.Interactables.Count() > 1)
-                    throw new Exception("Dont know what to do with multiple interactables!");
-
-                var inter = cell.Interactables.First();
-
-                foreach (var i in inter.Interact())
-                    yield return i;
-
-            }
+           
 
             GetComponentInChildren<GridUserInput>(true).ActivateState();
 

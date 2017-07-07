@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DirectX11;
 using UnityEngine;
@@ -36,17 +37,49 @@ namespace Assets.Homm
 
         }
 
-        public bool MoveStep()
+        public IEnumerable<YieldInstruction> MoveStep(float stepInterval)
         {
-            if (WalkPath == null) return false;
-            if (MovementLeft == 0) return false;
+            while (WalkPath != null && MovementLeft != 0)
+            {
+                MovementLeft -= 1;
 
-            MovementLeft -= 1;
-            MoveTo(WalkPath[1]);
-            WalkPath.RemoveAt(0);
-            if (WalkPath.Count == 1) WalkPath = null;
+                if (WalkPath.Count == 2)
+                {
+                    // Last cell, check if interactable
+                    var cell = grid.Get(WalkPath[1]);
+                    if (cell.Interactables.Any())
+                    {
+                        if (cell.Interactables.Count() > 1)
+                            throw new Exception("Dont know what to do with multiple interactables!");
 
-            return true;
+                        var inter = cell.Interactables.First();
+
+                        foreach (var i in inter.Interact())
+                            yield return i;
+
+                        WalkPath = null;
+                        continue;
+
+                    }
+                }
+
+                //if (grid.Get(WalkPath[1]).IsOccupied)
+                //{
+                //    foreach (var f in grid.Get(WalkPath[1]).Interactables.First().Interact())
+                //        yield return f;
+
+                //    WalkPath = null;
+                //    continue;
+
+                //}
+
+                MoveTo(WalkPath[1]);
+                WalkPath.RemoveAt(0);
+                if (WalkPath.Count == 1) WalkPath = null;
+
+                yield return new WaitForSeconds(stepInterval);
+            }
+
         }
 
         public void SetTargetLocation(Point3 targetCell)
@@ -113,7 +146,7 @@ namespace Assets.Homm
                 openSet.Remove(current);
                 closedSet.Add(current);
 
-                foreach (var n in getNeighbours(current))
+                foreach (var n in getNeighbours(current, goal))
                 {
                     if (closedSet.Contains(n)) continue; // Ignore the neighbor which is already evaluated.
 
@@ -156,12 +189,12 @@ namespace Assets.Homm
 
         private bool[] tempNeighbours = new bool[4];
 
-        private IEnumerable<Point3> getNeighbours(Point3 current)
+        private IEnumerable<Point3> getNeighbours(Point3 current, Point3 finalGoal)
         {
             for (int i = 0; i < points.Length; i++)
             {
                 var n = current + points[i];
-                var walkable = grid.Get(n).IsWalkable;
+                var walkable = (grid.Get(n).IsWalkable && !grid.Get(n).IsOccupied) || (n == finalGoal && grid.Get(n).IsOccupied);
                 tempNeighbours[i] = walkable;
                 if (walkable)
                     yield return n;
@@ -174,7 +207,7 @@ namespace Assets.Homm
                     // We can walk both sides, so we can attempt diagonal walk
                     var n = current + points[i] + points[next];
 
-                    var walkable = grid.Get(n).IsWalkable;
+                    var walkable = (grid.Get(n).IsWalkable && !grid.Get(n).IsOccupied) || (n == finalGoal && grid.Get(n).IsOccupied);
                     if (walkable)
                         yield return n;
 

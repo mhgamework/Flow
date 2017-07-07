@@ -4,6 +4,7 @@ namespace Assets.Homm
 {
     public class SolidCell : MonoBehaviour
     {
+        public string Description = "";
         public void Start()
         {
             
@@ -14,6 +15,7 @@ namespace Assets.Homm
             var grid = HommMain.Instance.Grid;
             var cell = grid.pointToCell(transform.position);
             grid.Get(cell).IsWalkable = false;
+            grid.Get(cell).Description = Description;
             enabled = false;
         }
     }

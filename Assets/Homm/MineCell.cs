@@ -20,6 +20,8 @@ namespace Assets.Homm
             {
                 grid = HommMain.Instance.Grid;
                 grid.RegisterInteractable(this,transform.position);
+                var cell = grid.pointToCell(transform.position);
+                grid.Get(cell).Description = "Visit Mine " + (claimed ? "- Claimed" : "- Unclaimed");
 
             }
         }
