@@ -8,7 +8,12 @@ namespace Assets.Flow.WardDrawing
 {
     public class WardDrawInput : MonoBehaviour
     {
-        public List<List<Vector3>> Lines = new List<List<Vector3>>();
+        private List<List<Vector3>> Lines = new List<List<Vector3>>();
+        private List<List<Vector3>> Target = new List<List<Vector3>>();
+
+        public List<Vector3> ActiveShapeEditor = new List<Vector3>();
+        public List<Vector3> TargetShapeEditor = new List<Vector3>();
+        public bool set = false;
 
         public Transform GridPoint;
 
@@ -21,6 +26,7 @@ namespace Assets.Flow.WardDrawing
 
         private GameObject selected;
         private Point3 selectedCell;
+        private Vector3 targetPoint;
 
         public void Start()
         {
@@ -37,6 +43,13 @@ namespace Assets.Flow.WardDrawing
 
         public void Update()
         {
+            ActiveShapeEditor = toEditor(Lines);
+            Target = fromEditor(TargetShapeEditor);
+            if (set)
+            {
+                TargetShapeEditor = toEditor(Lines);
+                set = false;
+            }
             updateSelected();
             if (selected != null)
                 if (Input.GetMouseButtonDown(0))
@@ -55,12 +68,60 @@ namespace Assets.Flow.WardDrawing
             }
 
 
-            foreach (var l in Lines)
-            {
-                for (int i = 0; i < l.Count-1; i++)
-                {
+            var matcher = new WardComparer();
+            var matches = matcher.Match(Lines, Target);
 
-                    DisplayCatmullRomSpline(l, i);
+            DrawShape(Target, Color.gray);
+            Lines.Last().Add(targetPoint);
+            DrawShape(Lines, Color.white);
+            Lines.Last().Remove(targetPoint);
+
+            if (matches.Any())
+            {
+                DrawShape(matches.OrderByDescending(m => m.MatchingXLines.Count).First().MatchingXLines, Color.yellow);
+
+            }
+        }
+
+        private List<List<Vector3>> fromEditor(List<Vector3> targetShapeEditor)
+        {
+            var ret = new List<List<Vector3>>();
+            var current = new List<Vector3>();
+            foreach (var l in targetShapeEditor)
+            {
+                if (l.Equals(new Vector3(-1, -1, -1)))
+                {
+                    ret.Add(current);
+                    current = new List<Vector3>();
+                    continue;
+                }
+                current.Add(l);
+            }
+            return ret;
+        }
+
+        private List<Vector3> toEditor(List<List<Vector3>> lines)
+        {
+            var ret = new List<Vector3>();
+            foreach (var l in lines)
+            {
+                foreach (var k in l)
+                {
+                    ret.Add(k);
+                }
+                ret.Add(new Vector3(-1, -1, -1));
+
+            }
+            return ret;
+        }
+
+        private void DrawShape(List<List<Vector3>> lines, Color c)
+        {
+            foreach (var l in lines)
+            {
+                for (int i = 0; i < l.Count - 1; i++)
+                {
+                    DisplayCatmullRomSpline(l, i, c);
                 }
             }
         }
@@ -75,12 +136,12 @@ namespace Assets.Flow.WardDrawing
             plane.Raycast(ray, out enter);
             Debug.DrawRay(ray.origin, ray.direction);
 
-            var pos = ray.GetPoint(enter);
+            targetPoint = ray.GetPoint(enter);
 
             Debug.DrawRay(ray.GetPoint(enter), ray.direction);
 
 
-            var cell = (pos * (1f / GridCellSize)).ToPoint3Rounded();
+            var cell = (targetPoint * (1f / GridCellSize)).ToPoint3Rounded();
             if (selected != null)
             {
                 selected.transform.localScale = new Vector3(1, 1, 1) * PointSize;
@@ -119,18 +180,18 @@ namespace Assets.Flow.WardDrawing
 
 
         //Display a spline between 2 points derived with the Catmull-Rom spline algorithm
-        void DisplayCatmullRomSpline(List<Vector3> controlPointsList, int pos)
+        void DisplayCatmullRomSpline(List<Vector3> controlPointsList, int pos, Color color)
         {
             var a = pos - 1;
-            var b = pos ;
+            var b = pos;
             var c = pos + 1;
             var d = pos + 2;
             var isLoop = controlPointsList[0] == controlPointsList[controlPointsList.Count - 1];
 
             var end = controlPointsList.Count - 1;
 
-            if (a < 0) a = isLoop ? end-1 :0;
-            if (d > end) d = isLoop ? 1:end;
+            if (a < 0) a = isLoop ? end - 1 : 0;
+            if (d > end) d = isLoop ? 1 : end;
 
             //The 4 points we need to form a spline between p1 and p2
             Vector3 p0 = controlPointsList[a];
@@ -157,7 +218,7 @@ namespace Assets.Flow.WardDrawing
                 Vector3 newPos = GetCatmullRomPosition(t, p0, p1, p2, p3);
 
                 //Draw this line segment
-                Debug.DrawLine(lastPos, newPos);
+                Debug.DrawLine(lastPos, newPos, color);
 
                 //Save this pos so we can draw the next line segment
                 lastPos = newPos;
