@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Assets.UnityAdditions;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
@@ -22,23 +23,34 @@ namespace Assets.Flow.WardDrawing
         public float PointSize;
         public float SelectedPointSize;
 
-        private Dictionary<Point3, GameObject> dict = new Dictionary<Point3, GameObject>();
+        //private Dictionary<Point3, GameObject> dict = new Dictionary<Point3, GameObject>();
 
         private GameObject selected;
         private Point3 selectedCell;
         private Vector3 targetPoint;
+        private Plane drawPlane;
+
+        private GameObject GridContainer;
 
         public void Start()
         {
+
             Lines.Add(new List<Vector3>());
+
+            GridContainer = new GameObject("GridContainer");
+            GridContainer.transform.SetParent(transform);
+            var localOffset = new Vector3(Size / 2f, Size / 2f, 0);
             for (int x = 0; x < Size; x++)
                 for (int y = 0; y < Size; y++)
                 {
-                    var p = Instantiate(GridPoint.gameObject, transform);
-                    p.transform.position = new Vector3(x, y) * GridCellSize;
+                    var p = Instantiate(GridPoint.gameObject, GridContainer.transform);
+                    p.transform.position = new Vector3(x, y) * GridCellSize - localOffset;
                     p.transform.localScale = new Vector3(1, 1, 1) * PointSize;
-                    dict.Add(new Point3(x, y, 0), p);
+                    //dict.Add(new Point3(x, y, 0), p);
                 }
+
+            SetPlane(new Vector3(), Vector3.forward);
+
         }
 
         public void Update()
@@ -51,15 +63,15 @@ namespace Assets.Flow.WardDrawing
                 set = false;
             }
             updateSelected();
-            if (selected != null)
-                if (Input.GetMouseButtonDown(0))
-                {
-                    Lines.Last().Add(selectedCell);
-                }
-                else if (Input.GetMouseButtonDown(1))
-                {
-                    Lines.Add(new List<Vector3>());
-                }
+            //if (selected != null)
+            if (Input.GetMouseButtonDown(0))
+            {
+                Lines.Last().Add(selectedCell);
+            }
+            else if (Input.GetMouseButtonDown(1))
+            {
+                Lines.Add(new List<Vector3>());
+            }
 
             if (Input.GetKeyDown(KeyCode.Backspace))
             {
@@ -130,10 +142,9 @@ namespace Assets.Flow.WardDrawing
         {
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-            var plane = new Plane(Vector3.forward, 0);
 
             float enter;
-            plane.Raycast(ray, out enter);
+            drawPlane.Raycast(ray, out enter);
             Debug.DrawRay(ray.origin, ray.direction);
 
             targetPoint = ray.GetPoint(enter);
@@ -142,18 +153,18 @@ namespace Assets.Flow.WardDrawing
 
 
             var cell = (targetPoint * (1f / GridCellSize)).ToPoint3Rounded();
-            if (selected != null)
-            {
-                selected.transform.localScale = new Vector3(1, 1, 1) * PointSize;
-                selected = null;
+            //if (selected != null)
+            //{
+            //    selected.transform.localScale = new Vector3(1, 1, 1) * PointSize;
+            //    selected = null;
 
-            }
-            if (dict.ContainsKey(cell))
-            {
-                selected = dict[cell];
-                selected.transform.localScale = new Vector3(1, 1, 1) * SelectedPointSize;
-                selectedCell = cell;
-            }
+            //}
+            //if (dict.ContainsKey(cell))
+            //{
+            //selected = dict[cell];
+            //selected.transform.localScale = new Vector3(1, 1, 1) * SelectedPointSize;
+            selectedCell = cell;
+            //}
         }
 
 
@@ -240,6 +251,32 @@ namespace Assets.Flow.WardDrawing
             Vector3 pos = 0.5f * (a + (b * t) + (c * t * t) + (d * t * t * t));
 
             return pos;
+        }
+
+        public void Show()
+        {
+        }
+
+        public void Hide()
+        {
+        }
+
+        public void SetPlane(Vector3 point, Vector3 normal)
+        {
+            point = point.ToPoint3Rounded().ToVector3();
+            GridContainer.transform.position = point;
+            GridContainer.transform.LookAt(point + normal);
+            var euler = GridContainer.transform.rotation.eulerAngles;
+            euler.x = Mathf.Round(euler.x / 90f) * 90f;
+            euler.y = Mathf.Round(euler.y /90f) * 90f;
+            euler.z = Mathf.Round(euler.z / 90f) * 90f;
+            GridContainer.transform.rotation = Quaternion.Euler(euler);
+
+
+            drawPlane = new Plane(GridContainer.transform.forward, point);
+
+
+
         }
     }
 }

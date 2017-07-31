@@ -23,6 +23,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public Dictionary<KeyCode, IState> tools = new Dictionary<KeyCode, IState>();
         private List<VoxelMaterial> VoxelMaterials;
 
+        public DrawWardTool DrawWardTool;
 
 
         private IEditableVoxelWorld world;
@@ -41,14 +42,17 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             ActiveMaterial = VoxelMaterials[0];
 
+            DrawWardTool.Init(this, world, SphereGizmo);
+
             tools.Add(KeyCode.Alpha0, new NullState());
-            tools.Add(KeyCode.Alpha1, new PlaceSphereState(this, world, SphereGizmo));
-            tools.Add(KeyCode.Alpha2, new PlaceSphereStateMidair(this, world, SphereGizmo));
-            tools.Add(KeyCode.Alpha3, new ReplaceMaterialTool(this, world, SphereGizmo));
+            tools.Add(KeyCode.Alpha1, new DepositTool(this, world, SphereGizmo));
+            tools.Add(KeyCode.Alpha2, new SmoothTool(this, world, SphereGizmo));
+            tools.Add(KeyCode.Alpha3, DrawWardTool);
             tools.Add(KeyCode.Alpha4, new FlattenTool(this, world, SphereGizmo, PlaneGizmo));
-            tools.Add(KeyCode.Alpha5, new DrawOnPlaneTool(this, world, SphereGizmo, PlaneGizmo));
-            tools.Add(KeyCode.Alpha6, new SmoothTool(this, world, SphereGizmo));
-            tools.Add(KeyCode.Alpha7, new DepositTool(this, world, SphereGizmo));
+            tools.Add(KeyCode.Alpha5, new ReplaceMaterialTool(this, world, SphereGizmo));
+            tools.Add(KeyCode.Alpha6, new PlaceSphereStateMidair(this, world, SphereGizmo));
+            tools.Add(KeyCode.Alpha7, new PlaceSphereState(this, world, SphereGizmo));
+            tools.Add(KeyCode.Alpha8, new DrawOnPlaneTool(this, world, SphereGizmo, PlaneGizmo));
 
             activeState = tools[KeyCode.Alpha1];
 
