@@ -9,17 +9,24 @@ using Assets.MarchingCubes;
 using Assets.MarchingCubes.VoxelWorldMVP;
 
 /// <summary>
+/// Control script for the marching cubes test screen
+/// Used in the demo for 170814
 /// For testing the marchingcubes renderer
 /// </summary>
 public class MarchingCubesTestScript : MonoBehaviour
 {
-   public int Resolution = 30;
+    public int Resolution = 30;
+    public float Size = 10f;
 
-   
+    public bool Change = true;
+    public int Min = 1;
+    public int Max = 16;
+    public float ChangeSpeed = 1;
 
     public TestModeEnum TestMode;
 
     public Material TemplateMaterial;
+    private VoxelChunkRenderer voxelChunkRenderer;
 
     public enum TestModeEnum
     {
@@ -31,18 +38,13 @@ public class MarchingCubesTestScript : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-
-        var voxelChunkRenderer = GetComponent<VoxelChunkRenderer>();
+        voxelChunkRenderer = GetComponent<VoxelChunkRenderer>();
         voxelChunkRenderer.MaterialsDictionary = new[] { Color.green, Color.red, Color.blue }.ToDictionary(c => c, c =>
            {
                var ret = new Material(TemplateMaterial);
                ret.color = c;
                return ret;
            });
-        var data = createChunkData();
-
-        voxelChunkRenderer.SetChunk(data);
-
     }
 
     private UniformVoxelData createChunkData()
@@ -149,6 +151,23 @@ public class MarchingCubesTestScript : MonoBehaviour
         }
 
         return ret;
+    }
+
+    public void Update()
+    {
+        if (Change)
+        {
+            var time = Time.timeSinceLevelLoad;
+            time *= ChangeSpeed / (Max - Min);
+            Resolution = (int)Math.Round( Mathf.PingPong(time,Max-Min)+Min);
+        }
+
+        var data = createChunkData();
+
+        data.LastChangeFrame = Time.frameCount;
+        voxelChunkRenderer.SetChunk(data);
+        voxelChunkRenderer.SetWorldcoords(new Point3(0, 0, 0), 1f / (Resolution-1) * Size);
+
     }
 
 
