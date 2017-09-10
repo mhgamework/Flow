@@ -14,6 +14,7 @@ namespace Assets.Flow.WardDrawing
 
         public List<Vector3> ActiveShapeEditor = new List<Vector3>();
         public List<Vector3> TargetShapeEditor = new List<Vector3>();
+        public Vector3 TargetShapeOffset = new Vector3();
         public bool set = false;
 
         public Transform GridPoint;
@@ -50,6 +51,12 @@ namespace Assets.Flow.WardDrawing
                 }
 
             SetPlane(new Vector3(), Vector3.forward);
+
+            for (int i = 0; i < TargetShapeEditor.Count; i++)
+            {
+                if (TargetShapeEditor[i] == new Vector3(-1, -1, -1)) continue;
+                TargetShapeEditor[i] += TargetShapeOffset;
+            }
 
         }
 

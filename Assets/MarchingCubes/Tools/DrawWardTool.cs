@@ -46,7 +46,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             wardDrawInput.Hide();
         }
 
-        public void Update(RaycastHit? raycast)
+        void IState.Update(RaycastHit? raycast)
         {
             if (Input.GetMouseButton(2))
             {
