@@ -379,7 +379,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         }
         private struct Result
         {
-            public VoxelChunkRenderer.MeshData data;
+            public VoxelMeshData data;
             public NodeAndVersion node;
         }
 
@@ -388,7 +388,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             // Not sure if needed
         }
 
-        private VoxelChunkRenderer createRenderObject(NodeAndVersion node, VoxelChunkRenderer.MeshData meshData)
+        private VoxelChunkRenderer createRenderObject(NodeAndVersion node, VoxelMeshData meshData)
         {
             var renderObject = new GameObject();
             renderObject.name = "Node " + node.ChangedFrame + " " + node.Node.LowerLeft + " " + node.Node.Size + " V: " + meshData.doubledVertices.Count;

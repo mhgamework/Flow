@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
-    public class VoxelChunkMeshGenerator
+    public class VoxelChunkMeshGenerator : IVoxelMeshGenerator
     {
         public VoxelChunkMeshGenerator(MarchingCubesService s)
         {
@@ -18,6 +18,22 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         Point3[] Vertices = new Point3[] { new Point3(0, 0, 1), new Point3(1, 0, 1), new Point3(1, 0, 0), new Point3(0, 0, 0), new Point3(0, 1, 1), new Point3(1, 1, 1), new Point3(1, 1, 0), new Point3(0, 1, 0) };
         private MarchingCubesService s;
 
+        public VoxelMeshData GenerateMeshFromVoxelData(Array3D<VoxelData> data)
+        {
+            List<Vector3> verts;
+            int numMeshes;
+            List<int[]> indicesList;
+            List<Color> color;
+            generateMesh(data, out verts, out numMeshes, out indicesList, out color);
+
+            return new VoxelMeshData
+            {
+                colors = color,
+                doubledVertices = verts,
+                indicesList = indicesList,
+                numMeshes = numMeshes
+            };
+        }
         public void generateMesh(Array3D<VoxelData> data, out List<Vector3> doubledVertices, out int numMeshes, out List<int[]> indicesList, out List<Color> colors)
         {
             var triangles = new List<int>();
@@ -34,7 +50,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             var actualIsoSurface = 0;
 
-            var points = Vertices.Select(v => v.ToVector3() ).ToArray(); // *0.99f to show edges :)
+            var points = Vertices.Select(v => v.ToVector3()).ToArray(); // *0.99f to show edges :)
 
             //var individualColors = new[] { Color.red, Color.green, Color.blue };
             var firstColor = new Color();
@@ -141,5 +157,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 colors.Add(color);
             }
         }
+
+      
     }
 }

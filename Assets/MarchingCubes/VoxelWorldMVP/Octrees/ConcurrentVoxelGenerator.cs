@@ -101,7 +101,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
 
         private VoxelChunkMeshGenerator meshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
 
-        private VoxelChunkRenderer.MeshData firstData;
+        private VoxelMeshData firstData;
         private Result generateMeshTask(Task task, Stopwatch w)
         {
             w.Reset();
@@ -128,7 +128,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
 
         public struct Result
         {
-            public VoxelChunkRenderer.MeshData data;
+            public VoxelMeshData data;
             public int Frame;
             public RenderOctreeNode node;
         }

@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
@@ -15,25 +14,5 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     {
         public Array3D<VoxelData> Data { get;  set; }
         public int LastChangeFrame { get;  set; }   
-    }
-    public struct VoxelData
-    {
-        public float Density;
-        public VoxelMaterial Material;
-
-        public VoxelData(float density, VoxelMaterial material)
-        {
-            Density = density;
-            Material = material;
-        }
-
-        public override string ToString()
-        {
-            return string.Format("Density: {0} - Material: {1}", Density, Material == null ? "NONE" : Material.color.ToString());
-        }
-    }
-    public class VoxelMaterial
-    {
-        public Color color;
     }
 }

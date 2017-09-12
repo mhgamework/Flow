@@ -51,7 +51,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private MeshRenderer renderer;
         VoxelChunkMeshGenerator meshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
 
-        private MeshData lastMeshData = null;
+        private VoxelMeshData lastMeshData = null;
         private int lastUpdatedFrame = -1;
 
         // Use this for initialization
@@ -95,7 +95,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
 
 
-        public void setMeshToUnity(MeshData data)
+        public void setMeshToUnity(VoxelMeshData data)
         {
             Start();
             //if (mesh == null)
@@ -124,7 +124,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             }).ToArray();
         }
 
-        public static MeshData generateMesh(VoxelChunkMeshGenerator meshGenerator, Array3D<VoxelData> chunkData)
+        public static VoxelMeshData generateMesh(VoxelChunkMeshGenerator meshGenerator, Array3D<VoxelData> chunkData)
         {
             List<Vector3> doubledVertices;
             int numMeshes;
@@ -132,7 +132,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             List<Color> colors;
             meshGenerator.generateMesh(chunkData, out doubledVertices, out numMeshes, out indicesList, out colors);
 
-            return new MeshData()
+            return new VoxelMeshData()
             {
                 doubledVertices = doubledVertices,
                 numMeshes = numMeshes,
@@ -140,16 +140,5 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 colors = colors
             };
         }
-
-        public class MeshData
-        {
-            public List<Vector3> doubledVertices;
-            public int numMeshes;
-            public List<int[]> indicesList;
-            public List<Color> colors;
-        }
-
-
     }
-
 }
