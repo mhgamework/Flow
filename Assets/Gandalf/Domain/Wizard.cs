@@ -6,11 +6,13 @@ namespace Assets.Gandalf.Domain
     public class Wizard
     {
         private readonly GridElementFactory elementFactory;
+        private readonly ExplorationService explorationService;
         public Cell CurrentCell { get; private set; }
 
-        public Wizard(GridElementFactory elementFactory)
+        public Wizard(GridElementFactory elementFactory,ExplorationService explorationService)
         {
             this.elementFactory = elementFactory;
+            this.explorationService = explorationService;
         }
 
         public void MoveTo(Cell cell)
@@ -44,6 +46,7 @@ namespace Assets.Gandalf.Domain
         public void TeleportTo(Cell cell)
         {
             CurrentCell = cell;
+            explorationService.Explore(this, cell);
         }
     }
 }

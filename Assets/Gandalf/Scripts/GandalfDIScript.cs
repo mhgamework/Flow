@@ -26,7 +26,8 @@ namespace Assets.Gandalf.Scripts
             RegisterSingleton(ci => new Grid(GridSize, GridCellSize));
             RegisterSingleton(ci => new GridElementFactory());
             RegisterSingleton(ci => new TilePlaceHelper(ci.Get<Grid>()));
-            RegisterSingleton(ci => new Wizard(ci.Get<GridElementFactory>()));
+            RegisterSingleton(ci => new Wizard(ci.Get<GridElementFactory>(),ci.Get<ExplorationService>()));
+            RegisterSingleton(ci => new ExplorationService());
         }
 
         private void RegisterSingleton<T>(Func<GandalfDIScript, T> ctr) where T : class
@@ -46,7 +47,7 @@ namespace Assets.Gandalf.Scripts
         public T Get<T>() where T : class
         {
             init();
-            if (!constructors.ContainsKey(typeof(T))) throw new Exception();
+            if (!constructors.ContainsKey(typeof(T))) throw new Exception(typeof(T).FullName);
 
             return constructors[typeof(T)]() as T;
 

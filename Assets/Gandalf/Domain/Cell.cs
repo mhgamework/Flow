@@ -7,7 +7,7 @@ namespace Assets.Gandalf.Domain
     public class Cell
     {
         private readonly Grid grid;
-
+        public bool IsExplored { get; private set; }
         public Cell(Point3 coordinate,Grid grid)
         {
             this.grid = grid;
@@ -25,6 +25,11 @@ namespace Assets.Gandalf.Domain
         public IEnumerable<T> Get<T>()
         {
             throw new System.NotImplementedException();
+        }
+
+        public void MarkExplored()
+        {
+            IsExplored = true;
         }
 
         public IEnumerable<Cell> CalculatePath(Cell destination)
