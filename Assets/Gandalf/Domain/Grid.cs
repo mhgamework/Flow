@@ -73,7 +73,9 @@ namespace Assets.Gandalf
         public Cell GetCellContainingWorldPosition(Vector3 pos)
         {
             pos *= (1f / GridCellSize);
-            return Get(pos.ToFloored());
+            var floored = pos.ToFloored();
+            if (!HasCell(floored.X, floored.Z)) return null;
+            return Get(floored);
         }
 
 

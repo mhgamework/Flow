@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Assets.Gandalf.Domain
 {
     public class Wizard
     {
-        private readonly GridElementFactory elementFactory;
+        private readonly IGridElementFactory elementFactory;
         private readonly ExplorationService explorationService;
         public Cell CurrentCell { get; private set; }
 
-        public Wizard(GridElementFactory elementFactory,ExplorationService explorationService)
+        public Wizard(IGridElementFactory elementFactory,ExplorationService explorationService)
         {
             this.elementFactory = elementFactory;
             this.explorationService = explorationService;
@@ -37,10 +38,11 @@ namespace Assets.Gandalf.Domain
 
         public void RemoveGoblin(Goblin goblin)
         {
-            if (!CurrentCell.Get<Goblin>().Contains(goblin))
-                throw new System.Exception("Wizard cannot remove goblins that are not in the wizards cell");
+            throw new NotImplementedException();
+            //if (!CurrentCell.Get<Goblin>().Contains(goblin))
+            //    throw new System.Exception("Wizard cannot remove goblins that are not in the wizards cell");
 
-            elementFactory.Remove(goblin);
+            //elementFactory.Remove(goblin);
         }
 
         public void TeleportTo(Cell cell)

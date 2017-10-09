@@ -22,6 +22,7 @@ namespace Assets.Gandalf.Domain
 
         public int Get(ItemType itemType)
         {
+            if (!Amounts.ContainsKey(itemType)) return 0;
             return Amounts[itemType];
         }
 
@@ -33,5 +34,11 @@ namespace Assets.Gandalf.Domain
 
             return amount;
         }
+
+        public string ToItemString()
+        {
+            return Amounts.Aggregate("", (acc, el) => acc + el.Key.Name + ": " + el.Value + "\n");
+        }
+
     }
 }

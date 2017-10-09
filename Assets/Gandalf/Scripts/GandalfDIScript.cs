@@ -10,7 +10,7 @@ namespace Assets.Gandalf.Scripts
         public float GridCellSize = 1;
 
         Grid grid;
-        private GridElementFactory gridElementFactory;
+        public GridElementFactory GridElementFactory;
 
         private Dictionary<Type, Func<Object>> constructors;
         public void Start()
@@ -24,10 +24,10 @@ namespace Assets.Gandalf.Scripts
             constructors = new Dictionary<Type, Func<object>>();
 
             RegisterSingleton(ci => new Grid(GridSize, GridCellSize));
-            RegisterSingleton(ci => new GridElementFactory());
             RegisterSingleton(ci => new TilePlaceHelper(ci.Get<Grid>()));
-            RegisterSingleton(ci => new Wizard(ci.Get<GridElementFactory>(),ci.Get<ExplorationService>()));
+            RegisterSingleton(ci => new Wizard(ci.Get<IGridElementFactory>(),ci.Get<ExplorationService>()));
             RegisterSingleton(ci => new ExplorationService());
+            RegisterSingleton<IGridElementFactory>(ci => GridElementFactory);
         }
 
         private void RegisterSingleton<T>(Func<GandalfDIScript, T> ctr) where T : class

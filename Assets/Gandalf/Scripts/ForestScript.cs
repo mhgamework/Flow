@@ -15,12 +15,14 @@ namespace Assets.Gandalf.Scripts
         public void Start()
         {
             var di = GandalfDIScript.Instance;
-            forest = new Forest();
             tilePlaceHelper = di.Get<TilePlaceHelper>();
+
+            cell = tilePlaceHelper.GetCell(transform);
+
+            forest = new Forest(cell);
             forest.GrowInterval = GrowInterval;
             StartCoroutine(forest.Simulate().GetEnumerator());
 
-            cell = tilePlaceHelper.GetCell(transform);
             //wizard.TeleportTo();
 
         }
