@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Assets.Homm
+namespace Assets.Reusable
 {
     public static class DictionaryExtensions
     {

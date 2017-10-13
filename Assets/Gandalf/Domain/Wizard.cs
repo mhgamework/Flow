@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Gandalf.Scripts;
 
 namespace Assets.Gandalf.Domain
 {
@@ -26,7 +27,7 @@ namespace Assets.Gandalf.Domain
         public IEnumerable<Cell> GetMovementOptions()
         {
             if (CurrentCell == null) return Enumerable.Empty<Cell>();
-            return CurrentCell.Neighbours4.ToArray();
+            return CurrentCell.Neighbours4.Where(n => n.IsWalkable).ToArray();
         }
 
         public Goblin SetGoblin(Cell from, Cell to)
@@ -49,6 +50,16 @@ namespace Assets.Gandalf.Domain
         {
             CurrentCell = cell;
             explorationService.Explore(this, cell);
+            foreach (var n in cell.Neighbours4)
+                explorationService.Explore(this, n);
+        }
+
+        public MagicExtenderScript CreateMagicExtender()
+        {
+            if (CurrentCell.Entity != null) return null;
+            var ret = elementFactory.CreateMagicExtender(CurrentCell);
+
+            return ret;
         }
     }
 }

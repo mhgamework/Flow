@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
+using MHGameWork.TheWizards;
 using UnityEngine;
 
 namespace Assets.Gandalf.Domain
 {
-    public class City : ICellEntity, IMagicProvider
+    public class City : ICellEntity, IMagicProvider, IMagicChargeDistributor
     {
         public Cell Position { get; private set; }
+        public float MagicAreaSize = 3;
 
         private int Magic = 0;
         private int MaxMagic = 10;
@@ -62,6 +64,16 @@ namespace Assets.Gandalf.Domain
             if (Magic < amount) return false;
             Magic -= amount;
             return true;
+        }
+
+        bool IMagicChargeDistributor.HasMagic
+        {
+            get { return true; }
+        }
+
+        public bool InRange(Cell cell)
+        {
+            return (Position.Coordinate - cell.Coordinate).ToVector3().magnitude < MagicAreaSize;
         }
     }
 }

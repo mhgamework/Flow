@@ -8,16 +8,18 @@ namespace Assets.Gandalf.Scripts
     {
         public Transform GroundNoMagic;
         public Transform GroundMagic;
+        private MagicChargeService magicChargeService;
 
         public void Start()
         {
-            
+            magicChargeService = GandalfDIScript.Instance.Get<MagicChargeService>();
         }
 
         public void Update()
         {
-            GroundMagic.gameObject.SetActive(Cell.HasMagic());
-            GroundNoMagic.gameObject.SetActive(!Cell.HasMagic());
+            var hasMagic = magicChargeService.HasMagic(Cell);
+            GroundMagic.gameObject.SetActive(hasMagic);
+            GroundNoMagic.gameObject.SetActive(!hasMagic);
         }
 
 

@@ -6,6 +6,8 @@ namespace Assets.Gandalf.Scripts
 {
     public class GridElementFactory : MonoBehaviour,IGridElementFactory
     {
+        public MagicExtenderScript MagicExtenderPrefab;
+
         private Dictionary<object, GameObject> dict = new Dictionary<object, GameObject>();
         public GoblinScript GoblinPrefab;
         private Grid grid;
@@ -34,6 +36,22 @@ namespace Assets.Gandalf.Scripts
             dict.Remove(goblin);
 
             UIControllerScript.Instance.OnGoblinRemoved(goblin);
+        }
+
+        public MagicExtenderScript CreateMagicExtender(Cell cell)
+        {
+            var ret = Instantiate(MagicExtenderPrefab, transform);
+
+            ret.GetComponent<CellEntityScript>().SetCell(cell);
+
+            return ret;
+
+        }
+
+
+        public void Destroy(MagicExtenderScript magicExtenderScript)
+        {
+            Object.Destroy(magicExtenderScript);
         }
     }
 }

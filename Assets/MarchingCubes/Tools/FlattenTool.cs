@@ -17,7 +17,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public string Name
         {
-            get { return "Flatten tool"; }
+            get { return "Flatten tool (Right click to select plane)"; }
         }
         public FlattenTool(VoxelWorldEditorScript script, IEditableVoxelWorld world, GameObject sphereGizmo, GameObject planeGizmo)
         {

@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Assets.Homm;
-using DirectX11;
 using UnityEngine;
 
-namespace Assets.Gandalf.Domain
+namespace Assets.Reusable
 {
     public abstract class EuclidianAStarAlgorithm<T> : AStarAlgorithm<T>
     {
@@ -12,8 +10,11 @@ namespace Assets.Gandalf.Domain
 
         public override float exact_cost(T start, T neighbour)
         {
-            return (GetPosition(start) - GetPosition(neighbour)).magnitude;
+            var startPos = GetPosition(start);
+            var neighbourPos = GetPosition(neighbour);
+            return (startPos - neighbourPos).magnitude; // Make it direction dependent
         }
+
 
         public override float heuristic_cost_estimate(T start, T goal)
         {

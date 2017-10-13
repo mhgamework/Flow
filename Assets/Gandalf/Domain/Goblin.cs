@@ -38,7 +38,7 @@ namespace Assets.Gandalf.Domain
                 else if (Items.IsEmpty && Position == Source)
                 {
                     // Pickup
-                    yield return new WaitForSeconds(2);
+                    //yield return new WaitForSeconds(1);
 
                     if (Position.Items.Take(ItemType.Wood, 1) == 0) continue;
 
@@ -49,7 +49,7 @@ namespace Assets.Gandalf.Domain
                 else if (!Items.IsEmpty && Position == Target)
                 {
                     // Pickup
-                    yield return new WaitForSeconds(2);
+                    yield return new WaitForSeconds(0.5f);
 
                     if (Items.Get(ItemType.Wood) == 0) continue;
                     if (Items.Take(ItemType.Wood, 1) == 0) continue;
@@ -71,6 +71,11 @@ namespace Assets.Gandalf.Domain
             //}
         }
 
+        public IEnumerable<Cell> CalculatePath()
+        {
+            return Source.CalculatePath(Target);
+        }
+
         public Vector3 CalculateRenderingPosition(float currentTime)
         {
             return Position.CenterPosition - new Vector3(1, 0, 1) * grid.GridCellSize * 0.5f;
@@ -78,7 +83,7 @@ namespace Assets.Gandalf.Domain
 
         public float LifeUntil = 0;
 
-        public float WalkSpeed = 1;
+        public float WalkSpeed = 0.2f;
 
         public ItemCollection Items { get; private set; }
 

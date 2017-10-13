@@ -67,5 +67,9 @@ namespace Assets.Gandalf.Scripts
         {
             if (goblin == Selected) Selected = null;
         }
+        public void OnSpawnExtenderClick()
+        {
+            wizard.CreateMagicExtender();
+        }
     }
 }

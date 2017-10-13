@@ -27,6 +27,7 @@ namespace Assets.Gandalf.Scripts
             RegisterSingleton(ci => new TilePlaceHelper(ci.Get<Grid>()));
             RegisterSingleton(ci => new Wizard(ci.Get<IGridElementFactory>(),ci.Get<ExplorationService>()));
             RegisterSingleton(ci => new ExplorationService());
+            RegisterSingleton(ci => new MagicChargeService());
             RegisterSingleton<IGridElementFactory>(ci => GridElementFactory);
         }
 

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using Assets.Reusable;
 using UnityEngine;
 
 namespace Assets.Gandalf.Domain
@@ -7,7 +9,7 @@ namespace Assets.Gandalf.Domain
     {
         public override IEnumerable<Cell> GetNeighbours(Cell current, Cell finalGoal)
         {
-            return current.Neighbours4;
+            return current.Neighbours4.Where(n => n.IsWalkable);
         }
 
         protected override Vector3 GetPosition(Cell p)

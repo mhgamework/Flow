@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Gandalf.Scripts;
 using DirectX11;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace Assets.Gandalf.Domain
         public ICellEntity Entity { get; private set; }
         public ItemCollection Items { get; private set; }
         public IDictionary<string, string> Values { get { return Entity == null ? new Dictionary<string, string>(): Entity.Values; } }
-        public string Name { get { return Entity == null ? "Empty" : Entity.GetCellInfo(); } }
+        public string Name { get { return NewEntity == null ? "Empty" : NewEntity.Name; } }
         public IEnumerable<string> Actions { get { return Enumerable.Empty<string>(); } }
         public void DoAction(string action)
         {
@@ -35,6 +36,8 @@ namespace Assets.Gandalf.Domain
             MagicProviders = new List<IMagicProvider>();
         }
 
+        public CellEntityScript NewEntity;
+
         public bool TakeMagic(int amount)
         {
             foreach (var p in MagicProviders)
@@ -50,6 +53,8 @@ namespace Assets.Gandalf.Domain
         {
             get { return (Coordinate + new Vector3(0.5f, 0, 0.5f)) * grid.GridCellSize; }
         }
+
+        public bool IsWalkable { get{ return NewEntity == null ? true : NewEntity.IsWalkable; }}
 
 
         public void MarkExplored()
