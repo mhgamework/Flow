@@ -14,9 +14,9 @@ public class OverlayPanel : Singleton<OverlayPanel>
     // Use this for initialization
     void Start()
     {
-        textComponent = GetComponentInChildren<Text>();
-        panelImageComponent = GetComponentInChildren<Image>();
-        canvasGroup = GetComponentInChildren<CanvasGroup>();
+        textComponent = GetComponentInChildren<Text>(true);
+        panelImageComponent = GetComponentInChildren<Image>(true);
+        canvasGroup = GetComponentInChildren<CanvasGroup>(true);
         panelObject = panelImageComponent.gameObject;
 
         Hide();
