@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Assets.MarchingCubes.Domain;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
@@ -45,38 +46,21 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             sphereGizmo.transform.localScale = Vector3.one * script.ActiveSize;
             var range = script.ActiveSize;
             var material = script.ActiveMaterial;
-            var radius = new Point3(1, 1, 1) * (int)Math.Ceiling(script.ActiveSize);
 
             if (Input.GetMouseButton(0))
             {
-                //var weights = new[] {0.5f, 1f, 0.5f};
-                var weights = new[] { 0.1f, 2f, 0.1f };
-                weights = weights.Select(f => f / weights.Sum()).ToArray();
-
-                world.RunKernelXbyXUnrolled(point.ToFloored() - radius, point.ToCeiled() + radius, (data, p) =>
-                {
-                    var val = data[1];
-                    //if ((p - point).magnitude <= range)
-                    var d = 0f;
-                    for (int i = 0; i < weights.Length; i++)
-                    {
-                        d += Mathf.Clamp(data[i].Density, -1, 1) * weights[i];
-                    }
-                    {
-                        if (d > 0 && val.Material == null)
-                            val.Material = material;
-                        //val.Material = material;
-                        val.Density = d;
-                        return val;
-                    }
-                    return val;
-                }, 3, Time.frameCount);
-
-
-
+                SmoothTerrain(range, material);
             }
 
         }
+
+        protected virtual void SmoothTerrain(float radius, VoxelMaterial material)
+        {
+            //var weights = new[] {0.5f, 1f, 0.5f};
+            WorldEditOperations.SmoothTerrain(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), material, Time.frameCount, world, point);
+        }
+
+
 
         public void OnDrawGizmos()
         {

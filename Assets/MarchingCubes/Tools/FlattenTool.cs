@@ -1,4 +1,5 @@
 using System;
+using Assets.MarchingCubes.Domain;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
@@ -58,26 +59,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             if (Input.GetMouseButton(0))
             {
-
-                var range = script.ActiveSize;
-                var material = script.ActiveMaterial;
-                var radius = new Point3(1, 1, 1) * (int)Math.Ceiling(script.ActiveSize);
-
-                world.RunKernel1by1(localPoint.ToFloored() - radius, localPoint.ToCeiled() + radius, (data, p) =>
-                {
-                    if ((p - localPoint).magnitude <= range)// && data.Density >  0)
-                    {
-                        if (data.Material == null || data.Material.color.Equals(new Color()))
-                            data.Material = material;
-                        data.Density = new Plane(flatNormal, flatPoint).GetDistanceToPoint(p);
-                        return data;
-                    }
-                    return data;
-                }, Time.frameCount);
-
+                FlattenTerrain(localPoint, new Plane(flatNormal, flatPoint), script.ActiveSize, script.ActiveMaterial);
             }
 
         }
+
+        protected virtual  void FlattenTerrain(Vector3 localPoint, Plane targetPlane, float range, VoxelMaterial material)
+        {
+            WorldEditOperations.FlattenTerrain(localPoint, range, material, world, Time.frameCount,targetPlane);
+        }
+
 
         public void OnDrawGizmos()
         {

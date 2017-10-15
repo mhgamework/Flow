@@ -24,6 +24,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private List<VoxelMaterial> VoxelMaterials;
 
         public DrawWardTool DrawWardTool;
+        public bool AddDefaultTools = true;
 
 
         private IEditableVoxelWorld world;
@@ -31,8 +32,23 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public VoxelMaterial ActiveMaterial;
         public float ActiveSize = 3;
 
+        private Dictionary<KeyCode,CreateTool> toolConstructors = new Dictionary<KeyCode,CreateTool>();
+        public KeyCode StartTool = KeyCode.Alpha0;
+
         public void Start()
         {
+            if (AddDefaultTools)
+            {
+                RegisterTool(KeyCode.Alpha0, new NullState());
+                RegisterTool(KeyCode.Alpha1, new DepositTool(this, world, SphereGizmo));
+                RegisterTool(KeyCode.Alpha2, new SmoothTool(this, world, SphereGizmo));
+                //RegisterTool(KeyCode.Alpha3, DrawWardTool);
+                RegisterTool(KeyCode.Alpha3, new FlattenTool(this, world, SphereGizmo, PlaneGizmo));
+                RegisterTool(KeyCode.Alpha4, new ReplaceMaterialTool(this, world, SphereGizmo));
+                RegisterTool(KeyCode.Alpha5, new PlaceSphereStateMidair(this, world, SphereGizmo));
+                //RegisterTool(KeyCode.Alpha7, new PlaceSphereState(this, world, SphereGizmo));
+                //RegisterTool(KeyCode.Alpha8, new DrawOnPlaneTool(this, world, SphereGizmo, PlaneGizmo));
+            }
         }
 
         public void Init(IEditableVoxelWorld world, List<VoxelMaterial> voxelMaterials)
@@ -44,25 +60,25 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             DrawWardTool.Init(this, world, SphereGizmo);
 
-            
-            tools.Add(KeyCode.Alpha1, new DepositTool(this, world, SphereGizmo));
-            tools.Add(KeyCode.Alpha2, new SmoothTool(this, world, SphereGizmo));
-            //tools.Add(KeyCode.Alpha3, DrawWardTool);
-            tools.Add(KeyCode.Alpha3, new FlattenTool(this, world, SphereGizmo, PlaneGizmo));
-            tools.Add(KeyCode.Alpha4, new ReplaceMaterialTool(this, world, SphereGizmo));
-            tools.Add(KeyCode.Alpha5, new PlaceSphereStateMidair(this, world, SphereGizmo));
-            //tools.Add(KeyCode.Alpha7, new PlaceSphereState(this, world, SphereGizmo));
-            //tools.Add(KeyCode.Alpha8, new DrawOnPlaneTool(this, world, SphereGizmo, PlaneGizmo));
-            tools.Add(KeyCode.Alpha0, new NullState());
-
-
-            activeState = tools[KeyCode.Alpha1];
-
+            // Create and add all tools
+            foreach (var t in toolConstructors)
+            {
+                tools.Add(t.Key,t.Value(world,SphereGizmo,PlaneGizmo));
+            }
+            activeState = tools[StartTool];
             activeState.Start();
-
             raycaster = new VoxelWorldRaycaster();
         }
 
+        public delegate IState CreateTool(IEditableVoxelWorld world, GameObject sphereGizmo, GameObject planeGizmo);
+        public void RegisterTool(KeyCode keycode, CreateTool ctr )
+        {
+            toolConstructors.Add(keycode, ctr);
+        }
+        private void RegisterTool(KeyCode keycode, IState tool)
+        {
+            RegisterTool(keycode, (a, b, c) => tool);
+        }
 
 
         public void Update()
