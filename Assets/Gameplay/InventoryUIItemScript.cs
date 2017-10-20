@@ -20,7 +20,7 @@ namespace Assets.Gameplay
         {
             for (;;)
             {
-                Text.text = type + ": " + inventory.Get(type);
+                Text.text = type + ": " + inventory.Get(type).ToString("0.00");
                 yield return new WaitForSeconds(0.1f);
             }
         }

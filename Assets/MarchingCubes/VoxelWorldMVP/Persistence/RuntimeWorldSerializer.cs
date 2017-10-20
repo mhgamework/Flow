@@ -17,6 +17,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
     /// </summary>
     public class RuntimeWorldSerializer : IWorldSerializer
     {
+        private readonly string savegamePath;
+
+        public RuntimeWorldSerializer(string savegamePath)
+        {
+            this.savegamePath = savegamePath;
+        }
+
         public void Save(int changesSinceFrame, VoxelWorldAsset asset, OctreeVoxelWorld world)
         {
             var version = createVersion(changesSinceFrame, asset, world);
@@ -27,7 +34,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 
         public VoxelWorldAsset LoadAsset(VoxelWorldAsset asset)
         {
-            if (!File.Exists("savegame.txt")) return asset;
+            if (!File.Exists(getSavegameTxt())) return asset;
             // Ignore inboud asset
             try
             {
@@ -43,6 +50,15 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
                 return asset;
             }
 
+        }
+
+        private string getSavegameTxt()
+        {
+            return savegamePath+ ".txt";
+        }
+        private string getSavegameDat()
+        {
+            return savegamePath+ ".dat";
         }
 
         public VoxelWorldAsset CreateAsset(int minNodeSize)
@@ -67,18 +83,20 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 
         public void SaveToDisk(VoxelWorldAsset asset)
         {
-            using (var fs = File.OpenWrite("savegame.txt"))
-            using (var w = new BinaryWriter(File.OpenWrite("savegame_raw.dat")))
+            using (var fs = File.OpenWrite(getSavegameTxt()))
+            using (var w = new BinaryWriter(File.OpenWrite(getSavegameDat())))
             {
                 using (var mode = new RunLengthEncoder.WriteMode(fs))
                     PersistenceFunc(asset, mode, null, w);
             }
         }
 
+     
+
         public void LoadFromDisk(VoxelWorldAsset asset)
         {
-            using (var fs = File.OpenRead("savegame.txt"))
-            using (var r = new BinaryReader(File.OpenRead("savegame_raw.dat")))
+            using (var fs = File.OpenRead(getSavegameTxt()))
+            using (var r = new BinaryReader(File.OpenRead(getSavegameDat())))
             {
                 using (var mode = new RunLengthEncoder.ReadMode(fs))
                     PersistenceFunc(asset, mode, r, null);
@@ -167,33 +185,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
                 }
 
             }
-            //hermiteData.Versions
-            //var flattenedCoords = Enumerable.Range(0, hermiteData.NumCells.Z + 1)
-            //                          .SelectMany(z => Enumerable.Range(0, hermiteData.NumCells.Y + 1)
-            //                          .SelectMany(y => Enumerable.Range(0, hermiteData.NumCells.X + 1)
-            //                          .Select(x => new Point3(x, y, z)))).ToArray();
-
-            //mode.comment("Material Ids - 0 to NumCells.XYZ inclusive - X + NumCells.X * (Y + NumCells.Y * Z) - Run lenght encoded (mat id, count)");
-
-            //mode.data(wr => writeRunLength(flattenedCoords.Length, i => getMaterialId(hermiteData.GetMaterial(flattenedCoords[i])), wr),
-            //    r => readRunLength(flattenedCoords.Length, (i, matId) => hermiteData.SetMaterial(flattenedCoords[i], getMaterial(matId)), r));
-
-
-            //var dirName = new[] { "X", "Y", "Z" };
-
-            //for (int dir = 0; dir < 3; dir++)
-            //{
-            //    mode.comment("Intersections " + dirName[dir] + " - Same format");
-
-            //    mode.data(wr => writeRunLength(flattenedCoords.Length, i => hermiteData.GetIntersection(flattenedCoords[i], dir), wr),
-            //        r => readRunLength(flattenedCoords.Length, (Action<int, float>)((i, intersect) => hermiteData.SetIntersection(flattenedCoords[i], dir, intersect)), r));
-
-            //    mode.comment("Normals " + dirName[dir] + " - Same format");
-
-            //    mode.data(wr => writeRunLength(flattenedCoords.Length, i => hermiteData.GetNormal(flattenedCoords[i], dir), wr),
-            //        r => readRunLength(flattenedCoords.Length, (i, normal) => hermiteData.SetNormal(flattenedCoords[i], dir, normal), r));
-            //}
-
 
             return hermiteData;
         }

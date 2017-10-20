@@ -17,8 +17,10 @@ namespace Assets.Gameplay
         public string JetpackMagic = "Air";
         public float JetpackMagicConsumptionRate = 1f;
 
+        public float InteractRange = 10f;
 
-        
+        public Transform PlayerTransform;
+
         public bool TryUseDepositMagic(float depositRadius)
         {
             return tryConsumeMagicForTerrainTool(TerrainToolDepositMagic, depositRadius);
@@ -62,6 +64,11 @@ namespace Assets.Gameplay
         {
             var consumption = JetpackMagicConsumptionRate * Time.deltaTime;
             return tryTakeMagic(JetpackMagic, consumption);
+        }
+
+        public bool InInteractRange(Transform interactableTransform)
+        {
+            return Vector3.Distance(interactableTransform.position, PlayerTransform.position) <= InteractRange;
         }
     }
 }

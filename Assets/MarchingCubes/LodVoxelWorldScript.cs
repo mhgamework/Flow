@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Assets.MarchingCubes.Persistence;
 using Assets.MarchingCubes.Procedural;
@@ -33,6 +34,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private List<VoxelMaterial> VoxelMaterials;
 
         private IWorldSerializer worldSerializer;
+        public string SaveFilePath = "savegame";
         public VoxelWorldAsset SavedWorld;
 
         public int SavedRevertVersions = 0;
@@ -56,7 +58,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             // TODO: create Materials here, set on editor and set dictionary on renderer!
             VoxelMaterials = MaterialColors.Select(c => new VoxelMaterial {color = c}).ToList();
             worldgentemptestthing = FindObjectOfType<ProceduralGenerationTest>();
-            worldSerializer = new RuntimeWorldSerializer();
+            new FileInfo(SaveFilePath).Directory.Create();
+            worldSerializer = new RuntimeWorldSerializer(SaveFilePath);
 
 #if UNITY_EDITOR
             //worldSerializer = new EditorWorldSerializer();
@@ -139,6 +142,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private IEnumerable<YieldInstruction> saveCoroutine()
         {
+            Application.CaptureScreenshot(SaveFilePath + ".png");
+            yield return null;
             OverlayPanel.Instance.Show("Saving World...");
             yield return null;
             worldSerializer.Save(lastSaveFrame, SavedWorld, world);

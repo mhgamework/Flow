@@ -31,11 +31,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void Start()
         {
+            sphereGizmo.SetActive(true);
             planeGizmo.SetActive(true);
         }
 
         public void Stop()
         {
+            sphereGizmo.SetActive(false);
             planeGizmo.SetActive(false);
         }
 

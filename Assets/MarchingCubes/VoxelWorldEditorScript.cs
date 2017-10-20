@@ -61,10 +61,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             DrawWardTool.Init(this, world, SphereGizmo);
 
             // Create and add all tools
-            foreach (var t in toolConstructors)
-            {
-                tools.Add(t.Key,t.Value(world,SphereGizmo,PlaneGizmo));
-            }
+            ActivateNewTools();
+         
             activeState = tools[StartTool];
             activeState.Start();
             raycaster = new VoxelWorldRaycaster();
@@ -79,7 +77,17 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             RegisterTool(keycode, (a, b, c) => tool);
         }
-
+        /// <summary>
+        /// For dynamically adding tools at runtime
+        /// </summary>
+        public void ActivateNewTools()
+        {
+            foreach (var t in toolConstructors)
+            {
+                tools.Add(t.Key, t.Value(world, SphereGizmo, PlaneGizmo));
+            }
+            toolConstructors.Clear();
+        }
 
         public void Update()
         {

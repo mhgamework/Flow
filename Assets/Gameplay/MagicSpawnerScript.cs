@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace Assets.Gameplay
 {
-    public class MagicSpawnerScript : MonoBehaviour,IPointerDownHandler,IPointerUpHandler, IPointerEnterHandler,IPointerExitHandler
+    public class MagicSpawnerScript : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
     {
         public string MagicType;
         public float MagicGrowSpeed = 0.1f;
@@ -20,16 +20,21 @@ namespace Assets.Gameplay
         private bool absorbing = false;
         public float AbsorbSpeed = 1;
 
+        private bool targeted = false;
+
         public void Start()
         {
+            oriColor = EmittedMagicRenderable.GetComponentInChildren<Renderer>().material.color;
+
             StartCoroutine(Emit().GetEnumerator());
+
         }
 
         public void Update()
         {
             if (absorbing)
             {
-                if (!Input.GetMouseButton(0))
+                if (!Input.GetMouseButton(0) || !LocalPlayerSingleton.Instance.InInteractRange(transform))
                 {
                     absorbing = false;
                     return;
@@ -40,12 +45,20 @@ namespace Assets.Gameplay
                 MagicEmitted -= amount;
                 UpdateEmittedMagicRenderable();
             }
+            if (targeted)
+            {
+                if (LocalPlayerSingleton.Instance.InInteractRange(transform))
+                    setHighlight();
+                else
+                    setNonHighlight();
+
+            }
         }
 
 
         public IEnumerable<YieldInstruction> Emit()
         {
-            for (;;)
+            for (; ; )
             {
                 UpdateEmittedMagicRenderable();
 
@@ -75,17 +88,24 @@ namespace Assets.Gameplay
         private Color oriColor;
         public void OnPointerEnter(PointerEventData eventData)
         {
-            var renderer = EmittedMagicRenderable.GetComponentInChildren<Renderer>();
-            oriColor = renderer.material.color;
-            renderer.material.color = Color.Lerp(oriColor, Color.white, 0.5f);
+            targeted = true;
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
+            targeted = false;
+            setNonHighlight();
+        }
+        private void setHighlight()
+        {
             var renderer = EmittedMagicRenderable.GetComponentInChildren<Renderer>();
+            renderer.material.color = Color.Lerp(oriColor, Color.white, 0.5f);
+        }
 
+        void setNonHighlight()
+        {
+            var renderer = EmittedMagicRenderable.GetComponentInChildren<Renderer>();
             renderer.material.color = oriColor;
-
         }
     }
 }

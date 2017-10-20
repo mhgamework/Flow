@@ -30,10 +30,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void Start()
         {
+            sphereGizmo.SetActive(true);
+
         }
 
         public void Stop()
         {
+            sphereGizmo.SetActive(false);
         }
 
         public void Update(RaycastHit? raycast)
