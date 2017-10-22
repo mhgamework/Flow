@@ -19,7 +19,7 @@ namespace Assets.Gandalf.Scripts
             var grid = di.Get<Grid>();
 
             SetCell(tilePlaceHelper.GetCell(transform));
-            Renderable = transform.FindChild("Renderable");
+            Renderable = transform.Find("Renderable");
 
             var magicChargeDistributor = (IMagicChargeDistributor)GetComponent(typeof(IMagicChargeDistributor));
             if (magicChargeDistributor != null)
