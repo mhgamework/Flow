@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Assets.MarchingCubes.Domain;
+using Assets.VR;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
@@ -41,27 +42,35 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void Update(RaycastHit? raycast)
         {
+            var pressed0 = Input.GetMouseButton(0);
+            var pressed1 = Input.GetMouseButton(1);
+
+            Update(raycast, pressed0, pressed1);
+        }
+
+        public void Update(RaycastHit? raycast, bool pressed0, bool pressed1)
+        {
             if (!raycast.HasValue) return;
 
             point = raycast.Value.point;
 
             sphereGizmo.transform.position = point;
-            sphereGizmo.transform.localScale = Vector3.one * script.ActiveSize;
+            sphereGizmo.transform.localScale = Vector3.one * script.ActiveSize * VRSettings.RenderScale; //VR
             var range = script.ActiveSize;
             var material = script.ActiveMaterial;
 
-            if (Input.GetMouseButton(0)) DepositTerrainMaterial(range, material);
-            if (Input.GetMouseButton(1)) WithdrawTerrainMaterial(range, material);
+            if (pressed0) DepositTerrainMaterial(range, material);
+            if (pressed1) WithdrawTerrainMaterial(range, material);
         }
 
         protected virtual void DepositTerrainMaterial(float radius, VoxelMaterial material)
         {
-            WorldEditOperations.DepositOrWithdrawTerrainMaterial(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), 0, material, point, world, Time.frameCount);
+            WorldEditOperations.DepositOrWithdrawTerrainMaterial(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), 0, material, point/ VRSettings.RenderScale, world, Time.frameCount);
         }
 
         protected virtual void WithdrawTerrainMaterial(float radius, VoxelMaterial material)
         {
-            WorldEditOperations.DepositOrWithdrawTerrainMaterial(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), 1, material, point, world, Time.frameCount);
+            WorldEditOperations.DepositOrWithdrawTerrainMaterial(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), 1, material, point/ VRSettings.RenderScale, world, Time.frameCount);
         }
 
 

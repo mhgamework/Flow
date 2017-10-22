@@ -142,7 +142,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private IEnumerable<YieldInstruction> saveCoroutine()
         {
-            Application.CaptureScreenshot(SaveFilePath + ".png");
+            ScreenCapture.CaptureScreenshot(SaveFilePath + ".png");
             yield return null;
             OverlayPanel.Instance.Show("Saving World...");
             yield return null;

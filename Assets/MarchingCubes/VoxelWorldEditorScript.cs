@@ -121,7 +121,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             }
 
-            activeState.Update(raycaster.raycast());
+            //VR: activeState.Update(raycaster.raycast());
         }
 
         private void addMovingSphere()

@@ -4,6 +4,7 @@ using MHGameWork.TheWizards.DualContouring.Terrain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.VR;
 using MHGameWork.TheWizards.Graphics;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -170,7 +171,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             Profiler.BeginSample("UpdateClipmaps");
 
-            UpdateClipmaps(root, Camera.main.transform.position, VoxelWorld.ChunkSize.X, outDirtyNodes,
+            UpdateClipmaps(root, Camera.main.transform.position/VRSettings.RenderScale, VoxelWorld.ChunkSize.X, outDirtyNodes,
                 outMissingRenderdataNodes, LODDistanceFactor);
 
             Profiler.EndSample();

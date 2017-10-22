@@ -3,6 +3,7 @@ using DirectX11;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.VR;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
@@ -27,15 +28,19 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             this.chunkData = chunkData;
         }
-
+        /// <summary>
+        /// Only used by uniform renderer
+        /// </summary>
+        /// <param name="chunkCoord"></param>
+        /// <param name="chunkSize"></param>
         public void SetWorldcoords(Point3 chunkCoord, Point3 chunkSize)
         {
             transform.position = chunkCoord.Multiply(chunkSize);
         }
         public void SetWorldcoords(Vector3 lowerLeft, float scale)
         {
-            transform.localScale = new Vector3(scale, scale, scale);
-            transform.position = lowerLeft;
+            transform.localScale = new Vector3(scale, scale, scale) * VRSettings.RenderScale;
+            transform.position = lowerLeft * VRSettings.RenderScale;
         }
 
         /// <summary>
