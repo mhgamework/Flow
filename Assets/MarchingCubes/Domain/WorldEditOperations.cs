@@ -12,6 +12,50 @@ namespace Assets.MarchingCubes.Domain
         /// <summary>
         /// Mode 0 is deposit, mode 1 is withdraw
         /// </summary>
+        public static void DepositOrWithdrawTerrainMaterialImproved(Point3 radius, int mode, VoxelMaterial material, Vector3 point, IEditableVoxelWorld world, int currentFrameCount)
+        {
+            //var weights = new[] {0.5f, 1f, 0.5f};
+            var weights = new[] { 1, 0, 1 };
+            weights = weights.Select(f => f / weights.Sum()).ToArray();
+
+            var plane = new Plane(Vector3.up, point + Vector3.up * Time.deltaTime);
+
+            world.RunKernelXbyXUnrolled(point.ToFloored() - radius, point.ToCeiled() + radius, (data, p) =>
+            {
+
+
+                var val = data[1];
+                //if ((p - point).magnitude <= range)
+
+                var d = Mathf.Min(data[0].Density + 1, data[1].Density, data[2].Density + 1);
+                var distToPlane = plane.GetDistanceToPoint(p);
+
+                var change = distToPlane - d;
+                var changeAbs = Mathf.Abs(change);
+                var changeDir = Mathf.Sign(change);
+
+                //d = (data[0].Density + data[2].Density) * 0.5f;
+                d = d + changeDir * Mathf.Min(Time.deltaTime, changeAbs);// -= Time.deltaTime;
+
+                //var d = 0f;
+                //for (int i = 0; i < weights.Length; i++)
+                //{
+                //    d += Mathf.Clamp(data[i].Density, -1, 1) * weights[i];
+                //}
+                {
+                    //val.Material = material;
+                    val.Density = d;
+                    if (val.Density > 0 && val.Material == null)
+                        val.Material = material;
+                    return val;
+                }
+                return val;
+            }, 3, currentFrameCount);
+        }
+
+        /// <summary>
+        /// Mode 0 is deposit, mode 1 is withdraw
+        /// </summary>
         /// <param name="radius"></param>
         /// <param name="mode"></param>
         /// <param name="material"></param>
