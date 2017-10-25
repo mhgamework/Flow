@@ -65,12 +65,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         protected virtual void DepositTerrainMaterial(float radius, VoxelMaterial material)
         {
-            WorldEditOperations.DepositOrWithdrawTerrainMaterial(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), 0, material, point/ VRSettings.RenderScale, world, Time.frameCount);
+            WorldEditOperations.DepositOrWithdrawTerrainMaterialImproved(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), 0, material, point/ VRSettings.RenderScale, world, Time.frameCount);
         }
 
         protected virtual void WithdrawTerrainMaterial(float radius, VoxelMaterial material)
         {
-            WorldEditOperations.DepositOrWithdrawTerrainMaterial(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), 1, material, point/ VRSettings.RenderScale, world, Time.frameCount);
+            WorldEditOperations.DepositOrWithdrawTerrainMaterialImproved(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), 1, material, point/ VRSettings.RenderScale, world, Time.frameCount);
         }
 
 
