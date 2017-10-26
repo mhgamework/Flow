@@ -1,5 +1,6 @@
 using System;
 using Assets.MarchingCubes.Domain;
+using Assets.VR;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
@@ -49,7 +50,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             var localPoint = raycast.Value.point;
 
             sphereGizmo.transform.position = localPoint;
-            sphereGizmo.transform.localScale = Vector3.one * script.ActiveSize;
+            sphereGizmo.transform.localScale = Vector3.one * script.ActiveSize * VRSettings.RenderScale;
 
 
             if (Input.GetMouseButtonDown(1))
@@ -61,7 +62,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             if (Input.GetMouseButton(0))
             {
-                FlattenTerrain(localPoint, new Plane(flatNormal, flatPoint), script.ActiveSize, script.ActiveMaterial);
+                FlattenTerrain(localPoint / VRSettings.RenderScale, new Plane(flatNormal, flatPoint / VRSettings.RenderScale), script.ActiveSize, script.ActiveMaterial);
             }
 
         }

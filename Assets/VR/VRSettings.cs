@@ -2,6 +2,6 @@
 {
     public class VRSettings
     {
-        public static float RenderScale = 0.1f;
+        public static float RenderScale = 0.3f;
     }
 }

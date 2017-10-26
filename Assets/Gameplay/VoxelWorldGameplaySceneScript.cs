@@ -14,7 +14,8 @@ namespace Assets.Gameplay
         {
             VoxelWorldEditorScript.StartTool = KeyCode.Alpha1;
             VoxelWorldEditorScript.RegisterTool(KeyCode.Alpha1, (w, s, p) => new NullState());
-            VoxelWorldEditorScript.RegisterTool(KeyCode.Alpha2, (w, s, p) => new WithdrawDepositMagicTool(VoxelWorldEditorScript, w, s));
+            VoxelWorldEditorScript.RegisterTool(KeyCode.Alpha2, (w, s, p) => new PushPullTool(VoxelWorldEditorScript, w, s));
+            //VoxelWorldEditorScript.RegisterTool(KeyCode.Alpha2, (w, s, p) => new WithdrawDepositMagicTool(VoxelWorldEditorScript, w, s));
             VoxelWorldEditorScript.RegisterTool(KeyCode.Alpha3, (w, s, p) => new SmoothMagicTool(VoxelWorldEditorScript, w, s));
             VoxelWorldEditorScript.RegisterTool(KeyCode.Alpha4, (w, s, p) => new FlattenMagicTool(VoxelWorldEditorScript, w, s, p));
         }

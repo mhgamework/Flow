@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Assets.MarchingCubes.Domain;
+using Assets.VR;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
@@ -45,7 +46,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             point = raycast.Value.point;
 
             sphereGizmo.transform.position = point;
-            sphereGizmo.transform.localScale = Vector3.one * script.ActiveSize;
+            sphereGizmo.transform.localScale = Vector3.one * script.ActiveSize * VRSettings.RenderScale;
             var range = script.ActiveSize;
             var material = script.ActiveMaterial;
 
@@ -59,7 +60,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         protected virtual void SmoothTerrain(float radius, VoxelMaterial material)
         {
             //var weights = new[] {0.5f, 1f, 0.5f};
-            WorldEditOperations.SmoothTerrain(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), material, Time.frameCount, world, point);
+            WorldEditOperations.SmoothTerrain(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), material, Time.frameCount, world, point / VRSettings.RenderScale);
         }
 
 
