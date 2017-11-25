@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
@@ -123,10 +124,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                                 // TODO: use thecurrentcolor here, since we are mimicking single color kernels, 
                                 // but not sure it matters i think matval is not used perhaps
                                 matvals[i] = mat;
-                            }
+                            } 
                             Color outColor;
                             s.Polygonise(gridvals, matvals, points, 0, vertices, p, materials);
-
+                            
                             if (!isMultiColor) break; // default case, speedup!
                         }
 

@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Profiling;
+using Debug = UnityEngine.Debug;
 
 namespace Assets.MarchingCubes.ComputeShader
 {
@@ -22,12 +24,23 @@ namespace Assets.MarchingCubes.ComputeShader
         public ComputeBuffer TrianglesBuffer { get; private set; }
     }
 
+    class Chunk
+    {
+        public float[] sdf;
+
+        public Buffers buffers;
+        public Vector3 offset;
+    }
+
     public class MarchingCubesComputeSceneScript : MonoBehaviour
     {
         public UnityEngine.ComputeShader shader;
         private Mesh mesh;
         private Buffers buffers;
-        int configCellSize = 128;
+        int configCellSize = 64;
+
+        private List<Chunk> chunks = new List<Chunk>();
+
 
         public void Start()
         {
@@ -35,37 +48,82 @@ namespace Assets.MarchingCubes.ComputeShader
             filter.mesh = new Mesh();
             mesh = filter.mesh;
             buffers = createBuffers(configCellSize);
+
+            var repeat = 3;
+            var entireSize = configCellSize * repeat;
+            var sphereSize = 16;
+
+
+
+            for (int z = 0; z < repeat; z++)
+                for (int y = 0; y < repeat; y++)
+                    for (int x = 0; x < repeat; x++)
+                    {
+                        var c = new Chunk();
+
+                        var offset = new Vector3(x, y, z) * configCellSize;
+                        c.sdf = generateSphereData(configCellSize, new Vector3(1, 1, 1) * entireSize * 0.5f, sphereSize, offset);
+                        c.buffers = createBuffers(configCellSize);
+                        c.offset = offset;
+                        //var triangles = CalculateTriangles(sdf, configCellSize, buffers);
+                        //pointList.AddRange(triangles.Select(p => p + offset));
+
+                        chunks.Add(c);
+                    }
         }
 
         private List<Vector3> pointList = new List<Vector3>();
         public void Update()
         {
-            pointList.Clear();
+            PerfTest();
 
+            //pointList.Clear();
 
-            var repeat = 1;
-            var entireSize = configCellSize * repeat;
-            //var sdf = generateSphereData(size, new Vector3(size, size, size) * 0.5f, size * 0.4f);
-            for (int z = 0; z < repeat; z++)
-                for (int y = 0; y < repeat; y++)
-                    for (int x = 0; x < repeat; x++)
-                    {
-                        var offset = new Vector3(x, y, z) * configCellSize;
-                        var sdf = generateSphereData(configCellSize, new Vector3(1, 1, 1) * entireSize * 0.5f, entireSize * 0.03f, offset);
-                        var triangles = CalculateTriangles(sdf, configCellSize, buffers);
-                        pointList.AddRange(triangles.Select(p => p + offset));
+            //foreach (var c in chunks)
+            //{
+               
+            //    runCalculateTrianglesShader(shader, c.sdf, configCellSize, c.buffers);
+             
+            //}
+            //foreach (var c in chunks)
+            //{
+            //    var triangles = retrieveCalculationOutput(c.buffers);
+            //    pointList.AddRange(triangles.Select(p => p + c.offset));
+            //}
 
-                    }
+            ////Debug.Log(triangles.Length);
 
-
-            //Debug.Log(triangles.Length);
-
-            mesh.Clear();
-            mesh.SetVertices(pointList.ToList());
-            mesh.SetIndices(pointList.Select((v, k) => k).ToArray(), MeshTopology.Triangles, 0);
-            mesh.RecalculateBounds();
-            mesh.RecalculateNormals();
+            //mesh.Clear();
+            //mesh.SetVertices(pointList.ToList());
+            //mesh.SetIndices(pointList.Select((v, k) => k).ToArray(), MeshTopology.Triangles, 0);
+            //mesh.RecalculateBounds();
+            //mesh.RecalculateNormals();
         }
+
+        void PerfTest()
+        {
+            var w = new Stopwatch();
+
+            var sdf = generateSphereData(configCellSize, new Vector3(1, 1, 1) * configCellSize * 0.5f, configCellSize*0.4f, new Vector3());
+            var buffers  = createBuffers(configCellSize);
+            setSdfToBuffer(sdf,buffers);
+            runCellGatheringKernel(shader, configCellSize, buffers);
+            var data = getCellBufferData(buffers); // Force GPU-CPU sync
+
+            var times = 10;
+            w.Start();
+            for (int i = 0; i < times; i++)
+            {
+                buffers.TrianglesBuffer.SetCounterValue(0);
+                runTriangleKernel(shader, buffers);
+                var triangles = retrieveCalculationOutput(buffers);
+            }
+            w.Stop();
+
+            Debug.Log(w.ElapsedMilliseconds / (float)times);
+        }
+
+
 
         private float[] generateSphereData(int cellSize, Vector3 spherePos, float sphereSize, Vector3 offset)
         {
@@ -113,14 +171,15 @@ namespace Assets.MarchingCubes.ComputeShader
         private Vector3[] calculateTriangles(float[] sdf, int size)
         {
             var buffers = createBuffers(size);
-            return CalculateTriangles(sdf, size, buffers);
+            return CalculateTriangles(shader, sdf, size, buffers);
         }
 
         private static Buffers createBuffers(int size)
         {
             var densityBuffer = new ComputeBuffer((size + 1) * (size + 1) * (size + 1), 4); //new ComputeBuffer(sdf.Length, 4);
             var cellsBuffer = new ComputeBuffer(size * size * size, 4 * 3 + 4, ComputeBufferType.Append);
-            var countBuffer = new ComputeBuffer(1, 4, ComputeBufferType.IndirectArguments);
+            var countBuffer = new ComputeBuffer(3, 4, ComputeBufferType.IndirectArguments);
+            countBuffer.SetData(new[] { 0, 1, 1 });
             var trianglesBuffer = new ComputeBuffer((size + 1) * (size + 1) * (size + 1) * 12, 4 * 3 * 3,
                 ComputeBufferType.Append);
 
@@ -129,29 +188,65 @@ namespace Assets.MarchingCubes.ComputeShader
             return buffers;
         }
 
-        private Vector3[] CalculateTriangles(float[] sdf, int size, Buffers buffers)
+        private static Vector3[] CalculateTriangles(UnityEngine.ComputeShader shader, float[] sdf, int size, Buffers buffers)
         {
-            buffers.DensityBuffer.SetData(sdf);
+            runCalculateTrianglesShader(shader, sdf, size, buffers);
 
 
-            int kernel = shader.FindKernel("CSMain");
-            shader.SetBuffer(kernel, "densityBuffer", buffers.DensityBuffer);
+            return retrieveCalculationOutput(buffers);
+        }
 
-            buffers.CellsBuffer.SetCounterValue(0);
-            shader.SetBuffer(kernel, "outCellsBuffer", buffers.CellsBuffer);
+        private static Vector3[] retrieveCalculationOutput(Buffers buffers)
+        {
+            ComputeBuffer.CopyCount(buffers.TrianglesBuffer, buffers.CountBuffer, 0);
+            var argsData2 = new int[1];
 
-            shader.Dispatch(kernel, size / 8, size / 8, size / 8);
+            buffers.CountBuffer.GetData(argsData2);
+            var trianglesCount = argsData2[0];
 
+            Triangle[] output = new Triangle[trianglesCount];
+            buffers.TrianglesBuffer.GetData(output);
+
+            //foreach (var tp in output) Debug.Log(tp);
+
+            return output.SelectMany(t => new[] { t.a, t.b, t.c }).ToArray();
+        }
+
+        private static void runCalculateTrianglesShader(UnityEngine.ComputeShader shader, float[] sdf, int size, Buffers buffers)
+        {
+            setSdfToBuffer(sdf, buffers);
+
+
+            runCellGatheringKernel(shader, size, buffers);
+
+            runTriangleKernel(shader, buffers);
+        }
+
+        private static CellIntermediate[] getCellBufferData(Buffers buffers)
+        {
             ComputeBuffer.CopyCount(buffers.CellsBuffer, buffers.CountBuffer, 0);
 
-            var argsData = new int[1];
+            var argsData = new int[3];
             buffers.CountBuffer.GetData(argsData);
             var cellCount = argsData[0];
-            if (cellCount == 0) return new Vector3[0];
+            
+            var temp = new CellIntermediate[cellCount];
+            buffers.CellsBuffer.GetData(temp);
+            return temp;
+        }
+
+        private static void runTriangleKernel(UnityEngine.ComputeShader shader, Buffers buffers)
+        {
+            ComputeBuffer.CopyCount(buffers.CellsBuffer, buffers.CountBuffer, 0);
+
+            //var argsData = new int[1];
+            //buffers.CountBuffer.GetData(argsData);
+            //var cellCount = argsData[0];
+            //if (cellCount == 0) return new Vector3[0];
             //var temp = new CellIntermediate[cellCount];
             //cellsBuffer.GetData(temp);
             //foreach (var p in temp) Debug.Log(p);
-            buffers.CellsBuffer.SetCounterValue(0);
+            //buffers.CellsBuffer.SetCounterValue(0);
 
 
             buffers.TrianglesBuffer.SetCounterValue(0);
@@ -160,19 +255,24 @@ namespace Assets.MarchingCubes.ComputeShader
             shader.SetBuffer(shader.FindKernel("CSTriangle"), "densityBuffer", buffers.DensityBuffer);
             shader.SetBuffer(shader.FindKernel("CSTriangle"), "inCellsBuffer", buffers.CellsBuffer);
             shader.SetBuffer(shader.FindKernel("CSTriangle"), "trianglesBuffer", buffers.TrianglesBuffer);
-            shader.Dispatch(shader.FindKernel("CSTriangle"), Mathf.Max(1, cellCount), 1, 1);
+            //shader.Dispatch(shader.FindKernel("CSTriangle"), cellCount, 1, 1);
+            shader.DispatchIndirect(shader.FindKernel("CSTriangle"), buffers.CountBuffer); // cellCount, 1, 1);
+        }
 
+        private static void runCellGatheringKernel(UnityEngine.ComputeShader shader, int size, Buffers buffers)
+        {
+            int kernel = shader.FindKernel("CSMain");
+            shader.SetBuffer(kernel, "densityBuffer", buffers.DensityBuffer);
 
-            ComputeBuffer.CopyCount(buffers.TrianglesBuffer, buffers.CountBuffer, 0);
-            buffers.CountBuffer.GetData(argsData);
-            var trianglesCount = argsData[0];
+            buffers.CellsBuffer.SetCounterValue(0);
+            shader.SetBuffer(kernel, "outCellsBuffer", buffers.CellsBuffer);
 
-            Triangle[] output = new Triangle[trianglesCount];
-            buffers.TrianglesBuffer.GetData(output);
+            shader.Dispatch(kernel, size / 8, size / 8, size / 8);
+        }
 
-            //foreach (var tp in output) Debug.Log(tp);
-
-            return output.SelectMany(t => new[] { t.a, t.b, t.c }).ToArray();
+        private static void setSdfToBuffer(float[] sdf, Buffers buffers)
+        {
+            buffers.DensityBuffer.SetData(sdf);
         }
     }
 }

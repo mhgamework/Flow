@@ -23,7 +23,7 @@ StructuredBuffer<CellIntermediate> inCellsBuffer;
 
 //define SIZE 9
 //#define SIZE (16+1)
-#define SIZE (128+1)
+#define SIZE (64+1)
 
 [numthreads(8, 8, 8)]
 void CSMain(uint3 id : SV_DispatchThreadID)
