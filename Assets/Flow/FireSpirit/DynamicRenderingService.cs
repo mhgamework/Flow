@@ -10,7 +10,7 @@ namespace Assets.Flow.FireSpirit
     public class DynamicRenderingService : Singleton<DynamicRenderingService>, IDynamicRenderingService
     {
         private List<DynamicVoxelEntity> entities = new List<DynamicVoxelEntity>();
-        public VoxelChunkRenderer TemplateRenderer;
+        public VoxelChunkRendererScript TemplateRenderer;
 
         private Dictionary<Color, Material> dict = new Dictionary<Color, Material>();
 
