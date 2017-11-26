@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Assets.MarchingCubes.Persistence;
 using Assets.MarchingCubes.Rendering.ClipmapsOctree;
 using Assets.MarchingCubes.SdfModeling;
@@ -7,6 +8,7 @@ using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using Assets.VR;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.MarchingCubes.Rendering
 {
@@ -23,19 +25,21 @@ namespace Assets.MarchingCubes.Rendering
         //TODO add render scale
 
 
-        
+        public Text DebugText;
+
         public Material TemplateMaterial;
 
 
         private ClipmapsOctreeService clipmapsOctreeService;
-        
+
 
         private bool init = false;
+        private AsyncCPUVoxelRenderer renderingService;
 
 
         public void Start()
         {
-          
+
 
         }
         private void initialize()
@@ -54,7 +58,7 @@ namespace Assets.MarchingCubes.Rendering
             var meshGenerator = new VoxelChunkMeshGenerator(marchingCubesService);
 
             var concurrentGenerator = new ConcurrentVoxelGenerator(meshGenerator);
-            var renderingService = new AsyncCPUVoxelRenderer(
+            renderingService = new AsyncCPUVoxelRenderer(
                 concurrentGenerator,
                 chunkPool,
                 World.VoxelMaterials,
@@ -70,7 +74,7 @@ namespace Assets.MarchingCubes.Rendering
         }
 
 
-    
+
 
         public void Update()
         {
@@ -82,7 +86,9 @@ namespace Assets.MarchingCubes.Rendering
             clipmapsOctreeService.LODDistanceFactor = LODDistanceFactor;
             clipmapsOctreeService.UpdateRendererState(LODCamera.transform.position / VRSettings.RenderScale);
 
+            if (DebugText)
+                DebugText.text = renderingService.UnavailableChunks.ToString();
         }
-      
+
     }
 }

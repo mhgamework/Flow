@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using Assets.MarchingCubes.Rendering.AsyncCPURenderer;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -249,25 +250,79 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             return v.X + size.X * (v.Y + size.Y * v.Z);
         }
 
+        private Dictionary<ChunkCoord, UniformVoxelData> pregenCache = new Dictionary<ChunkCoord, UniformVoxelData>(); // Temp hacky to async generate nodes
+
+        /// <summary>
+        /// Thread safe
+        /// </summary>
+        /// <param name="c"></param>
+        public void PregenerateChunk(ChunkCoord c)
+        {
+            var data = generateInitialChunkData(c.LowerLeft, c.Depth);
+            lock (pregenCache)
+            {
+                pregenCache[c] = data;
+            }
+        }
+
+        public bool HasChunkDataAvailable(ChunkCoord c)
+        {
+            lock (pregenCache)
+            {
+                return pregenCache.ContainsKey(c);
+            }
+        }
+
+        /// <summary>
+        /// Lightweight alloc without data gen
+        /// </summary>
+        /// <param name="octreeNode"></param>
+        private void allocChunkNoData(OctreeNode octreeNode)
+        {
+            if (octreeNode.Depth == depth) return; // leaf node
+            if (octreeNode.Children == null)
+                helper.Split(octreeNode);
+
+        }
+
 
         private void allocChunk(OctreeNode octreeNode)
         {
             if (octreeNode.VoxelData != null) return;
-            Profiler.BeginSample("AllocChunk");
-            octreeNode.VoxelData = generator.Generate(octreeNode.LowerLeft, ChunkSize + new Point3(1, 1, 1) + new Point3(1, 1, 1), 1 << (this.depth - octreeNode.Depth));
-            Profiler.EndSample();
+            //Profiler.BeginSample("PRF-AllocChunk");
+            bool res;
+            UniformVoxelData data;
+            lock (pregenCache)
+            {
+                var c = new ChunkCoord(octreeNode.LowerLeft, octreeNode.Depth);
+                res = pregenCache.TryGetValue(c, out data);
+                if (res) pregenCache.Remove(c);
+            }
+            if (!res)
+            {
+                data = generateInitialChunkData(octreeNode.LowerLeft, octreeNode.Depth); // Generate synchronously
+                Debug.Log("Generating chunk synchronously!");
+            }
+            octreeNode.VoxelData = data;
+            //Profiler.EndSample();
 
-            if (octreeNode.Depth == depth) return; // leaf node
-            Profiler.BeginSample("AllocChunk-split");
-            helper.Split(octreeNode);
-            Profiler.EndSample();
-
+            allocChunkNoData(octreeNode);
         }
 
-        public void ResetChunk(OctreeNode octreeNode,int frame)
+        private UniformVoxelData generateInitialChunkData(Point3 lowerLeft, int depth)
         {
-            octreeNode.VoxelData = generator.Generate(octreeNode.LowerLeft, ChunkSize + new Point3(1, 1, 1) + new Point3(1, 1, 1), 1 << (this.depth - octreeNode.Depth));
+            return generator.Generate(lowerLeft, ChunkSize + new Point3(1, 1, 1) + new Point3(1, 1, 1), 1 << (this.depth - depth));
+        }
+
+        public void ResetChunk(OctreeNode octreeNode, int frame)
+        {
+            octreeNode.VoxelData = generateInitialChunkData(octreeNode.LowerLeft, octreeNode.Depth);
             octreeNode.VoxelData.LastChangeFrame = frame;
+        }
+
+        private UniformVoxelData generateInitialChunkData()
+        {
+            throw new NotImplementedException();
         }
 
 
@@ -304,9 +359,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             for (int i = 0; i < 3; i++)
                 if (nodeLowerLeft[i] < node.LowerLeft[i]) return null;
 
-            allocChunk(node);
+            // Removing this, only allocating the exact node now!!! allocChunk(node);
+            allocChunkNoData(node);
 
-            if (nodeLowerLeft == node.LowerLeft && nodeDepth == node.Depth) return node;
+            if (nodeLowerLeft == node.LowerLeft && nodeDepth == node.Depth)
+            {
+                allocChunk(node); // Only alloc the actual node!!
+                return node;
+            }
             if (nodeDepth == node.Depth) return null; // dont go deeper
 
             for (int i = 0; i < 8; i++)
@@ -347,5 +407,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         }
 
 
+        public float GetNodeSize(int nodeDepth)
+        {
+            return getNodeResolution(nodeDepth) * chunkSize;
+        }
     }
 }

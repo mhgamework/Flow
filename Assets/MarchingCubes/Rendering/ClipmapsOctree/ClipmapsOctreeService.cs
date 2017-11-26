@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.MarchingCubes.Rendering.AsyncCPURenderer;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using Assets.VR;
@@ -44,7 +45,7 @@ namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
 
         List<RenderOctreeNode> outDirtyNodes = new List<RenderOctreeNode>();
         List<RenderOctreeNode> outMissingRenderdataNodes = new List<RenderOctreeNode>();
-        private List<ConcurrentVoxelGenerator.Task> tempTaskList = new List<ConcurrentVoxelGenerator.Task>();
+        private List<ChunkCoord> tempTaskList = new List<ChunkCoord>();
 
 
         public ClipmapsOctreeService(OctreeVoxelWorld voxelWorld, AsyncCPUVoxelRenderer rendererService)
@@ -73,14 +74,14 @@ namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
         {
             if (VoxelWorld == null) return;
 
-            Profiler.BeginSample("ClearBuffers");
+            Profiler.BeginSample("PRF-ClearBuffers");
 
             outDirtyNodes.Clear();
             outMissingRenderdataNodes.Clear();
 
             Profiler.EndSample();
 
-            Profiler.BeginSample("UpdateClipmaps");
+            Profiler.BeginSample("PRF-UpdateClipmaps");
 
             UpdateClipmaps(root,
                 cameraPosition,
@@ -92,24 +93,20 @@ namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
             Profiler.EndSample();
 
             //debugText.SetText("Tasks: ", outMissingRenderdataNodes.Count.ToString());
-            Profiler.BeginSample("Async");
+            Profiler.BeginSample("PRF-Async");
 
-            foreach (var f in outMissingRenderdataNodes)
+            tempTaskList.Clear(); // I added this no clue why this wasnt here
+            for (var i = 0; i < outMissingRenderdataNodes.Count; i++)
             {
-                tempTaskList.Add(new ConcurrentVoxelGenerator.Task
-                {
-                    node = f,
-                    dataNode = getNode(f),
-                    Frame = getNode(f).VoxelData.LastChangeFrame,
-                    chunkData = getNode(f).VoxelData.Data
-                });
+                var f = outMissingRenderdataNodes[i];
+                tempTaskList.Add(toCoord(f));
             }
             rendererService.PrepareShowChunk(tempTaskList);
 
             Profiler.EndSample();
 
             // subtle invariant, if a node is in the cache, it will not be in the async working queue. only way node is missprocessed is when it is in process while sending new requests which should be fine
-            Profiler.BeginSample("Transition");
+            Profiler.BeginSample("PRF-Transition");
 
             foreach (var dirty in outDirtyNodes)
                 if (checkAllRenderablesAvailable(dirty))
@@ -234,7 +231,7 @@ namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
 
         private bool hasUpToDateRenderable(RenderOctreeNode node)
         {
-            return node.RenderObject != null && node.LastRenderFrame == getNode(node).VoxelData.LastChangeFrame;
+            return node.RenderObject != null && node.LastRenderFrame == rendererService.GetLastChangeFrame(toCoord(node));
         }
 
 
@@ -259,7 +256,7 @@ namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
 
         private bool checkAllRenderablesAvailable(RenderOctreeNode node)
         {
-            if (node.ShouldRender) return rendererService.CanShowChunk(getNode(node)) || hasUpToDateRenderable(node);
+            if (node.ShouldRender) return rendererService.CanShowChunk(toCoord(node)) || hasUpToDateRenderable(node);
             if (node.Children == null) return true;
             var ret = true;
             for (int i = 0; i < 8; i++)
@@ -288,26 +285,25 @@ namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
         {
             if (node.RenderObject != null)
                 throw new InvalidOperationException();
-            if (!rendererService.CanShowChunk(getNode(node)))
+            if (!rendererService.CanShowChunk(toCoord(node)))
             {
                 throw new InvalidOperationException();
             }
             int frame;
-            var result = rendererService.ShowChunk(getNode(node), out frame);
+            var result = rendererService.ShowChunk(toCoord(node), out frame);
 
 
             node.RenderObject = result;
             node.LastRenderFrame = frame;
         }
 
-
-        private OctreeNode getNode(RenderOctreeNode f)
+        private ChunkCoord toCoord(RenderOctreeNode node)
         {
-            if (f.DataNode == null)
-                f.DataNode = VoxelWorld.GetNode(f.LowerLeft, f.Depth);
-            return f.DataNode;
+            return new ChunkCoord(node.LowerLeft, node.Depth);
         }
 
+
+    
         public void OnDestroyRenderNode(RenderOctreeNode renderOctreeNode)
         {
             DestroyRenderObject(renderOctreeNode);

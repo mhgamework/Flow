@@ -124,14 +124,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
             {
                 data = firstData,
                 Frame = task.Frame,
-                node = task.node
+                //node = task.node
             };
         }
 
 
         public struct Task
         {
-            public RenderOctreeNode node;
+            //public RenderOctreeNode node;
             public OctreeNode dataNode;
             public int Frame;
             public Array3D<VoxelData> chunkData;
@@ -141,7 +141,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
         {
             public VoxelMeshData data;
             public int Frame;
-            public RenderOctreeNode node;
+            //public RenderOctreeNode node;
         }
     }
 }

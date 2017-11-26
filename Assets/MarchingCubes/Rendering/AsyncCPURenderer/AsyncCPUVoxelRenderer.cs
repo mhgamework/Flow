@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using Assets.MarchingCubes.Rendering.AsyncCPURenderer;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using UnityEngine;
@@ -25,6 +28,13 @@ namespace Assets.MarchingCubes.Rendering
         private readonly OctreeVoxelWorld octreeVoxelWorld;
         private readonly Transform transform;
 
+        private List<ConcurrentVoxelGenerator.Task> tempTaskList = new List<ConcurrentVoxelGenerator.Task>();
+
+        private Dictionary<ChunkCoord, OctreeNode> nodeLookup = new Dictionary<ChunkCoord, OctreeNode>();
+
+        public int UnavailableChunks { get; private set; }
+
+
         public AsyncCPUVoxelRenderer(ConcurrentVoxelGenerator concurrentVoxelGenerator,
             VoxelChunkRendererPoolScript chunkPool,
             List<VoxelMaterial> voxelMaterials,
@@ -43,6 +53,47 @@ namespace Assets.MarchingCubes.Rendering
                 mat.color = c.color;
                 return mat;
             });
+
+            var t = new Thread(() =>testThread(0));
+            t.Start();
+            t = new Thread(() => testThread(1));
+            t.Start();
+            t = new Thread(() => testThread(2));
+            t.Start();
+        }
+
+        private Queue<ChunkCoord> parallelGen = new Queue<ChunkCoord>();
+        void testThread(int num)
+        {
+            try
+            {
+                Debug.Log("Start " + num);
+                int amount = 10;
+                var buf = new List<ChunkCoord>();
+                for (; ; )
+                {
+                    lock (parallelGen)
+                    {
+                        while (parallelGen.Count == 0)
+                            Monitor.Wait(parallelGen);
+                        buf.Clear();
+                        while (parallelGen.Count != 0 && buf.Count < amount)
+                            buf.Add(parallelGen.Dequeue());
+                    }
+                    for (int i = 0; i < buf.Count; i++)
+                    {
+                        octreeVoxelWorld.PregenerateChunk(buf[i]);
+                        Debug.Log(num + " " + buf[i]);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                throw;
+            }
+       
+
         }
 
         /// <summary>
@@ -50,14 +101,42 @@ namespace Assets.MarchingCubes.Rendering
         /// Results in CanShowChunk becoming true
         /// </summary>
         /// <param name="tempTaskList"></param>
-        public void PrepareShowChunk(List<ConcurrentVoxelGenerator.Task> tempTaskList)
+        public void PrepareShowChunk(List<ChunkCoord> tasks)
         {
-            concurrentVoxelGenerator.SetRequestedChunks(tempTaskList);
+            UnavailableChunks = tasks.Count;
 
+            tempTaskList.Clear();
+            lock (parallelGen)
+            {
+                parallelGen.Clear();
+            }
+            for (int i = 0; i < tasks.Count; i++)
+            {
+                var c = tasks[i];
+                if ( !octreeVoxelWorld.HasChunkDataAvailable(c))
+                {
+                    lock (parallelGen)
+                    {
+                        parallelGen.Enqueue(c);
+                        Monitor.PulseAll(parallelGen);
+                    }
+                    continue;
+                }
+                var node = getNode(c);
+                tempTaskList.Add(new ConcurrentVoxelGenerator.Task
+                {
+                    dataNode = node,
+                    Frame = node.VoxelData.LastChangeFrame,
+                    chunkData = node.VoxelData.Data
+                });
+            }
+            concurrentVoxelGenerator.SetRequestedChunks(tempTaskList);
         }
 
-        public bool CanShowChunk(OctreeNode node)
+        public bool CanShowChunk(ChunkCoord c)
         {
+            OctreeNode node;
+            if (!tryGetNode(c, out node)) return false; // Node not genned yet
             return concurrentVoxelGenerator.HasNodeData(node);
         }
 
@@ -65,10 +144,10 @@ namespace Assets.MarchingCubes.Rendering
         /// Warning: Allthough this is called show/hide, these methods are currently
         /// probably NOT idempotent.
         /// </summary>
-        public VoxelChunkRendererScript ShowChunk(OctreeNode node, out int frame)
+        public VoxelChunkRendererScript ShowChunk(ChunkCoord node, out int frame)
         {
-            var result = concurrentVoxelGenerator.GetNodeData(node);
-            concurrentVoxelGenerator.RemoveNodeData(node);
+            var result = concurrentVoxelGenerator.GetNodeData(getNode(node));
+            concurrentVoxelGenerator.RemoveNodeData(getNode(node));
 
             var ret = createRenderData(result); ;
 
@@ -89,13 +168,13 @@ namespace Assets.MarchingCubes.Rendering
 
         private VoxelChunkRendererScript createRenderData(ConcurrentVoxelGenerator.Result result)
         {
-            Profiler.BeginSample("RequestChunk");
+            Profiler.BeginSample("PRF-RequestChunk");
 
             var comp = chunkPool.RequestChunk();
 
             Profiler.EndSample();
 
-            Profiler.BeginSample("SetToUnity");
+            Profiler.BeginSample("PRF-SetToUnity");
 
 
             comp.AutomaticallyGenerateMesh = false;
@@ -109,17 +188,37 @@ namespace Assets.MarchingCubes.Rendering
             return comp;
         }
 
-        private void activateRenderdata(OctreeNode node, VoxelChunkRendererScript renderDataOrNull)
+        private void activateRenderdata(ChunkCoord node, VoxelChunkRendererScript renderDataOrNull)
         {
             var comp = renderDataOrNull;
             comp.MaterialsDictionary = materialsDictionary;
-            comp.SetWorldcoords(node.LowerLeft, node.Size / (float)(octreeVoxelWorld.ChunkSize.X)); // TOOD: DANGEROES
+            comp.SetWorldcoords(node.LowerLeft, octreeVoxelWorld.GetNodeSize(node.Depth) / (float)(octreeVoxelWorld.ChunkSize.X)); // TOOD: DANGEROES
 
             comp.transform.SetParent(transform);
             //comp.gameObject.SetActive(true);
         }
 
 
-  
+        public int GetLastChangeFrame(ChunkCoord node)
+        {
+            return getNode(node).VoxelData.LastChangeFrame;
+        }
+
+        private bool tryGetNode(ChunkCoord f, out OctreeNode node)
+        {
+            return nodeLookup.TryGetValue(f, out node);
+        }
+        private OctreeNode getNode(ChunkCoord f)
+        {
+            OctreeNode ret;
+            if (nodeLookup.TryGetValue(f, out ret)) return ret;
+            //if (f.DataNode == null)
+            //f.DataNode = VoxelWorld.GetNode(f.LowerLeft, f.Depth);
+            //return f.DataNode;
+            ret = octreeVoxelWorld.GetNode(f.LowerLeft, f.Depth);
+            nodeLookup[f] = ret;
+            return ret;
+        }
+
     }
 }

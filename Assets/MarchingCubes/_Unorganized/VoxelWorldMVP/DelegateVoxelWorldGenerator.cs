@@ -24,7 +24,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution)
         {
-            Profiler.BeginSample("GenerateChunk");
+            //Profiler.BeginSample("PRF-GenerateChunk");
 
             var ret = new UniformVoxelData();
             ret.Data = new Array3D<VoxelData>(chunkSize);
@@ -33,7 +33,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 ret.Data[p] = worldFunction(p * sampleResolution + start, sampleResolution);
             });
 
-            Profiler.EndSample();
+            //Profiler.EndSample();
 
             return ret;
         }

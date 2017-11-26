@@ -115,19 +115,22 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                                         }
                                         cellColorList.Add(mat);
                                     }
+                                    if (val > 0)
+                                    {
+                                        isMultiColor = true; // Maybe add if ( val < 0 ), because it is also possible that a voxel has a other material but is air?
+                                        val = Math.Max(val, -val); // Make air by mirroring around the isosurface level, should remain identical?
+                                    }
 
-                                    isMultiColor = true; // Maybe add if ( val < 0 ), because it is also possible that a voxel has a other material but is air?
-                                    val = Math.Max(val, -val); // Make air by mirroring around the isosurface level, should remain identical?
                                 }
 
                                 gridvals[i] = val;
                                 // TODO: use thecurrentcolor here, since we are mimicking single color kernels, 
                                 // but not sure it matters i think matval is not used perhaps
                                 matvals[i] = mat;
-                            } 
+                            }
                             Color outColor;
                             s.Polygonise(gridvals, matvals, points, 0, vertices, p, materials);
-                            
+
                             if (!isMultiColor) break; // default case, speedup!
                         }
 
@@ -159,6 +162,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             }
         }
 
-      
+
     }
 }

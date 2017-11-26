@@ -16,5 +16,13 @@ namespace Assets.UnityAdditions
         {
             return new Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
         }
+        /// <summary>
+        /// Component wise multiplication
+        /// </summary>
+        /// <returns></returns>
+        public static Vector2 Multiply(this Vector2 a, Vector2 b)
+        {
+            return new Vector2(a.x * b.x, a.y * b.y);
+        }
     }
 }
