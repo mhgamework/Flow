@@ -2,6 +2,7 @@ using System;
 using DirectX11;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
@@ -23,12 +24,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution)
         {
+            Profiler.BeginSample("GenerateChunk");
+
             var ret = new UniformVoxelData();
             ret.Data = new Array3D<VoxelData>(chunkSize);
             ret.Data.ForEach((v, p) =>
             {
                 ret.Data[p] = worldFunction(p * sampleResolution + start, sampleResolution);
             });
+
+            Profiler.EndSample();
 
             return ret;
         }

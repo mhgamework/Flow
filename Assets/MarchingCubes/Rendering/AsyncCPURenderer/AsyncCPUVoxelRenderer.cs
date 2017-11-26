@@ -15,7 +15,7 @@ namespace Assets.MarchingCubes.Rendering
     /// TODO: concurrentvoxelgenerator currently seems to be a single parallel thread, 
     /// which could be improved
     /// </summary>
-    public class VoxelChunkRendererService
+    public class AsyncCPUVoxelRenderer
     {
         private Material TemplateMaterial;
         private Dictionary<Color, Material> materialsDictionary;
@@ -25,7 +25,7 @@ namespace Assets.MarchingCubes.Rendering
         private readonly OctreeVoxelWorld octreeVoxelWorld;
         private readonly Transform transform;
 
-        public VoxelChunkRendererService(ConcurrentVoxelGenerator concurrentVoxelGenerator,
+        public AsyncCPUVoxelRenderer(ConcurrentVoxelGenerator concurrentVoxelGenerator,
             VoxelChunkRendererPoolScript chunkPool,
             List<VoxelMaterial> voxelMaterials,
             OctreeVoxelWorld octreeVoxelWorld,
@@ -105,7 +105,7 @@ namespace Assets.MarchingCubes.Rendering
             comp.gameObject.SetActive(true);
 
             Profiler.EndSample();
-            //renderObject.SetActive(false);
+
             return comp;
         }
 

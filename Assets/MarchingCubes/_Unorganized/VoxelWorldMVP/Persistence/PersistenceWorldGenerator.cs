@@ -97,7 +97,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
         private UniformVoxelData toChunkData(SerializedChunk chunk)
         {
 
-            Profiler.BeginSample("toCHunkData");
+            //Profiler.BeginSample("toCHunkData");
             var d = new UniformVoxelData();
             d.LastChangeFrame = 0;
             var size = _asset.ChunkSize + _asset.ChunkOversize;
@@ -115,7 +115,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
             });
 
 
-            Profiler.EndSample();
+            //Profiler.EndSample();
 
             return d;
 
