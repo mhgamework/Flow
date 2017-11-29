@@ -38,7 +38,7 @@ namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
         public float LODDistanceFactor = 1.2f;
 
 
-        private AsyncCPUVoxelRenderer rendererService;
+        private IVoxelRenderer rendererService;
 
 
         //private ConcurrentVoxelGenerator concurrentVoxelGenerator = new ConcurrentVoxelGenerator();
@@ -48,7 +48,7 @@ namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
         private List<ChunkCoord> tempTaskList = new List<ChunkCoord>();
 
 
-        public ClipmapsOctreeService(OctreeVoxelWorld voxelWorld, AsyncCPUVoxelRenderer rendererService)
+        public ClipmapsOctreeService(OctreeVoxelWorld voxelWorld, IVoxelRenderer rendererService)
         {
             VoxelWorld = voxelWorld;
             this.rendererService = rendererService;

@@ -14,7 +14,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
     ///   Core idea is that one of the threads should not be affected by synchronization overhead. Not sure which one atm
     ///   Can we reduce synchronization overhead?
     /// </summary>
-    public class ConcurrentVoxelGenerator
+    public class ConcurrentVoxelGenerator : IConcurrentVoxelGenerator
     {
         private int stopped;
         private Thread t;

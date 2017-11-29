@@ -13,6 +13,10 @@ struct Triangle {
 	float3 c;
 };
 
+struct CellCoord {
+	uint3 coord;
+	uint sampleResolution;
+};
 // Create a RenderTexture with enableRandomWrite flag and set it
 // with cs.SetTexture
 //RWTexture3D<float4> densityGrid;
@@ -21,24 +25,110 @@ AppendStructuredBuffer<Triangle> trianglesBuffer;
 AppendStructuredBuffer<CellIntermediate> outCellsBuffer;
 StructuredBuffer<CellIntermediate> inCellsBuffer;
 
+
+StructuredBuffer<CellCoord> cellCoordBuffer;
+
 //define SIZE 9
 //#define SIZE (16+1)
-#define SIZE (64+1)
+#define SIZE (16+2)
+//#define SIZE (64+1)
+
+float hash1(float2 p)
+{
+	p = 50.0*frac(p*0.3183099);
+	return frac(p.x*p.y*(p.x + p.y));
+}
+
+
+float noise(float2 x)
+{
+	float2 p = floor(x);
+	float2 w = frac(x);
+	float2 u = w*w*w*(w*(w*6.0 - 15.0) + 10.0);
+
+#if 0
+	p *= 0.3183099;
+	float kx0 = 50.0*fract(p.x);
+	float kx1 = 50.0*fract(p.x + 0.3183099);
+	float ky0 = 50.0*fract(p.y);
+	float ky1 = 50.0*fract(p.y + 0.3183099);
+
+	float a = fract(kx0*ky0*(kx0 + ky0));
+	float b = fract(kx1*ky0*(kx1 + ky0));
+	float c = fract(kx0*ky1*(kx0 + ky1));
+	float d = fract(kx1*ky1*(kx1 + ky1));
+#else
+	float a = hash1(p + float2(0, 0));
+	float b = hash1(p + float2(1, 0));
+	float c = hash1(p + float2(0, 1));
+	float d = hash1(p + float2(1, 1));
+#endif
+
+	return -1.0 + 2.0*(a + (b - a)*u.x + (c - a)*u.y + (a - b - c + d)*u.x*u.y);
+}
+
+//const float2x2 m2 = mat2(0.80, 0.60,
+//	-0.60, 0.80);
+const float2x2 m2 = { 0.80,-0.60,0.60,0.80 };
+
+float fbm_9(float2 x)
+{
+	float f = 1.9;
+	float s = 0.55;
+	float a = 0.0;
+	float b = 0.5;
+	for (int i = 0; i<9; i++)
+	{
+		float n = noise(x);
+		a += b*n;
+		b *= s;
+		x = f*x;
+		//x = f*m2*x;
+	}
+	return a;
+}
+
+
+float sdf(uint3 p) {
+	//return (float)(p.y) - 8.0;
+	//return dot(frac((float3)p / 8.0) - 4.0, float3(1,1,1));
+	//return length((float3)p - float3(800, 800, 800)) - 500;
+	//return -(fbm_9(p.xz*0.002)*200.0+100.0 - p.y); // First Cool working terrain!!!
+	return -(fbm_9(p.xz*0.0005)*800.0 + 400.0 - p.y); // First Cool working terrain!!!
+	//return -( sin(p.x*0.05)*20 + sin(p.z*0.001)*100 + 200 - p.y);
+}
 
 [numthreads(8, 8, 8)]
-void CSMain(uint3 id : SV_DispatchThreadID)
+void CSMain(uint3 oriId : SV_DispatchThreadID)
 {
 	int cubeindex = 0;
+	uint sampleResolution = cellCoordBuffer[0].sampleResolution;
 
+	uint3 id = oriId*sampleResolution + cellCoordBuffer[0].coord;
+	/*CellIntermediate t;
+	t.cellIndex = cellCoordBuffer[0].coord;
+	t.cubeindex = cellCoordBuffer[0].sampleResolution;
 
-	cubeindex |= 1 * (int)step(0.0, densityBuffer[dot((id + uint3(0, 0, 1)), uint3(1, SIZE, SIZE*SIZE))]);
+	outCellsBuffer.Append(t);*/
+
+	//sampleResolution = 1;
+
+	/*cubeindex |= 1 * (int)step(0.0, densityBuffer[dot((id + uint3(0, 0, 1)), uint3(1, SIZE, SIZE*SIZE))]);
 	cubeindex |= 2 * (int)step(0.0, densityBuffer[dot((id + uint3(1, 0, 1)), uint3(1, SIZE, SIZE*SIZE))]);
 	cubeindex |= 4 * (int)step(0.0, densityBuffer[dot((id + uint3(1, 0, 0)), uint3(1, SIZE, SIZE*SIZE))]);
 	cubeindex |= 8 * (int)step(0.0, densityBuffer[dot((id + uint3(0, 0, 0)), uint3(1, SIZE, SIZE*SIZE))]);
 	cubeindex |= 16 * (int)step(0.0, densityBuffer[dot((id + uint3(0, 1, 1)), uint3(1, SIZE, SIZE*SIZE))]);
 	cubeindex |= 32 * (int)step(0.0, densityBuffer[dot((id + uint3(1, 1, 1)), uint3(1, SIZE, SIZE*SIZE))]);
 	cubeindex |= 64 * (int)step(0.0, densityBuffer[dot((id + uint3(1, 1, 0)), uint3(1, SIZE, SIZE*SIZE))]);
-	cubeindex |= 128 * (int)step(0.0, densityBuffer[dot((id + uint3(0, 1, 0)), uint3(1, SIZE, SIZE*SIZE))]);
+	cubeindex |= 128 * (int)step(0.0, densityBuffer[dot((id + uint3(0, 1, 0)), uint3(1, SIZE, SIZE*SIZE))]);*/
+	cubeindex |= 1 * (int)step(0.0, sdf(id + uint3(0, 0, sampleResolution)));
+	cubeindex |= 2 * (int)step(0.0, sdf(id + uint3(sampleResolution, 0, sampleResolution)));
+	cubeindex |= 4 * (int)step(0.0, sdf(id + uint3(sampleResolution, 0, 0)));
+	cubeindex |= 8 * (int)step(0.0, sdf(id + uint3(0, 0, 0)));
+	cubeindex |= 16 * (int)step(0.0, sdf(id + uint3(0, sampleResolution, sampleResolution)));
+	cubeindex |= 32 * (int)step(0.0, sdf(id + uint3(sampleResolution, sampleResolution, sampleResolution)));
+	cubeindex |= 64 * (int)step(0.0, sdf(id + uint3(sampleResolution, sampleResolution, 0)));
+	cubeindex |= 128 * (int)step(0.0, sdf(id + uint3(0, sampleResolution, 0)));
 
 
 
@@ -59,7 +149,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
 
 	if (cubeindex != 255 && cubeindex != 0) {
 		CellIntermediate ret;
-		ret.cellIndex = id;
+		ret.cellIndex = oriId;
 		ret.cubeindex = cubeindex;
 
 		outCellsBuffer.Append(ret);
@@ -393,6 +483,8 @@ float3 VertexInterp(float isolevel, float3 p1, float3 p2, float valp1, float val
 
 }
 
+
+
 // NOTE: SV_GroupIndex does not seem to work!
 [numthreads(1, 1, 1)]
 void CSTriangle(uint3 myId : SV_DispatchThreadID)
@@ -402,7 +494,11 @@ void CSTriangle(uint3 myId : SV_DispatchThreadID)
 	float3 vertlist[12];
 	float isolevel = 0;
 
+	uint sampleResolution = cellCoordBuffer[0].sampleResolution;
+
 	uint3 id = data.cellIndex;
+	uint3 worldId = id * sampleResolution + cellCoordBuffer[0].coord;
+	//sampleResolution = 1;
 
 	float3 gridP[8];
 	gridP[0] = float3(0, 0, 1) + id;
@@ -415,14 +511,22 @@ void CSTriangle(uint3 myId : SV_DispatchThreadID)
 	gridP[7] = float3(0, 1, 0) + id;
 
 	float gridVals[8];
-	gridVals[0] = densityBuffer[dot((id + uint3(0, 0, 1)), uint3(1, SIZE, SIZE*SIZE))];
-	gridVals[1] = densityBuffer[dot((id + uint3(1, 0, 1)), uint3(1, SIZE, SIZE*SIZE))];
-	gridVals[2] = densityBuffer[dot((id + uint3(1, 0, 0)), uint3(1, SIZE, SIZE*SIZE))];
-	gridVals[3] = densityBuffer[dot((id + uint3(0, 0, 0)), uint3(1, SIZE, SIZE*SIZE))];
-	gridVals[4] = densityBuffer[dot((id + uint3(0, 1, 1)), uint3(1, SIZE, SIZE*SIZE))];
-	gridVals[5] = densityBuffer[dot((id + uint3(1, 1, 1)), uint3(1, SIZE, SIZE*SIZE))];
-	gridVals[6] = densityBuffer[dot((id + uint3(1, 1, 0)), uint3(1, SIZE, SIZE*SIZE))];
-	gridVals[7] = densityBuffer[dot((id + uint3(0, 1, 0)), uint3(1, SIZE, SIZE*SIZE))];
+	//gridVals[0] = densityBuffer[dot((id + uint3(0, 0, 1)), uint3(1, SIZE, SIZE*SIZE))];
+	//gridVals[1] = densityBuffer[dot((id + uint3(1, 0, 1)), uint3(1, SIZE, SIZE*SIZE))];
+	//gridVals[2] = densityBuffer[dot((id + uint3(1, 0, 0)), uint3(1, SIZE, SIZE*SIZE))];
+	//gridVals[3] = densityBuffer[dot((id + uint3(0, 0, 0)), uint3(1, SIZE, SIZE*SIZE))];
+	//gridVals[4] = densityBuffer[dot((id + uint3(0, 1, 1)), uint3(1, SIZE, SIZE*SIZE))];
+	//gridVals[5] = densityBuffer[dot((id + uint3(1, 1, 1)), uint3(1, SIZE, SIZE*SIZE))];
+	//gridVals[6] = densityBuffer[dot((id + uint3(1, 1, 0)), uint3(1, SIZE, SIZE*SIZE))];
+	//gridVals[7] = densityBuffer[dot((id + uint3(0, 1, 0)), uint3(1, SIZE, SIZE*SIZE))];
+	gridVals[0] = sdf(worldId + uint3(0, 0, 1)*sampleResolution);
+	gridVals[1] = sdf(worldId + uint3(1, 0, 1)*sampleResolution);
+	gridVals[2] = sdf(worldId + uint3(1, 0, 0)*sampleResolution);
+	gridVals[3] = sdf(worldId + uint3(0, 0, 0)*sampleResolution);
+	gridVals[4] = sdf(worldId + uint3(0, 1, 1)*sampleResolution);
+	gridVals[5] = sdf(worldId + uint3(1, 1, 1)*sampleResolution);
+	gridVals[6] = sdf(worldId + uint3(1, 1, 0)*sampleResolution);
+	gridVals[7] = sdf(worldId + uint3(0, 1, 0)*sampleResolution);
 
 
 	// MH TODO these ifs are pointless on GPU
@@ -497,6 +601,8 @@ void CSTriangle(uint3 myId : SV_DispatchThreadID)
 		//triangles.Add(vertlist[triTableEntry[i + 1]] + offset); // Swapped for facing
 		//colors.Add(material);
 	}
+
+
 	//outputBuffer.Append(float3(1,1,1));//[id.x] = 55;
 
 	//outputBuffer.Append(float3(densityBuffer[dot(id + uint3(0, 0, 0), uint3(1, SIZE, SIZE*SIZE))],0,0));//[id.x] = 55;

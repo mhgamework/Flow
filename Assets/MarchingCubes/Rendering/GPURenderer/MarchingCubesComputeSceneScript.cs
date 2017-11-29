@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using DirectX11;
 using UnityEngine;
 using UnityEngine.Profiling;
 using Debug = UnityEngine.Debug;
@@ -10,18 +11,23 @@ namespace Assets.MarchingCubes.ComputeShader
 {
     public class Buffers
     {
-        public Buffers(ComputeBuffer densityBuffer, ComputeBuffer cellsBuffer, ComputeBuffer countBuffer, ComputeBuffer trianglesBuffer)
+        public Buffers(ComputeBuffer densityBuffer, ComputeBuffer cellsBuffer, ComputeBuffer countBuffer, ComputeBuffer trianglesBuffer, ComputeBuffer cellCoordBuffer)
         {
             DensityBuffer = densityBuffer;
             CellsBuffer = cellsBuffer;
             CountBuffer = countBuffer;
             TrianglesBuffer = trianglesBuffer;
+            CellCoordBuffer = cellCoordBuffer;
+            TrianglesArrayBuffer = new MarchingCubesComputeSceneScript.Triangle[100 * 1024];// Random number used, need to improve probably
         }
 
         public ComputeBuffer DensityBuffer { get; private set; }
         public ComputeBuffer CellsBuffer { get; private set; }
         public ComputeBuffer CountBuffer { get; private set; }
         public ComputeBuffer TrianglesBuffer { get; private set; }
+        public ComputeBuffer CellCoordBuffer { get; private set; }
+
+        public MarchingCubesComputeSceneScript.Triangle[] TrianglesArrayBuffer { get; private set; }
     }
 
     class Chunk
@@ -81,9 +87,9 @@ namespace Assets.MarchingCubes.ComputeShader
 
             //foreach (var c in chunks)
             //{
-               
+
             //    runCalculateTrianglesShader(shader, c.sdf, configCellSize, c.buffers);
-             
+
             //}
             //foreach (var c in chunks)
             //{
@@ -104,9 +110,9 @@ namespace Assets.MarchingCubes.ComputeShader
         {
             var w = new Stopwatch();
 
-            var sdf = generateSphereData(configCellSize, new Vector3(1, 1, 1) * configCellSize * 0.5f, configCellSize*0.4f, new Vector3());
-            var buffers  = createBuffers(configCellSize);
-            setSdfToBuffer(sdf,buffers);
+            var sdf = generateSphereData(configCellSize, new Vector3(1, 1, 1) * configCellSize * 0.5f, configCellSize * 0.4f, new Vector3());
+            var buffers = createBuffers(configCellSize);
+            setSdfToBuffer(sdf, buffers);
             runCellGatheringKernel(shader, configCellSize, buffers);
             var data = getCellBufferData(buffers); // Force GPU-CPU sync
 
@@ -124,8 +130,7 @@ namespace Assets.MarchingCubes.ComputeShader
         }
 
 
-
-        private float[] generateSphereData(int cellSize, Vector3 spherePos, float sphereSize, Vector3 offset)
+        public static float[] generateSphereData(int cellSize, Vector3 spherePos, float sphereSize, Vector3 offset)
         {
             var sdf = new float[(cellSize + 1) * (cellSize + 1) * (cellSize + 1)];
             int i = 0;
@@ -143,7 +148,7 @@ namespace Assets.MarchingCubes.ComputeShader
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct CellIntermediate
+        public struct CellIntermediate
         {
             public int x;
             public int y;
@@ -156,7 +161,7 @@ namespace Assets.MarchingCubes.ComputeShader
             }
         };
         [StructLayout(LayoutKind.Sequential)]
-        struct Triangle
+        public struct Triangle
         {
             public Vector3 a;
             public Vector3 b;
@@ -167,6 +172,27 @@ namespace Assets.MarchingCubes.ComputeShader
                 return string.Format("A: {0}, B: {1}, C: {2}", a, b, c);
             }
         };
+        [StructLayout(LayoutKind.Sequential)]
+        struct CellCoord
+        {
+            public uint coordX;
+            public uint coordY;
+            public uint coordZ;
+            public uint sampleResolution;
+
+            public override string ToString()
+            {
+                return string.Format("CoordX: {0}, CoordY: {1}, CoordZ: {2}, SampleResolution: {3}", coordX, coordY, coordZ, sampleResolution);
+            }
+
+            public CellCoord(uint coordX, uint coordY, uint coordZ, uint sampleResolution)
+            {
+                this.coordX = coordX;
+                this.coordY = coordY;
+                this.coordZ = coordZ;
+                this.sampleResolution = sampleResolution;
+            }
+        };
 
         private Vector3[] calculateTriangles(float[] sdf, int size)
         {
@@ -174,8 +200,10 @@ namespace Assets.MarchingCubes.ComputeShader
             return CalculateTriangles(shader, sdf, size, buffers);
         }
 
-        private static Buffers createBuffers(int size)
+        public static Buffers createBuffers(int size)
         {
+            var cellCoordBuffer = new ComputeBuffer(1, (4) * 4); //new ComputeBuffer(sdf.Length, 4);
+
             var densityBuffer = new ComputeBuffer((size + 1) * (size + 1) * (size + 1), 4); //new ComputeBuffer(sdf.Length, 4);
             var cellsBuffer = new ComputeBuffer(size * size * size, 4 * 3 + 4, ComputeBufferType.Append);
             var countBuffer = new ComputeBuffer(3, 4, ComputeBufferType.IndirectArguments);
@@ -184,7 +212,7 @@ namespace Assets.MarchingCubes.ComputeShader
                 ComputeBufferType.Append);
 
 
-            var buffers = new Buffers(densityBuffer, cellsBuffer, countBuffer, trianglesBuffer);
+            var buffers = new Buffers(densityBuffer, cellsBuffer, countBuffer, trianglesBuffer, cellCoordBuffer);
             return buffers;
         }
 
@@ -196,20 +224,38 @@ namespace Assets.MarchingCubes.ComputeShader
             return retrieveCalculationOutput(buffers);
         }
 
-        private static Vector3[] retrieveCalculationOutput(Buffers buffers)
+        public static Vector3[] retrieveCalculationOutput(Buffers buffers)
+        {
+            var trianglesCount = retrieveTrianglesCount(buffers);
+            var ret = new Vector3[trianglesCount*3];
+            retrieveVertices(buffers,ret,trianglesCount);
+            return ret;
+        }
+        private static void retrieveVertices(Buffers buffers, Vector3[] outVertices, int trianglesCount)
+        {
+            //Triangle[] output = new Triangle[trianglesCount];
+            if (trianglesCount > buffers.TrianglesArrayBuffer.Length)
+                throw new System.Exception("Num triangles generated on gpu exceeds predefined buffer size");
+            buffers.TrianglesBuffer.GetData(buffers.TrianglesArrayBuffer);
+
+            int iVert = 0;
+            //foreach (var tp in output) Debug.Log(tp);
+            for (int i = 0; i < trianglesCount; i++)
+            {
+                outVertices[iVert++] = buffers.TrianglesArrayBuffer[i].a;
+                outVertices[iVert++] = buffers.TrianglesArrayBuffer[i].b;
+                outVertices[iVert++] = buffers.TrianglesArrayBuffer[i].c;
+            }
+        }
+
+        public static int retrieveTrianglesCount(Buffers buffers)
         {
             ComputeBuffer.CopyCount(buffers.TrianglesBuffer, buffers.CountBuffer, 0);
             var argsData2 = new int[1];
 
             buffers.CountBuffer.GetData(argsData2);
             var trianglesCount = argsData2[0];
-
-            Triangle[] output = new Triangle[trianglesCount];
-            buffers.TrianglesBuffer.GetData(output);
-
-            //foreach (var tp in output) Debug.Log(tp);
-
-            return output.SelectMany(t => new[] { t.a, t.b, t.c }).ToArray();
+            return trianglesCount;
         }
 
         private static void runCalculateTrianglesShader(UnityEngine.ComputeShader shader, float[] sdf, int size, Buffers buffers)
@@ -222,22 +268,24 @@ namespace Assets.MarchingCubes.ComputeShader
             runTriangleKernel(shader, buffers);
         }
 
-        private static CellIntermediate[] getCellBufferData(Buffers buffers)
+        public static CellIntermediate[] getCellBufferData(Buffers buffers)
         {
             ComputeBuffer.CopyCount(buffers.CellsBuffer, buffers.CountBuffer, 0);
 
             var argsData = new int[3];
             buffers.CountBuffer.GetData(argsData);
             var cellCount = argsData[0];
-            
+
             var temp = new CellIntermediate[cellCount];
             buffers.CellsBuffer.GetData(temp);
             return temp;
         }
 
-        private static void runTriangleKernel(UnityEngine.ComputeShader shader, Buffers buffers)
+        public static void runTriangleKernel(UnityEngine.ComputeShader shader, Buffers buffers, Point3 cellCoord = new Point3(), int sampleResolution = 1)
         {
             ComputeBuffer.CopyCount(buffers.CellsBuffer, buffers.CountBuffer, 0);
+            // Cellcorod not really needed
+            buffers.CellCoordBuffer.SetData(new[] { new CellCoord((uint)cellCoord.X, (uint)cellCoord.Y, (uint)cellCoord.Z, (uint)sampleResolution) });
 
             //var argsData = new int[1];
             //buffers.CountBuffer.GetData(argsData);
@@ -251,7 +299,7 @@ namespace Assets.MarchingCubes.ComputeShader
 
             buffers.TrianglesBuffer.SetCounterValue(0);
 
-
+            shader.SetBuffer(shader.FindKernel("CSTriangle"), "cellCoordBuffer", buffers.CellCoordBuffer);
             shader.SetBuffer(shader.FindKernel("CSTriangle"), "densityBuffer", buffers.DensityBuffer);
             shader.SetBuffer(shader.FindKernel("CSTriangle"), "inCellsBuffer", buffers.CellsBuffer);
             shader.SetBuffer(shader.FindKernel("CSTriangle"), "trianglesBuffer", buffers.TrianglesBuffer);
@@ -259,10 +307,14 @@ namespace Assets.MarchingCubes.ComputeShader
             shader.DispatchIndirect(shader.FindKernel("CSTriangle"), buffers.CountBuffer); // cellCount, 1, 1);
         }
 
-        private static void runCellGatheringKernel(UnityEngine.ComputeShader shader, int size, Buffers buffers)
+        public static void runCellGatheringKernel(UnityEngine.ComputeShader shader, int size, Buffers buffers, Point3 cellCoord = new Point3(), int sampleResolution = 1)
         {
             int kernel = shader.FindKernel("CSMain");
+
+            buffers.CellCoordBuffer.SetData(new[] { new CellCoord((uint)cellCoord.X, (uint)cellCoord.Y, (uint)cellCoord.Z, (uint)sampleResolution) });
+
             shader.SetBuffer(kernel, "densityBuffer", buffers.DensityBuffer);
+            shader.SetBuffer(kernel, "cellCoordBuffer", buffers.CellCoordBuffer);
 
             buffers.CellsBuffer.SetCounterValue(0);
             shader.SetBuffer(kernel, "outCellsBuffer", buffers.CellsBuffer);
@@ -270,7 +322,7 @@ namespace Assets.MarchingCubes.ComputeShader
             shader.Dispatch(kernel, size / 8, size / 8, size / 8);
         }
 
-        private static void setSdfToBuffer(float[] sdf, Buffers buffers)
+        public static void setSdfToBuffer(float[] sdf, Buffers buffers)
         {
             buffers.DensityBuffer.SetData(sdf);
         }

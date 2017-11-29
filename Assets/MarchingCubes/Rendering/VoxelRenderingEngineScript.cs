@@ -14,6 +14,8 @@ namespace Assets.MarchingCubes.Rendering
 {
     public class VoxelRenderingEngineScript : MonoBehaviour
     {
+        public bool UseGpuRenderer = false;
+        public UnityEngine.ComputeShader GPUShader;
         /// <summary>
         /// Temporary, should be a generic world plugin
         /// </summary>
@@ -54,10 +56,12 @@ namespace Assets.MarchingCubes.Rendering
             var world = World.GetWorld(); // createTestWorld();
 
 
-            var marchingCubesService = new MarchingCubesService();
-            var meshGenerator = new VoxelChunkMeshGenerator(marchingCubesService);
-
-            var concurrentGenerator = new ConcurrentVoxelGenerator(meshGenerator);
+            IConcurrentVoxelGenerator concurrentGenerator;
+            if (UseGpuRenderer)
+                concurrentGenerator = createGpuRenderer( world);
+            else
+                concurrentGenerator = createCPURenderer();
+       
             renderingService = new AsyncCPUVoxelRenderer(
                 concurrentGenerator,
                 chunkPool,
@@ -70,10 +74,24 @@ namespace Assets.MarchingCubes.Rendering
             clipmapsOctreeService = new ClipmapsOctreeService(world, renderingService);
 
 
-            concurrentGenerator.Start(); // WARN dont forget
         }
 
+        private IConcurrentVoxelGenerator createGpuRenderer(OctreeVoxelWorld world)
+        {
+            return new GpuVoxelMeshGenerator(GPUShader,world);
+        }
 
+        private IConcurrentVoxelGenerator createCPURenderer()
+        {
+
+            var marchingCubesService = new MarchingCubesService();
+            var meshGenerator = new VoxelChunkMeshGenerator(marchingCubesService);
+
+            var ret =new ConcurrentVoxelGenerator(meshGenerator);
+            ret.Start(); // WARN dont forget
+
+            return ret;
+        }
 
 
         public void Update()
