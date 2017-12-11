@@ -19,7 +19,7 @@ namespace Assets.MarchingCubes.Rendering
         /// <summary>
         /// Temporary, should be a generic world plugin
         /// </summary>
-        public TestVoxelWorldScript World;
+        public VoxelWorldGenerator World;
 
         public Camera LODCamera;
         public float LODDistanceFactor = 1.2f;

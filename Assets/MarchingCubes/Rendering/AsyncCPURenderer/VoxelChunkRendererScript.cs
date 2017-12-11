@@ -108,17 +108,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             //    lastMeshData = data;
             //    return;
             //}
-            mesh.Clear();
-            mesh.SetVertices(data.doubledVertices);
-            mesh.subMeshCount = data.numMeshes;
-            for (int i = 0; i < data.indicesList.Count; i++)
-                mesh.SetIndices(data.indicesList[i], MeshTopology.Triangles, i);
-
-            // NOTE MATERIALS ARE SET FROM unity editor and do not respect the colors!! ( They should match )
-
-            mesh.RecalculateBounds();
-            mesh.RecalculateNormals();
-
+            data.UpdateMesh(mesh);
+         
             //GetComponent<MeshCollider>().enabled = false;
             GetComponent<MeshCollider>().sharedMesh = mesh;
             renderer.sharedMaterials = data.colors.Select(c =>

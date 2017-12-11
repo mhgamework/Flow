@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.UnityAdditions;
 using MHGameWork.TheWizards;
+using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
 
 namespace Assets.MarchingCubes
@@ -12,8 +14,37 @@ namespace Assets.MarchingCubes
     /// <summary>
     /// Temporary unity script to control the world config
     /// </summary>
-    public class TestVoxelWorldScript : MonoBehaviour
+    public class VoxelWorldGenerator : MonoBehaviour
     {
+        public enum DrawMode { Noise, Color }
+        public bool DrawMesh = false;
+
+        public DrawMode Mode;
+        [Range(1, 6)]
+        public int LodLevel;
+        public bool AutoGenerate = false;
+        public int WorldSize = 10;
+        public float WorldScale = 1;
+        [Range(1, 20)]
+        public int Octaves;
+        [Range(0, 1)]
+        public float Persistence;
+        public float Lacunarity;
+        public int Seed;
+        public Vector2 Offset;
+        public TerrainType[] Regions;
+
+        public bool GenerateCalibrationNoise = false;
+
+        public float HeightMultiplier = 1;
+
+        public AnimationCurve MeshHightCurve;
+
+
+
+
+
+
         public int ChunkSize = 8;
         public int WorldDepth = 5;
 
@@ -141,8 +172,128 @@ namespace Assets.MarchingCubes
             };
         }
 
-    }
+        public void Generate()
+        {
+            var map = noise(WorldSize, Octaves, WorldScale, Persistence, Lacunarity, Seed, Offset);
 
+            if (GenerateCalibrationNoise)
+                for (int x = 0; x < WorldSize; x++)
+                    for (int z = 0; z < WorldSize; z++)
+                    {
+                        map[x, z] = new Vector2((x + Offset.x) / WorldScale, (z + Offset.y) / WorldScale).magnitude;
+                    }
+            var colorMap = new Color[WorldSize * WorldSize];
+            for (int x = 0; x < WorldSize; x++)
+                for (int z = 0; z < WorldSize; z++)
+                {
+                    var height = map[x, z];
+                    for (int i = 0; i < Regions.Length; i++)
+                    {
+                        if (height <= Regions[i].Height)
+                        {
+                            colorMap[x + z * WorldSize] = Regions[i].Color;
+                            break;
+                        }
+
+
+                    }
+                }
+            if (Mode == DrawMode.Noise)
+                WorldDisplay.Instance.DrawTexture(WorldDisplay.TextureFromHeightMap(map));
+            else if (Mode == DrawMode.Color)
+                WorldDisplay.Instance.DrawTexture(WorldDisplay.TextureFromColorMap(colorMap, WorldSize, WorldSize));
+            if (DrawMesh)
+            {
+                var resolution = (int)Math.Round(Math.Pow(2, LodLevel-1));
+                WorldDisplay.Instance.DrawMesh(GenerateMesh(map, colorMap, resolution), new Vector3(10 * resolution, HeightMultiplier, 10 * resolution), (WorldSize / resolution)-1);
+            }
+        }
+
+        private VoxelMeshData GenerateMesh(float[,] map, Color[] colorMap, int resolution)
+        {
+            var gen = new VoxelChunkMeshGenerator(new MarchingCubesService());
+
+            var chunkSize = WorldSize / resolution;
+
+            var data = new Array3D<VoxelData>(new DirectX11.Point3(chunkSize, chunkSize, chunkSize));
+            for (int x = 0; x < chunkSize; x++)
+                for (int y = 0; y < chunkSize; y++)
+                    for (int z = 0; z < chunkSize; z++)
+                    {
+                        var height = MeshHightCurve.Evaluate(map[WorldSize - 1 - x * resolution, WorldSize - 1 - z * resolution]);
+                        data[new DirectX11.Point3(x, y, z)] = new VoxelData((height - y), null);
+                    }
+
+            var mesh = gen.GenerateMeshFromVoxelData(data);
+            return mesh;
+        }
+
+
+        public static float[,] noise(int size, int octaves, float scale, float persistence, float lacunarity, int seed, Vector2 offset)
+        {
+            var test = new TerrainTest();
+            var rand = new System.Random(seed);
+
+            Vector2[] octaveOffsets = new Vector2[octaves];
+            for (int i = 0; i < octaves; i++)
+            {
+                float offsetX = rand.Next(-100000, 100000);
+                float offsetY = rand.Next(-100000, 100000);
+                octaveOffsets[i] = new Vector2(offsetX, offsetY) + offset;
+            }
+
+            var min = float.MaxValue;
+            var max = float.MinValue;
+
+            float halfSize = size / 2f;
+
+            var map = new float[size, size];
+            for (int x = 0; x < size; x++)
+                for (int z = 0; z < size; z++)
+                {
+
+                    float noiseHeight = 0.0f;
+                    float amplitude = 0.5f;
+                    float frequency = 1.0f;
+                    for (int i = 0; i < octaves; i++)
+                    {
+                        var sampleX = (x - halfSize) / scale * frequency + octaveOffsets[i].x;
+                        var sampleZ = (z - halfSize) / scale * frequency + octaveOffsets[i].y;
+
+                        float n = Mathf.PerlinNoise(sampleX, sampleZ);//* 2 - 1;
+                        //float n = test.noised(new Vector3(sampleX, 0, sampleZ)).x * 2 - 1;
+
+                        noiseHeight += amplitude * n; // accumulate values		
+                        amplitude *= persistence; // amplitude decrease
+
+                        frequency *= lacunarity; // frequency increase
+                    }
+
+                    map[x, z] = noiseHeight;
+                    if (noiseHeight < min)
+                        min = noiseHeight;
+                    if (noiseHeight > max)
+                        max = noiseHeight;
+                }
+
+            var diff = max - min;
+            for (int x = 0; x < size; x++)
+                for (int z = 0; z < size; z++)
+                {
+                    //map[x, z] = (map[x, z] - min) / diff;
+                }
+
+            return map;
+        }
+
+
+    }
+    [System.Serializable]
+    public struct TerrainType
+    {
+        public float Height;
+        public Color Color;
+    }
     public class TerrainTest
     {
 
