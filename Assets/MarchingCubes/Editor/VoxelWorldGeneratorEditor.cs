@@ -15,13 +15,13 @@ public class VoxelWorldGeneratorEditor : Editor {
         {
             if (worldGen.AutoGenerate)
             {
-                worldGen.Generate();
+                worldGen.DrawMapInEditor();
             }
         }
 
         if (GUILayout.Button("Generate"))
         {
-            worldGen.Generate();
+            worldGen.DrawMapInEditor();
         }
     }
 }

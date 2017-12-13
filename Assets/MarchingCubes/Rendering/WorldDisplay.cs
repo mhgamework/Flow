@@ -10,10 +10,10 @@ namespace Assets.MarchingCubes.Rendering
         public MeshFilter meshFilter;
         //public MeshRenderer meshRenderer;
 
-        public void DrawTexture(Texture2D texture)
+        public void DrawTexture(Texture2D texture, float scale)
         {
             textureRenderer.sharedMaterial.mainTexture = texture;
-            textureRenderer.transform.localScale = new Vector3(texture.width, 1, texture.height);
+            textureRenderer.transform.localScale = new Vector3(texture.width* scale, 1, texture.height* scale);
         }
 
 
@@ -21,7 +21,6 @@ namespace Assets.MarchingCubes.Rendering
         {
             var sizeX = heightMap.GetLength(0);
             var sizeY = heightMap.GetLength(1);
-            Texture2D texture = new Texture2D(sizeX, sizeY);
 
             Color[] colors = new Color[sizeX * sizeY];
             for (int x = 0; x < sizeX; x++)
@@ -48,10 +47,12 @@ namespace Assets.MarchingCubes.Rendering
         public void DrawMesh(VoxelMeshData meshData, Vector3 scale, float MeshSizeXZ)
         {
             meshFilter.sharedMesh = meshData.CreateMesh();
-            meshFilter.transform.localScale = scale;
+            meshFilter.transform.localScale = new Vector3(-scale.x,scale.y,-scale.z);
 
-            meshFilter.transform.localPosition = (-scale.TakeXZ() * MeshSizeXZ / 2f).ToXZ();
+            // Hacky inversions in this method, somehow the directions of the axes between texture map and voxel is different. Dont care for now
 
+            meshFilter.transform.localPosition = -(-scale.TakeXZ() * MeshSizeXZ / 2f).ToXZ();
+                
         }
     }
 }
