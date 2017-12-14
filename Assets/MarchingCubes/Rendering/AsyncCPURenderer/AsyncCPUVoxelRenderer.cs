@@ -21,6 +21,8 @@ namespace Assets.MarchingCubes.Rendering
     public class AsyncCPUVoxelRenderer : IVoxelRenderer
     {
         private Material TemplateMaterial;
+        private readonly Material vertexColorMaterial;
+        private readonly VoxelRenderingEngineScript voxelRenderingEngineScript;
         private Dictionary<Color, Material> materialsDictionary;
 
         private IConcurrentVoxelGenerator concurrentVoxelGenerator;
@@ -39,13 +41,16 @@ namespace Assets.MarchingCubes.Rendering
             VoxelChunkRendererPoolScript chunkPool,
             List<VoxelMaterial> voxelMaterials,
             OctreeVoxelWorld octreeVoxelWorld,
-            Transform transform, Material templateMaterial)
+            Transform transform,
+            VoxelRenderingEngineScript voxelRenderingEngineScript)
         {
             this.concurrentVoxelGenerator = concurrentVoxelGenerator;
             this.chunkPool = chunkPool;
             this.octreeVoxelWorld = octreeVoxelWorld;
             this.transform = transform;
-            TemplateMaterial = templateMaterial;
+            TemplateMaterial = voxelRenderingEngineScript.TemplateMaterial;
+            vertexColorMaterial = voxelRenderingEngineScript.VertexColorMaterial;
+            this.voxelRenderingEngineScript = voxelRenderingEngineScript;
 
             this.materialsDictionary = voxelMaterials.ToDictionary(v => v.color, c =>
             {
@@ -179,6 +184,7 @@ namespace Assets.MarchingCubes.Rendering
 
             comp.AutomaticallyGenerateMesh = false;
             comp.MaterialsDictionary = materialsDictionary;
+            comp.VertexColorMaterial = vertexColorMaterial;
             comp.setMeshToUnity(result.data);
             comp.transform.SetParent(transform);
             comp.gameObject.SetActive(true);
@@ -192,7 +198,7 @@ namespace Assets.MarchingCubes.Rendering
         {
             var comp = renderDataOrNull;
             comp.MaterialsDictionary = materialsDictionary;
-            comp.SetWorldcoords(node.LowerLeft, octreeVoxelWorld.GetNodeSize(node.Depth) / (float)(octreeVoxelWorld.ChunkSize.X)); // TOOD: DANGEROES
+            comp.SetWorldcoords(node.LowerLeft.ToVector3() * voxelRenderingEngineScript.RenderScale, octreeVoxelWorld.GetNodeSize(node.Depth) / (float)(octreeVoxelWorld.ChunkSize.X)* voxelRenderingEngineScript.RenderScale); // TOOD: DANGEROES
 
             comp.transform.SetParent(transform);
             //comp.gameObject.SetActive(true);

@@ -44,7 +44,7 @@ namespace Assets.MarchingCubes
            of totally below the isolevel.
         */
         Vector3[] vertlist = new Vector3[12];//vertlist[12];
-        public int Polygonise(double[] gridVals, Color[] matVals, Vector3[] gridP, double isolevel, List<Vector3> triangles, Point3 offset, List<Color> colors)
+        public int Polygonise(double[] gridVals, Color[] matVals, Vector3[] gridP, double isolevel, List<Vector3> triangles, Point3 offset, List<Color> colors, List<Color> vertexColors)
         {
             int i;
             int ntriang;
@@ -58,7 +58,7 @@ namespace Assets.MarchingCubes
             cubeindex = 0;
             var material = new Color();
             // Id, can cache the cubeindex if isolevel is fixed, which it is
-            if (gridVals[0] < isolevel) { cubeindex |= 1; material = matVals[0]; } // TODO material is not used here, i am doing a pass per material
+            if (gridVals[0] < isolevel) { cubeindex |= 1; material = matVals[0]; } // TODO material is not used here, i am doing a pass per material EDIT now oding experiments with material usage
             if (gridVals[1] < isolevel) { cubeindex |= 2; material = matVals[1]; }
             if (gridVals[2] < isolevel) { cubeindex |= 4; material = matVals[2]; }
             if (gridVals[3] < isolevel) { cubeindex |= 8; material = matVals[3]; }
@@ -119,6 +119,11 @@ namespace Assets.MarchingCubes
                 triangles.Add(vertlist[triTableEntry[i]] + offset);
                 triangles.Add(vertlist[triTableEntry[i + 2]] + offset);
                 triangles.Add(vertlist[triTableEntry[i + 1]] + offset); // Swapped for facing
+
+                vertexColors.Add(material);
+                vertexColors.Add(material);
+                vertexColors.Add(material);
+
                 colors.Add(material);
                 ntriang++;
             }

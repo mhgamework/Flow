@@ -23,6 +23,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         //public Material VoxelMaterial;
         private UniformVoxelData chunkData;
         public Dictionary<Color, Material> MaterialsDictionary = new Dictionary<Color, Material>();
+        public Material VertexColorMaterial;
 
         public void SetChunk(UniformVoxelData chunkData)
         {
@@ -39,8 +40,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         }
         public void SetWorldcoords(Vector3 lowerLeft, float scale)
         {
-            transform.localScale = new Vector3(scale, scale, scale) * VRSettings.RenderScale;
-            transform.position = lowerLeft * VRSettings.RenderScale;
+            transform.localScale = new Vector3(scale, scale, scale);
+            transform.position = lowerLeft;
         }
 
         /// <summary>
@@ -109,32 +110,24 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             //    return;
             //}
             data.UpdateMesh(mesh);
-         
+
             //GetComponent<MeshCollider>().enabled = false;
             GetComponent<MeshCollider>().sharedMesh = mesh;
-            renderer.sharedMaterials = data.colors.Select(c =>
-            {
-                Material val;
-                if (MaterialsDictionary.TryGetValue(c, out val)) return val;
-                return MaterialsDictionary[Color.black];// Return black, this is confusing
-            }).ToArray();
+            if (data.colors != null)
+                renderer.sharedMaterials = data.colors.Select(c =>
+                {
+                    Material val;
+                    if (MaterialsDictionary.TryGetValue(c, out val)) return val;
+                    return MaterialsDictionary[Color.black]; // Return black, this is confusing
+                }).ToArray();
+            else
+                renderer.sharedMaterial = VertexColorMaterial;
         }
 
         public static VoxelMeshData generateMesh(VoxelChunkMeshGenerator meshGenerator, Array3D<VoxelData> chunkData)
         {
-            List<Vector3> doubledVertices;
-            int numMeshes;
-            List<int[]> indicesList;
-            List<Color> colors;
-            meshGenerator.generateMesh(chunkData, out doubledVertices, out numMeshes, out indicesList, out colors);
+            return meshGenerator.GenerateMeshFromVoxelData(chunkData);
 
-            return new VoxelMeshData()
-            {
-                doubledVertices = doubledVertices,
-                numMeshes = numMeshes,
-                indicesList = indicesList,
-                colors = colors
-            };
         }
     }
 }

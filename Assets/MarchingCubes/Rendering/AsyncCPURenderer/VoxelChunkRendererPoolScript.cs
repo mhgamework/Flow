@@ -17,7 +17,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
 
             //renderObject.name = "Node " + result.Frame + " " + node.LowerLeft + " " + node.Size + " V: " +
-            //                result.data.doubledVertices.Count;
+            //                result.data.vertices.Count;
 
             return ret;
         }

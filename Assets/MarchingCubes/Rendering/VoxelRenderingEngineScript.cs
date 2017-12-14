@@ -14,6 +14,7 @@ namespace Assets.MarchingCubes.Rendering
 {
     public class VoxelRenderingEngineScript : MonoBehaviour
     {
+        public float RenderScale = 1;
         public bool UseGpuRenderer = false;
         public UnityEngine.ComputeShader GPUShader;
         /// <summary>
@@ -30,6 +31,7 @@ namespace Assets.MarchingCubes.Rendering
         public Text DebugText;
 
         public Material TemplateMaterial;
+        public Material VertexColorMaterial;
 
 
         private ClipmapsOctreeService clipmapsOctreeService;
@@ -68,7 +70,7 @@ namespace Assets.MarchingCubes.Rendering
                 World.VoxelMaterials,
                 world,
                 rendererObject.transform,
-                TemplateMaterial
+                this
             );
 
             clipmapsOctreeService = new ClipmapsOctreeService(world, renderingService);
@@ -102,7 +104,7 @@ namespace Assets.MarchingCubes.Rendering
                 init = true;
             }
             clipmapsOctreeService.LODDistanceFactor = LODDistanceFactor;
-            clipmapsOctreeService.UpdateRendererState(LODCamera.transform.position / VRSettings.RenderScale);
+            clipmapsOctreeService.UpdateRendererState(LODCamera.transform.position / RenderScale);
 
             if (DebugText)
                 DebugText.text = renderingService.UnavailableChunks.ToString();

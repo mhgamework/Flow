@@ -28,6 +28,7 @@ namespace Assets.MarchingCubes
         public bool AutoGenerate = false;
         public int WorldSize = 10;
         public float WorldScale = 1;
+        public float EditorScale = 1;
         [Range(1, 20)]
         public int Octaves;
         [Range(0, 1)]
@@ -204,13 +205,13 @@ namespace Assets.MarchingCubes
             }
         }
 
-        public MapData GenerateMapData(Vector2 lowerLeft, int sampleDist, int mapSize)
+        public MapData GenerateMapData(Vector2 lowerLeft, int sampleDist, int mapSize, float scale)
         {
 
-            var map = Noise.noise(mapSize, Octaves, WorldScale, Persistence, Lacunarity, Seed, new Vector2(Offset.x, Offset.y) + lowerLeft, sampleDist);
+            var map = Noise.noise(mapSize, Octaves, WorldScale* scale, Persistence, Lacunarity, Seed, new Vector2(Offset.x, Offset.y) + lowerLeft, sampleDist);
 
             if (GenerateCalibrationNoise)
-                map = Noise.calibrationNoise(mapSize, WorldScale / sampleDist, Offset);
+                map = Noise.calibrationNoise(mapSize, WorldScale* scale / sampleDist, Offset);
 
 
             var colorMap = new Color[mapSize * mapSize];
@@ -233,16 +234,16 @@ namespace Assets.MarchingCubes
             return new MapData(map, colorMap);
         }
 
-        public Array3D<VoxelData> GenerateVoxelData(MapData mapData, int sampleDistance, float chunkHeight, VoxelMaterial material)
+        public Array3D<VoxelData> GenerateVoxelData(MapData mapData, int sampleDistance, float chunkHeight, VoxelMaterial material, float editorScale)
         {
-            return VoxelDataGenerator.VoxelDataFromHeightMap(mapData.HeightMap, sampleDistance, chunkHeight, material, HeightMultiplier * WorldScale, MeshHightCurve);
+            return VoxelDataGenerator.VoxelDataFromMapData(mapData, sampleDistance, chunkHeight, material, HeightMultiplier * WorldScale* editorScale, MeshHightCurve);
         }
 
         public void DrawMapInEditor()
         {
             var mapSize = WorldSize / getLodSampleDistance();
 
-            var data = GenerateMapData(new Vector2(1, 1) * WorldSize / 2/ getLodSampleDistance(), getLodSampleDistance(), mapSize);
+            var data = GenerateMapData(new Vector2(1, 1) * WorldSize / 2/ getLodSampleDistance(), getLodSampleDistance(), mapSize,EditorScale);
 
 
 
@@ -267,7 +268,7 @@ namespace Assets.MarchingCubes
         {
             var gen = new VoxelChunkMeshGenerator(new MarchingCubesService());
 
-            var data = GenerateVoxelData(mapData, sampleDistance, chunkHeight, null);
+            var data = GenerateVoxelData(mapData, sampleDistance, chunkHeight, null,EditorScale);
 
             var mesh = gen.GenerateMeshFromVoxelData(data);
             return mesh;
@@ -297,11 +298,11 @@ namespace Assets.MarchingCubes
 
         public UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution)
         {
-            var map = voxelWorldGenerator.GenerateMapData(start.ToVector3().TakeXZ(), sampleResolution,chunkSize.X);
+            var map = voxelWorldGenerator.GenerateMapData(start.ToVector3().TakeXZ(), sampleResolution,chunkSize.X,1);
 
             var ret = new UniformVoxelData()
             {
-                Data = voxelWorldGenerator.GenerateVoxelData(map, sampleResolution, start.Y, voxelWorldGenerator.VoxelMaterials[0]),
+                Data = voxelWorldGenerator.GenerateVoxelData(map, sampleResolution, start.Y, voxelWorldGenerator.VoxelMaterials[0],1),
                 LastChangeFrame = 0
             };
 

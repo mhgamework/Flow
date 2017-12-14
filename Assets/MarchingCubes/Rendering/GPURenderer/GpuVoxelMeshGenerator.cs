@@ -71,7 +71,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             return new VoxelMeshData
             {
                 colors = color,
-                doubledVertices = new List<Vector3>(verts),
+                vertices = new List<Vector3>(verts),
                 indicesList = indicesList,
                 numMeshes = numMeshes
             };
