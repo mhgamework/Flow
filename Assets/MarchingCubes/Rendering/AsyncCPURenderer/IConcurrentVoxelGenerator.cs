@@ -8,5 +8,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
         bool HasNodeData(OctreeNode node);
         ConcurrentVoxelGenerator.Result GetNodeData(OctreeNode node);
         void RemoveNodeData(OctreeNode node);
+        void Update();
+        void ReleaseChunkData(VoxelMeshData resultData);
     }
 }

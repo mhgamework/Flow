@@ -27,18 +27,24 @@ namespace Assets.MarchingCubes.Rendering
 
         //TODO add render scale
 
+        public AnimationCurve LodDistanceCurve;
+        public float LodDistanceCurveEnd = 1;
 
         public Text DebugText;
 
         public Material TemplateMaterial;
         public Material VertexColorMaterial;
 
+        public bool enableMultithreading = true;
 
         private ClipmapsOctreeService clipmapsOctreeService;
 
 
         private bool init = false;
         private AsyncCPUVoxelRenderer renderingService;
+
+        IConcurrentVoxelGenerator concurrentGenerator;
+
 
 
         public void Start()
@@ -58,7 +64,6 @@ namespace Assets.MarchingCubes.Rendering
             var world = World.GetWorld(); // createTestWorld();
 
 
-            IConcurrentVoxelGenerator concurrentGenerator;
             if (UseGpuRenderer)
                 concurrentGenerator = createGpuRenderer( world);
             else
@@ -70,10 +75,11 @@ namespace Assets.MarchingCubes.Rendering
                 World.VoxelMaterials,
                 world,
                 rendererObject.transform,
-                this
+                this,
+                !enableMultithreading
             );
 
-            clipmapsOctreeService = new ClipmapsOctreeService(world, renderingService);
+            clipmapsOctreeService = new ClipmapsOctreeService(world, renderingService,LodDistanceCurve, LodDistanceCurveEnd);
 
 
         }
@@ -89,7 +95,7 @@ namespace Assets.MarchingCubes.Rendering
             var marchingCubesService = new MarchingCubesService();
             var meshGenerator = new VoxelChunkMeshGenerator(marchingCubesService);
 
-            var ret =new ConcurrentVoxelGenerator(meshGenerator);
+            var ret =new ConcurrentVoxelGenerator(meshGenerator,!enableMultithreading);
             ret.Start(); // WARN dont forget
 
             return ret;
@@ -105,6 +111,10 @@ namespace Assets.MarchingCubes.Rendering
             }
             clipmapsOctreeService.LODDistanceFactor = LODDistanceFactor;
             clipmapsOctreeService.UpdateRendererState(LODCamera.transform.position / RenderScale);
+
+            concurrentGenerator.Update();
+
+            renderingService.Update();
 
             if (DebugText)
                 DebugText.text = renderingService.UnavailableChunks.ToString();

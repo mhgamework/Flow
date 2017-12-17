@@ -39,6 +39,8 @@ namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
 
 
         private IVoxelRenderer rendererService;
+        private readonly AnimationCurve lodCurve;
+        private readonly float lodCurveEnd;
 
 
         //private ConcurrentVoxelGenerator concurrentVoxelGenerator = new ConcurrentVoxelGenerator();
@@ -48,10 +50,12 @@ namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
         private List<ChunkCoord> tempTaskList = new List<ChunkCoord>();
 
 
-        public ClipmapsOctreeService(OctreeVoxelWorld voxelWorld, IVoxelRenderer rendererService)
+        public ClipmapsOctreeService(OctreeVoxelWorld voxelWorld, IVoxelRenderer rendererService,AnimationCurve lodCurve, float lodCurveEnd)
         {
             VoxelWorld = voxelWorld;
             this.rendererService = rendererService;
+            this.lodCurve = lodCurve;
+            this.lodCurveEnd = lodCurveEnd;
 
             helper = new ClipMapsOctree<RenderOctreeNode>(new RenderOctreeNodeFactory(this));
 
@@ -160,30 +164,43 @@ namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
             float distanceFactor = 1.2f,
             bool parentDirty = false)
         {
-            if (isQualityGoodEnough(node, cameraPosition, distanceFactor))
+            Profiler.BeginSample("A");
+            if (isQualityGoodEnoughCurve(node, cameraPosition, LODDistanceFactor,lodCurve, lodCurveEnd))
             {
                 node.ShouldRender = true;
                 checkDirty(node, outDirtyNodes, outMissingRenderdataNodes, parentDirty);
+
                 if (node.Children != null)
                     for (int i = 0; i < 8; i++)
                         setShouldRenderFalseRecursive(node.Children[i]);
+                Profiler.EndSample();
+
                 return;
             }
+            Profiler.EndSample();
+            Profiler.BeginSample("B");
 
             if (node.Children == null)
                 helper.Split(node, false, minNodeSize);
+            Profiler.EndSample();
 
             if (node.Children == null)
             {
+                Profiler.BeginSample("C");
+
                 // Minlevel
                 node.ShouldRender = true;
                 checkDirty(node, outDirtyNodes, outMissingRenderdataNodes, parentDirty);
+                Profiler.EndSample();
+
                 return;
             }
+            Profiler.BeginSample("D");
 
             // Should not render
             node.ShouldRender = false;
             parentDirty = checkDirty(node, outDirtyNodes, outMissingRenderdataNodes, parentDirty);
+            Profiler.EndSample();
 
             for (int i = 0; i < 8; i++)
                 UpdateClipmaps(node.Children[i], cameraPosition, minNodeSize, outDirtyNodes, outMissingRenderDataNodes,
@@ -198,13 +215,22 @@ namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
                 setShouldRenderFalseRecursive(node.Children[i]);
         }
 
-        private static bool isQualityGoodEnough(RenderOctreeNode node, Vector3 cameraPosition, float distanceFactor)
+        private static bool isQualityGoodEnoughWithDistanceFactor(RenderOctreeNode node, Vector3 cameraPosition, float distanceFactor)
         {
             var center = (Vector3)node.LowerLeft.ToVector3() + Vector3.one * node.Size * 0.5f;
             var dist = Vector3.Distance(cameraPosition, center);
 
             // Should take into account the fact that if minNodeSize changes, the quality of far away nodes changes so the threshold maybe should change too
             var qualityGoodEnough = dist > node.Size * distanceFactor;
+            return qualityGoodEnough;
+        }
+        private static bool isQualityGoodEnoughCurve(RenderOctreeNode node, Vector3 cameraPosition, float distanceFactor,AnimationCurve curve, float curveEnd)
+        {
+            var center = (Vector3)node.LowerLeft.ToVector3() + Vector3.one * node.Size * 0.5f;
+            var dist = Vector3.Distance(cameraPosition, center);
+
+            // Should take into account the fact that if minNodeSize changes, the quality of far away nodes changes so the threshold maybe should change too
+            var qualityGoodEnough = dist * curve.Evaluate(dist/curveEnd) * distanceFactor > node.Size;
             return qualityGoodEnough;
         }
 

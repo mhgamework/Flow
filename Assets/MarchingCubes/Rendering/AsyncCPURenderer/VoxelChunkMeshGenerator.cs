@@ -19,23 +19,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         Point3[] Vertices = new Point3[] { new Point3(0, 0, 1), new Point3(1, 0, 1), new Point3(1, 0, 0), new Point3(0, 0, 0), new Point3(0, 1, 1), new Point3(1, 1, 1), new Point3(1, 1, 0), new Point3(0, 1, 0) };
         private MarchingCubesService s;
 
-        public VoxelMeshData GenerateMeshFromVoxelData(Array3D<VoxelData> data)
+        public void GenerateMeshFromVoxelData(Array3D<VoxelData> data, VoxelMeshData outData)
         {
-            List<Vector3> verts;
-            int numMeshes;
-            List<int[]> indicesList;
-            List<Color> color;
-            List<Color> vertexColors;
-            generateMeshVertexColors(data, out verts, out numMeshes, out indicesList, out color, out vertexColors);
-
-            return new VoxelMeshData
-            {
-                colors = color,
-                vertices = verts,
-                indicesList = indicesList,
-                numMeshes = numMeshes,
-                vertexColors = vertexColors
-            };
+            generateMeshVertexColors(data, outData);
         }
         public void generateMeshSeparateMaterials(Array3D<VoxelData> data, out List<Vector3> doubledVertices, out int numMeshes, out List<int[]> indicesList, out List<Color> colors)
         {
@@ -133,7 +119,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                                 matvals[i] = mat;
                             }
                             Color outColor;
-                            s.Polygonise(gridvals, matvals, points, 0, vertices, p, materials, vertexColors); // Vertex colors not used
+                            s.Polygonise(gridvals, matvals, points, 0, vertices, p, vertexColors); // Vertex colors not used
 
                             if (!isMultiColor) break; // default case, speedup!
                         }
@@ -167,12 +153,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             }
         }
 
-        public void generateMeshVertexColors(Array3D<VoxelData> data, out List<Vector3> vertices, out int numMeshes, out List<int[]> indicesList, out List<Color> colors, out List<Color> vertexColors)
+        public void generateMeshVertexColors(Array3D<VoxelData> data, VoxelMeshData outData)
         {
-            var materials = new List<Color>();
-            vertices = new List<Vector3>();
-
-            vertexColors = new List<Color>();
+            var outVertices = outData.vertices;
+            var outVertexColors = outData.vertexColors;
 
             var gridvals = new double[8];
             var matvals = new Color[8];
@@ -182,7 +166,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             var maxZ = data.Size.Z - 1;//size.Z - 2;
 
 
-            var actualIsoSurface = 0;
 
             var points = Vertices.Select(v => v.ToVector3()).ToArray(); // *0.99f to show edges :)
 
@@ -203,7 +186,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                             gridvals[i] = val;
                             matvals[i] = mat;
                         }
-                        s.Polygonise(gridvals, matvals, points, 0, vertices, p, materials, vertexColors);
+                        s.Polygonise(gridvals, matvals, points, 0, outVertices, p, outVertexColors);
 
 
                     }
@@ -212,36 +195,30 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
 
 
-            indicesList = new List<int[]>(1);
+            //indicesList = new List<int[]>(1);
 
-            var indices = new int[vertices.Count * 2];
 
-            var iIndex = 0;
             int iV = 0;
-            for (; iV < vertices.Count; iV += 3)
+            for (; iV < outVertices.Count; iV += 3)
             {
-                indices[iIndex++] = iV + 0;
-                indices[iIndex++] = iV + 1;
-                indices[iIndex++] = iV + 2;
+                outData.indices.Add(iV + 0);// indices[iIndex++] = iV + 0;
+                outData.indices.Add(iV + 1);
+                outData.indices.Add(iV + 2);
             }
-            for (; iV < vertices.Count*2; iV += 3)
+            for (; iV < outVertices.Count * 2; iV += 3)
             {
-                indices[iIndex++] = iV + 0;
-                indices[iIndex++] = iV + 2;
-                indices[iIndex++] = iV + 1;
+                outData.indices.Add(iV + 0);
+                outData.indices.Add(iV + 2);
+                outData.indices.Add(iV + 1);
+
             }
-
-
-            indicesList.Add(indices);
-
-
             // Double the verts so normals can be correctly calculated
-            vertices.AddRange(vertices);
-            vertexColors.AddRange(vertexColors);
-            
-            numMeshes = 1;
-            colors = null;//
-        
+            outVertices.AddRange(outVertices);
+            outVertexColors.AddRange(outVertexColors);
+
+
+            outData.numMeshes = 1;
+
         }
 
     }

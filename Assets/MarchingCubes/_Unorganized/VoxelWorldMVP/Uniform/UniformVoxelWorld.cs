@@ -29,7 +29,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             UniformVoxelData ret;
             if (chunks.TryGetValue(chunkCoord, out ret)) return ret;
 
-            ret = generator.Generate(chunkCoord.Multiply(ChunkSize), ChunkSize + new Point3(1, 1, 1), 1);
+            ret = new UniformVoxelData()
+            {
+                Data = new MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures.Array3D<VoxelData>(
+                    ChunkSize + new Point3(1, 1, 1))
+            };
+
+            generator.Generate(chunkCoord.Multiply(ChunkSize), ChunkSize + new Point3(1, 1, 1), 1, ret);
             chunks.Add(chunkCoord, ret);
 
             return ret;

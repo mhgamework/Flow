@@ -23,6 +23,7 @@ namespace Assets.MarchingCubes.Rendering
         private Material TemplateMaterial;
         private readonly Material vertexColorMaterial;
         private readonly VoxelRenderingEngineScript voxelRenderingEngineScript;
+        private readonly bool disableThreadingForDebugging;
         private Dictionary<Color, Material> materialsDictionary;
 
         private IConcurrentVoxelGenerator concurrentVoxelGenerator;
@@ -32,7 +33,7 @@ namespace Assets.MarchingCubes.Rendering
 
         private List<ConcurrentVoxelGenerator.Task> tempTaskList = new List<ConcurrentVoxelGenerator.Task>();
 
-        private Dictionary<ChunkCoord, OctreeNode> nodeLookup = new Dictionary<ChunkCoord, OctreeNode>();
+        private Dictionary<ChunkCoord, OctreeNode> nodeLookup = new Dictionary<ChunkCoord, OctreeNode>( new ChunkCoord.Comparer());
 
         public int UnavailableChunks { get; private set; }
 
@@ -42,7 +43,8 @@ namespace Assets.MarchingCubes.Rendering
             List<VoxelMaterial> voxelMaterials,
             OctreeVoxelWorld octreeVoxelWorld,
             Transform transform,
-            VoxelRenderingEngineScript voxelRenderingEngineScript)
+            VoxelRenderingEngineScript voxelRenderingEngineScript,
+            bool disableThreadingForDebugging)
         {
             this.concurrentVoxelGenerator = concurrentVoxelGenerator;
             this.chunkPool = chunkPool;
@@ -51,6 +53,7 @@ namespace Assets.MarchingCubes.Rendering
             TemplateMaterial = voxelRenderingEngineScript.TemplateMaterial;
             vertexColorMaterial = voxelRenderingEngineScript.VertexColorMaterial;
             this.voxelRenderingEngineScript = voxelRenderingEngineScript;
+            this.disableThreadingForDebugging = disableThreadingForDebugging;
 
             this.materialsDictionary = voxelMaterials.ToDictionary(v => v.color, c =>
             {
@@ -59,12 +62,16 @@ namespace Assets.MarchingCubes.Rendering
                 return mat;
             });
 
-            var t = new Thread(() =>testThread(0));
-            t.Start();
-            t = new Thread(() => testThread(1));
-            t.Start();
-            t = new Thread(() => testThread(2));
-            t.Start();
+            if (!disableThreadingForDebugging)
+            {
+                var t = new Thread(() => testThread(0));
+                t.Start();
+                t = new Thread(() => testThread(1));
+                t.Start();
+                t = new Thread(() => testThread(2));
+                t.Start();
+            }
+         
         }
 
         private Queue<ChunkCoord> parallelGen = new Queue<ChunkCoord>();
@@ -77,19 +84,7 @@ namespace Assets.MarchingCubes.Rendering
                 var buf = new List<ChunkCoord>();
                 for (; ; )
                 {
-                    lock (parallelGen)
-                    {
-                        while (parallelGen.Count == 0)
-                            Monitor.Wait(parallelGen);
-                        buf.Clear();
-                        while (parallelGen.Count != 0 && buf.Count < amount)
-                            buf.Add(parallelGen.Dequeue());
-                    }
-                    for (int i = 0; i < buf.Count; i++)
-                    {
-                        octreeVoxelWorld.PregenerateChunk(buf[i]);
-                        Debug.Log(num + " " + buf[i]);
-                    }
+                    PregenerateChunksThread(num, buf, amount);
                 }
             }
             catch (Exception e)
@@ -99,6 +94,36 @@ namespace Assets.MarchingCubes.Rendering
             }
        
 
+        }
+
+        private List<ChunkCoord> debugBuf = new List<ChunkCoord>();
+        public void Update()
+        {
+            Profiler.BeginSample("AsyncCPUVoxelRenderer-PregenerateChunksThread");
+            if (disableThreadingForDebugging)
+            {
+                PregenerateChunksThread(999, debugBuf, 4);
+            }
+            Profiler.EndSample();
+
+        }
+
+        private void PregenerateChunksThread(int num, List<ChunkCoord> buf, int amount)
+        {
+            if (disableThreadingForDebugging && parallelGen.Count == 0) return;
+            lock (parallelGen)
+            {
+                while (parallelGen.Count == 0)
+                    Monitor.Wait(parallelGen);
+                buf.Clear();
+                while (parallelGen.Count != 0 && buf.Count < amount)
+                    buf.Add(parallelGen.Dequeue());
+            }
+            for (int i = 0; i < buf.Count; i++)
+            {
+                octreeVoxelWorld.PregenerateChunk(buf[i]);
+                //Debug.Log(num + " " + buf[i]);
+            }
         }
 
         /// <summary>
@@ -159,6 +184,8 @@ namespace Assets.MarchingCubes.Rendering
             activateRenderdata(node, ret);
 
             frame = result.Frame;
+
+            concurrentVoxelGenerator.ReleaseChunkData(result.data);
 
             return ret;
         }

@@ -21,21 +21,18 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private UniformVoxelData first = null;
 
-        public UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution)
+        public void Generate(Point3 start, Point3 chunkSize, int sampleResolution, UniformVoxelData outDat)
         {
             //if (first!= null) return first;
-            var ret = new UniformVoxelData();
-            ret.Data = new Array3D<VoxelData>(chunkSize);
-            ret.Data.ForEach((v, p) =>
+            outDat.Data.ForEach((v, p) =>
             {
-                ret.Data[p] = new VoxelData()
+                outDat.Data[p] = new VoxelData()
                 {
                     Material = material,
                     Density = density
                 };
             });
             //first = ret;
-            return ret;
         }
     }
 }

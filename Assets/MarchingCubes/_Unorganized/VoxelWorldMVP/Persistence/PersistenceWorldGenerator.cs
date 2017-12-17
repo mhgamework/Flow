@@ -66,8 +66,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
             }
         }
 
-        public UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution)
+        public void Generate(Point3 start, Point3 chunkSize, int sampleResolution, UniformVoxelData outData)
         {
+            throw new NotImplementedException();
             //UnityEngine.Debug.Log(chunkSize.ToString() + " " + _asset.ChunkSize + " " + _asset.ChunkOversize);
             for (int i = 0; i < 3; i++)
                 if (chunkSize[i] != _asset.ChunkOversize + _asset.ChunkSize) // Should be multiple of the chunk size in the asset, minus the LOD overflow
@@ -86,12 +87,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
             if (theChunk != null)
             {
                 //Debug.Log("Loaded chunk " + start + " " + chunkSize + " " + relativeResolution);
-                return toChunkData(theChunk);
+                //return toChunkData(theChunk);
             }
             // This should mean that there is no change in the chunk data for this sector so use the world generator
             //Debug.Log("Unable to load chunk " + start + " " + chunkSize + " " + relativeResolution);
 
-            return _decorated.Generate(start, chunkSize, sampleResolution);
+            //return _decorated.Generate(start, chunkSize, sampleResolution);
         }
 
         private UniformVoxelData toChunkData(SerializedChunk chunk)

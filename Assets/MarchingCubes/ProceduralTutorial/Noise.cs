@@ -4,7 +4,7 @@ namespace Assets.MarchingCubes.ProceduralTutorial
 {
     public static class Noise
     {
-        public static float[,] noise(int size, int octaves, float scale, float persistence, float lacunarity, int seed, Vector2 offset, float sampleResolution = 1)
+        public static void noise(float[,] map, int size, int octaves, float scale, float persistence, float lacunarity, int seed, Vector2 offset, float sampleResolution = 1)
         {
             var test = new TerrainTest();
             var rand = new System.Random(seed);
@@ -24,61 +24,58 @@ namespace Assets.MarchingCubes.ProceduralTutorial
             //float halfSize = size / 2f;
 
 
-            var map = new float[size, size];
             for (int x = 0; x < size; x++)
-            for (int z = 0; z < size; z++)
-            {
-
-                float noiseHeight = 0.0f;
-                float amplitude = 0.5f;
-                float frequency = 1.0f;
-                for (int i = 0; i < octaves; i++)
+                for (int z = 0; z < size; z++)
                 {
-                    //var sampleX = (x - halfSize) / scale * frequency + octaveOffsets[i].x;
-                    //var sampleZ = (z - halfSize) / scale * frequency + octaveOffsets[i].y;
 
-                    var sampleX = (((x ) * sampleResolution + offset.x) / scale) * frequency + octaveOffsets[i].x;
-                    var sampleZ = (((z ) * sampleResolution + offset.y) / scale) * frequency + octaveOffsets[i].y;
+                    float noiseHeight = 0.0f;
+                    float amplitude = 0.5f;
+                    float frequency = 1.0f;
+                    for (int i = 0; i < octaves; i++)
+                    {
+                        //var sampleX = (x - halfSize) / scale * frequency + octaveOffsets[i].x;
+                        //var sampleZ = (z - halfSize) / scale * frequency + octaveOffsets[i].y;
 
-                    float n = Mathf.PerlinNoise(sampleX, sampleZ);//* 2 - 1;
-                    //float n = test.noised(new Vector3(sampleX, 0, sampleZ)).x * 2 - 1;
+                        var sampleX = (((x) * sampleResolution + offset.x) / scale) * frequency + octaveOffsets[i].x;
+                        var sampleZ = (((z) * sampleResolution + offset.y) / scale) * frequency + octaveOffsets[i].y;
 
-                    noiseHeight += amplitude * n; // accumulate values		
-                    amplitude *= persistence; // amplitude decrease
+                        //float n = 1- Mathf.Abs (Mathf.PerlinNoise(sampleX, sampleZ)* 2 - 1);
+                        float n = Mathf.PerlinNoise(sampleX, sampleZ);
+                                                                      //float n = test.noised(new Vector3(sampleX, 0, sampleZ)).x * 2 - 1;
 
-                    frequency *= lacunarity; // frequency increase
+                        noiseHeight += amplitude * n; // accumulate values		
+                        amplitude *= persistence; // amplitude decrease
+
+                        frequency *= lacunarity; // frequency increase
+                    }
+
+
+                    map[x, z] = noiseHeight;
+                    if (noiseHeight < min)
+                        min = noiseHeight;
+                    if (noiseHeight > max)
+                        max = noiseHeight;
+
+
                 }
-
-
-                map[x, z] = noiseHeight;
-                if (noiseHeight < min)
-                    min = noiseHeight;
-                if (noiseHeight > max)
-                    max = noiseHeight;
-
-
-            }
 
             var diff = max - min;
             for (int x = 0; x < size; x++)
-            for (int z = 0; z < size; z++)
-            {
-                //map[x, z] = (map[x, z] - min) / diff;
-            }
+                for (int z = 0; z < size; z++)
+                {
+                    //map[x, z] = (map[x, z] - min) / diff;
+                }
 
-            return map;
         }
 
-        public static float[,] calibrationNoise(int size,  float scale, Vector2 offset)
+        public static void calibrationNoise(float[,] map, int size, float scale, Vector2 offset)
         {
-            var map = new float[size, size];
 
             for (int x = 0; x < size; x++)
-            for (int z = 0; z < size; z++)
-            {
-                map[x, z] = new Vector2((x + offset.x) / scale, (z + offset.y) / scale).magnitude;
-            }
-            return map;
+                for (int z = 0; z < size; z++)
+                {
+                    map[x, z] = new Vector2((x + offset.x) / scale, (z + offset.y) / scale).magnitude;
+                }
 
         }
 

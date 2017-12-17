@@ -93,7 +93,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             }
             if (chunkData == null) return;
             if (lastUpdatedFrame >= chunkData.LastChangeFrame) return;
-            var data = generateMesh(meshGenerator, chunkData.Data);
+
+            var data = VoxelMeshData.CreatePreallocated();
+
+             meshGenerator.GenerateMeshFromVoxelData(chunkData.Data, data);
 
             setMeshToUnity(data);
             lastUpdatedFrame = Time.frameCount;
@@ -124,10 +127,5 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 renderer.sharedMaterial = VertexColorMaterial;
         }
 
-        public static VoxelMeshData generateMesh(VoxelChunkMeshGenerator meshGenerator, Array3D<VoxelData> chunkData)
-        {
-            return meshGenerator.GenerateMeshFromVoxelData(chunkData);
-
-        }
     }
 }

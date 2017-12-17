@@ -44,9 +44,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private int chunkDataSize;
 
-        public VoxelMeshData GenerateMeshFromVoxelData(Array3D<VoxelData> data)
+        public void GenerateMeshFromVoxelData(Array3D<VoxelData> data, VoxelMeshData outData)
         {
-            return null;
         }
 
         private VoxelMeshData retrieveResult(Buffers buffers)
@@ -181,6 +180,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void RemoveNodeData(OctreeNode node)
         {
+        }
+
+        public void Update()
+        {
+            
+        }
+
+        public void ReleaseChunkData(VoxelMeshData resultData)
+        {
+            
         }
     }
 }

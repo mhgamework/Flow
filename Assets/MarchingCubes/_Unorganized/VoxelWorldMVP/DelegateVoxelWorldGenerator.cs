@@ -22,20 +22,18 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             this.worldFunction = (a, b) => worldFunction(a);
         }
 
-        public UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution)
+        public void Generate(Point3 start, Point3 chunkSize, int sampleResolution, UniformVoxelData outData)
         {
             //Profiler.BeginSample("PRF-GenerateChunk");
-
-            var ret = new UniformVoxelData();
-            ret.Data = new Array3D<VoxelData>(chunkSize);
-            ret.Data.ForEach((v, p) =>
+            
+            outData.Data.ForEach((v, p) =>
             {
-                ret.Data[p] = worldFunction(p * sampleResolution + start, sampleResolution);
+                outData.Data[p] = worldFunction(p * sampleResolution + start, sampleResolution);
             });
 
             //Profiler.EndSample();
 
-            return ret;
+         
         }
     }
 }

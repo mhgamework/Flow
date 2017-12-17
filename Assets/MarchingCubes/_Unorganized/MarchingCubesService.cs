@@ -44,7 +44,7 @@ namespace Assets.MarchingCubes
            of totally below the isolevel.
         */
         Vector3[] vertlist = new Vector3[12];//vertlist[12];
-        public int Polygonise(double[] gridVals, Color[] matVals, Vector3[] gridP, double isolevel, List<Vector3> triangles, Point3 offset, List<Color> colors, List<Color> vertexColors)
+        public int Polygonise(double[] gridVals, Color[] matVals, Vector3[] gridP, double isolevel, List<Vector3> triangles, Point3 offset, List<Color> vertexColors)
         {
             int i;
             int ntriang;
@@ -124,7 +124,6 @@ namespace Assets.MarchingCubes
                 vertexColors.Add(material);
                 vertexColors.Add(material);
 
-                colors.Add(material);
                 ntriang++;
             }
 

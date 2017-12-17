@@ -13,7 +13,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         /// <param name="start"></param>
         /// <param name="chunkSize"></param>
         /// <param name="sampleResolution">space between each voxel</param>
+        /// <param name="outData"></param>
         /// <returns></returns>
-        UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution);
+        void Generate(Point3 start, Point3 chunkSize, int sampleResolution, UniformVoxelData outData);
     }
+   
 }

@@ -30,5 +30,7 @@ namespace Assets.MarchingCubes.Rendering
         void HideChunk(VoxelChunkRendererScript renderObject);
 
         int GetLastChangeFrame(ChunkCoord node);
+
+        void Update();
     }
 }

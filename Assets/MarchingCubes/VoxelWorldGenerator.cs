@@ -6,6 +6,7 @@ using Assets.MarchingCubes.ProceduralTutorial;
 using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
+using Assets.Reusable;
 using DirectX11;
 using MHGameWork.TheWizards;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
@@ -28,6 +29,8 @@ namespace Assets.MarchingCubes
         public bool AutoGenerate = false;
         public int WorldSize = 10;
         public float WorldScale = 1;
+        [Range(0.1f, 2)]
+
         public float EditorScale = 1;
         [Range(1, 20)]
         public int Octaves;
@@ -205,25 +208,24 @@ namespace Assets.MarchingCubes
             }
         }
 
-        public MapData GenerateMapData(Vector2 lowerLeft, int sampleDist, int mapSize, float scale)
+        public void GenerateMapData(MapData outMapData, Vector2 lowerLeft, int sampleDist, int mapSize, float scale)
         {
 
-            var map = Noise.noise(mapSize, Octaves, WorldScale* scale, Persistence, Lacunarity, Seed, new Vector2(Offset.x, Offset.y) + lowerLeft, sampleDist);
+            Noise.noise(outMapData.HeightMap, mapSize, Octaves, WorldScale * scale, Persistence, Lacunarity, Seed, /*new Vector2(Offset.x, Offset.y) +*/ lowerLeft, sampleDist);
 
             if (GenerateCalibrationNoise)
-                map = Noise.calibrationNoise(mapSize, WorldScale* scale / sampleDist, Offset);
+                Noise.calibrationNoise(outMapData.HeightMap, mapSize, WorldScale * scale / sampleDist, Offset);
 
 
-            var colorMap = new Color[mapSize * mapSize];
             for (int x = 0; x < mapSize; x++)
                 for (int z = 0; z < mapSize; z++)
                 {
-                    var height = map[x, z];
+                    var height = outMapData.HeightMap[x, z];
                     for (int i = 0; i < Regions.Length; i++)
                     {
                         if (height <= Regions[i].Height)
                         {
-                            colorMap[x + z * mapSize] = Regions[i].Color;
+                            outMapData.ColorMap[x + z * mapSize] = Regions[i].Color;
                             break;
                         }
 
@@ -231,30 +233,34 @@ namespace Assets.MarchingCubes
                     }
                 }
 
-            return new MapData(map, colorMap);
         }
 
-        public Array3D<VoxelData> GenerateVoxelData(MapData mapData, int sampleDistance, float chunkHeight, VoxelMaterial material, float editorScale)
+        public void GenerateVoxelData(MapData mapData, int sampleDistance, float chunkHeight, Dictionary<Color, VoxelMaterial> material, float editorScale, Array3D<VoxelData> outData)
         {
-            return VoxelDataGenerator.VoxelDataFromMapData(mapData, sampleDistance, chunkHeight, material, HeightMultiplier * WorldScale* editorScale, MeshHightCurve);
+            VoxelDataGenerator.VoxelDataFromMapData(mapData, sampleDistance, chunkHeight, material, HeightMultiplier * WorldScale * editorScale, MeshHightCurve, outData);
         }
 
         public void DrawMapInEditor()
         {
             var mapSize = WorldSize / getLodSampleDistance();
 
-            var data = GenerateMapData(new Vector2(1, 1) * WorldSize / 2/ getLodSampleDistance(), getLodSampleDistance(), mapSize,EditorScale);
+            var mapData = new MapData(mapSize);
+
+            // Say center as 0,0, then lowerleft is at:
+            var lowerLeft = Offset * WorldScale*EditorScale - new Vector2(1, 1) * WorldSize / 2 * getLodSampleDistance();
+
+            GenerateMapData(mapData, lowerLeft, getLodSampleDistance(), mapSize, EditorScale);
 
 
 
             if (Mode == DrawMode.Noise)
-                WorldDisplay.Instance.DrawTexture(WorldDisplay.TextureFromHeightMap(data.HeightMap), getLodSampleDistance());
+                WorldDisplay.Instance.DrawTexture(WorldDisplay.TextureFromHeightMap(mapData.HeightMap), getLodSampleDistance());
             else if (Mode == DrawMode.Color)
-                WorldDisplay.Instance.DrawTexture(WorldDisplay.TextureFromColorMap(data.ColorMap, mapSize, mapSize), getLodSampleDistance());
+                WorldDisplay.Instance.DrawTexture(WorldDisplay.TextureFromColorMap(mapData.ColorMap, mapSize, mapSize), getLodSampleDistance());
             if (DrawMesh)
             {
                 var resolution = getLodSampleDistance();
-                WorldDisplay.Instance.DrawMesh(GenerateMeshForEditor(data, resolution, meshStartY, 1, MeshHightCurve),
+                WorldDisplay.Instance.DrawMesh(GenerateMeshForEditor(mapData, resolution, meshStartY, 1, MeshHightCurve),
                     new Vector3(10 * resolution, 10 * resolution, 10 * resolution), (mapSize) - 1);
             }
         }
@@ -268,9 +274,12 @@ namespace Assets.MarchingCubes
         {
             var gen = new VoxelChunkMeshGenerator(new MarchingCubesService());
 
-            var data = GenerateVoxelData(mapData, sampleDistance, chunkHeight, null,EditorScale);
+            var data = new Array3D<VoxelData>(new Point3(1, 1, 1) * mapData.HeightMap.GetLength(0));
 
-            var mesh = gen.GenerateMeshFromVoxelData(data);
+            GenerateVoxelData(mapData, sampleDistance, chunkHeight, GetMaterialsDictionary(), EditorScale, data);
+
+            var mesh = VoxelMeshData.CreatePreallocated();
+            gen.GenerateMeshFromVoxelData(data, mesh);
             return mesh;
         }
 
@@ -286,6 +295,29 @@ namespace Assets.MarchingCubes
                 this.parameter = parameter;
             }
         }
+
+        private Dictionary<Color, VoxelMaterial> materialsDictionaryCache;
+        public Dictionary<Color, VoxelMaterial> GetMaterialsDictionary()
+        {
+            if (materialsDictionaryCache == null)
+            {
+                lock (this)
+                {
+                    if (materialsDictionaryCache == null) // only first thread
+                    {
+                        materialsDictionaryCache = new Dictionary<Color, VoxelMaterial>(new ColorEqualityComparer());
+                        foreach (var r in Regions)
+                        {
+                            if (materialsDictionaryCache.ContainsKey(r.Color)) continue;
+                            materialsDictionaryCache.Add(r.Color, new VoxelMaterial() { color = r.Color });
+                        }
+                    }
+                }
+
+            }
+
+            return materialsDictionaryCache;
+        }
     }
     class DemoWorldGenerator : IWorldGenerator
     {
@@ -296,17 +328,20 @@ namespace Assets.MarchingCubes
             this.voxelWorldGenerator = voxelWorldGenerator;
         }
 
-        public UniformVoxelData Generate(Point3 start, Point3 chunkSize, int sampleResolution)
+        private bool init = false;
+        MapData cacheData;//Not thread safe!
+
+        public void Generate(Point3 start, Point3 chunkSize, int sampleResolution, UniformVoxelData outData)
         {
-            var map = voxelWorldGenerator.GenerateMapData(start.ToVector3().TakeXZ(), sampleResolution,chunkSize.X,1);
-
-            var ret = new UniformVoxelData()
+            if (!init)
             {
-                Data = voxelWorldGenerator.GenerateVoxelData(map, sampleResolution, start.Y, voxelWorldGenerator.VoxelMaterials[0],1),
-                LastChangeFrame = 0
-            };
+                cacheData = new MapData(chunkSize.X);
+                init = true;
+            }
+            voxelWorldGenerator.GenerateMapData(cacheData, start.ToVector3().TakeXZ(), sampleResolution, chunkSize.X, 1);
+            voxelWorldGenerator.GenerateVoxelData(cacheData, sampleResolution, start.Y,
+                voxelWorldGenerator.GetMaterialsDictionary(), 1, outData.Data);
 
-            return ret;
         }
     }
 
@@ -315,11 +350,12 @@ namespace Assets.MarchingCubes
         public readonly float[,] HeightMap;
         public readonly Color[] ColorMap;
 
-        public MapData(float[,] heightMap, Color[] colorMap)
+        public MapData(int size)
         {
-            HeightMap = heightMap;
-            ColorMap = colorMap;
+            HeightMap = new float[size, size];
+            ColorMap = new Color[size * size];
         }
+
     }
     [System.Serializable]
     public struct TerrainType

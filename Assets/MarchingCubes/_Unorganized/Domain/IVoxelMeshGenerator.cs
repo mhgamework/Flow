@@ -4,6 +4,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 {
     public interface IVoxelMeshGenerator
     {
-        VoxelMeshData GenerateMeshFromVoxelData(Array3D<VoxelData> voxelData);
+        void GenerateMeshFromVoxelData(Array3D<VoxelData> voxelData, VoxelMeshData outData);
     }
 }

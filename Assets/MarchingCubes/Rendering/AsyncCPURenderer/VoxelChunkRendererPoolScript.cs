@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using Assets.Reusable.Threading;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
@@ -8,12 +10,17 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private List<VoxelChunkRendererScript> freeChunks = new List<VoxelChunkRendererScript>();
 
+        public void Start()
+        {
+
+        }
+
         public VoxelChunkRendererScript RequestChunk()
         {
-            if (freeChunks.Count == 0)
-                allocateNewChunk();
+            if (freeChunks.Count == 0) 
+                refillPool();
             var ret = freeChunks[freeChunks.Count - 1];
-            freeChunks.RemoveAt(freeChunks.Count-1);
+            freeChunks.RemoveAt(freeChunks.Count - 1);
 
 
             //renderObject.name = "Node " + result.Frame + " " + node.LowerLeft + " " + node.Size + " V: " +
@@ -22,12 +29,24 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             return ret;
         }
 
+        private void refillPool()
+        {
+            MainThreadDispatcher.Instance.Dispatch(() =>
+            {
+                Profiler.BeginSample("Allocating Voxel Chunk Renderers");
+                for (int i = 0; i < 100; i++) // Make MOAR
+                    allocateNewChunk();
+                Profiler.EndSample();
+            });
+
+        }
+
         public void ReleaseChunk(VoxelChunkRendererScript chunk)
         {
             freeChunks.Add(chunk);
             chunk.gameObject.SetActive(false);
             chunk.transform.SetParent(transform);
-            
+
         }
 
         private void allocateNewChunk()

@@ -59,8 +59,8 @@ namespace Assets.Flow.FireSpirit
             voxelRenderer.transform.position = thePos;
             voxelRenderer.transform.localScale = new Vector3(1, 1, 1) * entity.SampleInterval;
 
-            
-            var mesh = gen.GenerateMeshFromVoxelData(data);
+            var mesh = VoxelMeshData.CreatePreallocated();
+            gen.GenerateMeshFromVoxelData(data, mesh);
 
             voxelRenderer.setMeshToUnity(mesh);
         }
