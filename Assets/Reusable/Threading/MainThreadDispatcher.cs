@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using UnityEngine;
 
 namespace Assets.Reusable.Threading
 {
-    public class MainThreadDispatcher : Singleton<MainThreadDispatcher>
+    public class MainThreadDispatcher : Singleton<MainThreadDispatcher>, IDispatcher
     {
         private int count = 0;
         private Queue<Action> queue = new Queue<Action>();
         private Thread mainThread;
-        public void Start()
+        public void Awake()
         {
             mainThread = Thread.CurrentThread;
         }
@@ -42,6 +43,11 @@ namespace Assets.Reusable.Threading
                 while (count == theCount) Monitor.Wait(queue);//Block until executed
             }
 
+        }
+
+        public bool IsMainThread()
+        {
+            return Thread.CurrentThread == mainThread;
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using Assets.MarchingCubes.Rendering.AsyncCPURenderer;
+using Assets.Reusable;
 using Assets.Reusable.Threading;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
@@ -35,7 +36,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public OctreeNode Root { get; set; }
         private Dictionary<ChunkCoord, UniformVoxelData> pregenCache; // Temp hacky to async generate nodes
-        private Stack<UniformVoxelData> unusedVoxelDataPool = new Stack<UniformVoxelData>(); // Temp hacky to async generate nodes
+
+        private ConcurrentObjectPool<UniformVoxelData> unusedVoxelDataPool;
 
         /// <summary>
         /// The depth is used to determine the size of the world
@@ -61,7 +63,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             pregenCache = new Dictionary<ChunkCoord, UniformVoxelData>(new ChunkCoord.Comparer());
 
-          
+            unusedVoxelDataPool = new ConcurrentObjectPool<UniformVoxelData>(createEmptyUniformVoxelData, 1000, 1000,
+                MainThreadDispatcher.Instance);
+
         }
 
         public void RunKernel1by1Single(Point3 minInclusive, Point3 maxInclusive, Func<VoxelData, Point3, VoxelData> act, int frame, OctreeNode data)
@@ -264,7 +268,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         /// <param name="c"></param>
         public void PregenerateChunk(ChunkCoord c)
         {
-            var data = getNewVoxelData();
+            var data = unusedVoxelDataPool.Take();
 
             generateInitialChunkData(c.LowerLeft, c.Depth, data);
             lock (pregenCache)
@@ -308,7 +312,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             }
             if (!res)
             {
-                data = getNewVoxelData();
+                data = unusedVoxelDataPool.Take();
                 generateInitialChunkData(octreeNode.LowerLeft, octreeNode.Depth, data); // Generate synchronously
                 Debug.Log("Generating chunk synchronously!");
             }
@@ -318,30 +322,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             allocChunkNoData(octreeNode);
         }
 
-        private UniformVoxelData getNewVoxelData()
+     private UniformVoxelData createEmptyUniformVoxelData()
         {
-            lock (unusedVoxelDataPool)
+            var data = new UniformVoxelData()
             {
-                if (unusedVoxelDataPool.Count == 0)
-                {
-                    MainThreadDispatcher.Instance.Dispatch(() =>
-                    {
-                        Profiler.BeginSample("Allocating new chunk data");
-                        // Make Moar
-                        for (int i = 0; i < 1000; i++)
-                        {
-                            var data = new UniformVoxelData()
-                            {
-                                Data = new Array3D<VoxelData>(new Point3(1, 1, 1) * (ChunkSize.X + 1 + ChunkOversize)),
-                                LastChangeFrame = 0
-                            };
-                            unusedVoxelDataPool.Push(data);
-                        }
-                        Profiler.EndSample();
-                    });
-                }
-                return unusedVoxelDataPool.Pop();
-            }
+                Data = new Array3D<VoxelData>(new Point3(1, 1, 1) * (ChunkSize.X + 1 + ChunkOversize)),
+                LastChangeFrame = 0
+            };
+            return data;
         }
 
         private void generateInitialChunkData(Point3 lowerLeft, int depth, UniformVoxelData outData)

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Assets.Reusable;
 using Assets.Reusable.Threading;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -7,49 +8,30 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 {
     public class VoxelChunkRendererPoolScript : MonoBehaviour
     {
-
-        private List<VoxelChunkRendererScript> freeChunks = new List<VoxelChunkRendererScript>();
-
+        private ConcurrentObjectPool<VoxelChunkRendererScript> freeChunksPool;
         public void Start()
         {
-
+            freeChunksPool =
+                new ConcurrentObjectPool<VoxelChunkRendererScript>(allocateNewChunk, 100, 100,
+                    MainThreadDispatcher.Instance);
         }
 
         public VoxelChunkRendererScript RequestChunk()
         {
-            if (freeChunks.Count == 0) 
-                refillPool();
-            var ret = freeChunks[freeChunks.Count - 1];
-            freeChunks.RemoveAt(freeChunks.Count - 1);
-
-
-            //renderObject.name = "Node " + result.Frame + " " + node.LowerLeft + " " + node.Size + " V: " +
-            //                result.data.vertices.Count;
-
-            return ret;
+            return freeChunksPool.Take();
         }
 
-        private void refillPool()
-        {
-            MainThreadDispatcher.Instance.Dispatch(() =>
-            {
-                Profiler.BeginSample("Allocating Voxel Chunk Renderers");
-                for (int i = 0; i < 100; i++) // Make MOAR
-                    allocateNewChunk();
-                Profiler.EndSample();
-            });
-
-        }
+     
 
         public void ReleaseChunk(VoxelChunkRendererScript chunk)
         {
-            freeChunks.Add(chunk);
             chunk.gameObject.SetActive(false);
             chunk.transform.SetParent(transform);
+            freeChunksPool.Release(chunk);
 
         }
 
-        private void allocateNewChunk()
+        private VoxelChunkRendererScript allocateNewChunk()
         {
             var renderObject = new GameObject();
             renderObject.SetActive(false);
@@ -59,8 +41,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             comp.AutomaticallyGenerateMesh = false;
             comp.transform.SetParent(transform);
             comp.initialize();
-
-            freeChunks.Add(comp);
+            return comp;
         }
     }
 }

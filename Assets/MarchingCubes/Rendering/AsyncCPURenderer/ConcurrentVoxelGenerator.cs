@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Assets.Reusable;
 using Assets.Reusable.Threading;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine.Profiling;
@@ -26,12 +27,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
         private List<Task> taskList = new List<Task>();
 
 
-        private Stack<VoxelMeshData> meshDataPool = new Stack<VoxelMeshData>();
+        private ConcurrentObjectPool<VoxelMeshData> meshDataPool;
 
         public ConcurrentVoxelGenerator(VoxelChunkMeshGenerator meshGenerator, bool debugDisableThreading)
         {
             this.meshGenerator = meshGenerator;
             this.debugDisableThreading = debugDisableThreading;
+            meshDataPool = new ConcurrentObjectPool<VoxelMeshData>(() => VoxelMeshData.CreatePreallocated(), 1000, 1000, MainThreadDispatcher.Instance);
         }
 
         // MUST BE CALLED!!
@@ -82,7 +84,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
                     taskList.RemoveAt(taskList.Count - 1);
 
                     if (!cache.ContainsKey(task.dataNode)) valid = true;
-                    data = takeFromPool();
+                    data = meshDataPool.Take();
                 }
             }
             //for (int j = 0; j < 20 && i < tasks.Length; j++)
@@ -98,26 +100,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
             }
         }
 
-        private VoxelMeshData takeFromPool()
-        {
-            lock (this)
-            {
-                if (meshDataPool.Count == 0)
-                {
-                    MainThreadDispatcher.Instance.Dispatch(() =>
-                    {
-                        Profiler.BeginSample("Allocate Mesh Data");
-                        for (int i = 0; i < 1000; i++)
-                        {
-                            meshDataPool.Push(VoxelMeshData.CreatePreallocated());
-                        }
-                        Profiler.EndSample();
-                    });
-                }
-                return meshDataPool.Pop();
-            }
-        }
-
+      
         private Stopwatch debugStopwatch = new Stopwatch();
 
         public void Update()
@@ -138,7 +121,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
         {
             lock (this)
             {
-                meshDataPool.Push(resultData);
+                meshDataPool.Release(resultData);
             }
         }
 
@@ -168,14 +151,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
 
         private VoxelMeshData firstData;
 
-     
 
-        private Result generateMeshTask(Task task, Stopwatch w,VoxelMeshData voxelMeshData)
+
+        private Result generateMeshTask(Task task, Stopwatch w, VoxelMeshData voxelMeshData)
         {
             w.Reset();
             w.Start();
             //if (firstData == null)
-             meshGenerator.GenerateMeshFromVoxelData(task.chunkData, voxelMeshData); // DANGEROES multithreaded
+            meshGenerator.GenerateMeshFromVoxelData(task.chunkData, voxelMeshData); // DANGEROES multithreaded
             w.Stop();
             return new Result
             {
