@@ -103,6 +103,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                         return VisitOptions.SkipChildren;
                 // inside
                 allocChunk(n);
+                makeUnsharedChunk(n);
                 RunKernel1by1Single(minInclusive, maxInclusive, act, frame, n);
 
                 return VisitOptions.Continue;
@@ -264,6 +265,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             return v.X + size.X * (v.Y + size.Y * v.Z);
         }
 
+        public void makeUnsharedChunk(OctreeNode n)
+        {
+            if (n.VoxelData == emptyChunkShared)
+            {
+                var newData = unusedVoxelDataPool.Take();
+                n.VoxelData.Data.ForEach((d, p) => newData.Data[p] = d);
+                n.VoxelData = newData;
+                n.VoxelData.LastChangeFrame = 0;
+            }
+        }
 
         /// <summary>
         /// Thread safe

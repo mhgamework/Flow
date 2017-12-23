@@ -7,6 +7,7 @@ using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using Assets.VR;
+using DirectX11;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -44,7 +45,7 @@ namespace Assets.MarchingCubes.Rendering
         private AsyncCPUVoxelRenderer renderingService;
 
         IConcurrentVoxelGenerator concurrentGenerator;
-
+        private OctreeVoxelWorld octreeVoxelWorld;
 
 
         public void Start()
@@ -61,11 +62,11 @@ namespace Assets.MarchingCubes.Rendering
             var rendererObject = new GameObject("Renderer");
             rendererObject.transform.SetParent(transform);
 
-            var world = World.CreateNewWorld(); // createTestWorld();
+            octreeVoxelWorld = World.CreateNewWorld();
 
 
             if (UseGpuRenderer)
-                concurrentGenerator = createGpuRenderer( world);
+                concurrentGenerator = createGpuRenderer( octreeVoxelWorld);
             else
                 concurrentGenerator = createCPURenderer();
        
@@ -73,16 +74,22 @@ namespace Assets.MarchingCubes.Rendering
                 concurrentGenerator,
                 chunkPool,
                 World.VoxelMaterials,
-                world,
+                octreeVoxelWorld,
                 rendererObject.transform,
                 this,
                 !enableMultithreading
             );
 
-            clipmapsOctreeService = new ClipmapsOctreeService(world, renderingService,LodDistanceCurve, LodDistanceCurveEnd);
+            clipmapsOctreeService = new ClipmapsOctreeService(octreeVoxelWorld, renderingService,LodDistanceCurve, LodDistanceCurveEnd);
 
 
         }
+
+        public OctreeVoxelWorld GetWorld()
+        {
+            return octreeVoxelWorld;
+        }
+
 
         private IConcurrentVoxelGenerator createGpuRenderer(OctreeVoxelWorld world)
         {
@@ -120,5 +127,9 @@ namespace Assets.MarchingCubes.Rendering
                 DebugText.text = renderingService.UnavailableChunks.ToString();
         }
 
+        public Vector3 ToVoxelSpace(Vector3 min)
+        {
+            return min / RenderScale;
+        }
     }
 }
