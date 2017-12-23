@@ -4,9 +4,8 @@ namespace Assets.MarchingCubes.ProceduralTutorial
 {
     public static class Noise
     {
-        public static void noise(float[,] map, int size, int octaves, float scale, float persistence, float lacunarity, int seed, Vector2 offset, float sampleResolution = 1)
+        public static void noise(float[,] map, int size, int octaves, float scale, float persistence, float lacunarity, int seed, Vector2 offset, float sampleResolution , out float min, out float max)
         {
-            var test = new TerrainTest();
             var rand = new System.Random(seed);
 
             Vector2[] octaveOffsets = new Vector2[octaves];
@@ -18,8 +17,8 @@ namespace Assets.MarchingCubes.ProceduralTutorial
                 octaveOffsets[i] = new Vector2(offsetX, offsetY);// + offset;
             }
 
-            var min = float.MaxValue;
-            var max = float.MinValue;
+            min = float.MaxValue;
+            max = float.MinValue;
 
             //float halfSize = size / 2f;
 

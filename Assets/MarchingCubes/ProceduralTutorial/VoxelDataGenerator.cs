@@ -9,12 +9,25 @@ namespace Assets.MarchingCubes.ProceduralTutorial
     {
 
 
-        public static void VoxelDataFromMapData(MapData mapData, int sampleDistance, float chunkHeight, Dictionary<Color, VoxelMaterial> voxelMaterialDict, float heightMultiplier, AnimationCurve oriCurve, Array3D<VoxelData> outData)
+        public static void VoxelDataFromMapData(MapData mapData, int sampleDistance, float chunkHeight, Dictionary<Color, VoxelMaterial> voxelMaterialDict, float heightMultiplier, AnimationCurve oriCurve, Array3D<VoxelData> outData, out bool isEmpty)
         {
-            var curve = new AnimationCurve(oriCurve.keys);
 
+
+            var curve = new AnimationCurve(oriCurve.keys);
             var mapSize = mapData.HeightMap.GetLength(0);
             var chunkSize = mapSize;
+
+            var min = curve.Evaluate(mapData.Min) * heightMultiplier;
+            var max = curve.Evaluate(mapData.Max) * heightMultiplier;
+
+            if (min > chunkHeight + chunkSize * sampleDistance || max < chunkHeight)
+            {
+                isEmpty = true;
+                return;// Done
+            }
+
+            isEmpty = false;
+
 
             //var data = new Array3D<VoxelData>(new DirectX11.Point3(chunkSize, chunkSize, chunkSize));
             for (int x = 0; x < chunkSize; x++)

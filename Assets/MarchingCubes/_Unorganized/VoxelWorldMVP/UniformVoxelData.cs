@@ -13,6 +13,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     public class UniformVoxelData
     {
         public Array3D<VoxelData> Data { get;  set; }
-        public int LastChangeFrame { get;  set; }   
+        public int LastChangeFrame { get;  set; }
+
+        public bool isEmpty;
     }
 }

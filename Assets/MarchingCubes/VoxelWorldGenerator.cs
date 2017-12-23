@@ -211,7 +211,7 @@ namespace Assets.MarchingCubes
         public void GenerateMapData(MapData outMapData, Vector2 lowerLeft, int sampleDist, int mapSize, float scale)
         {
 
-            Noise.noise(outMapData.HeightMap, mapSize, Octaves, WorldScale * scale, Persistence, Lacunarity, Seed, /*new Vector2(Offset.x, Offset.y) +*/ lowerLeft, sampleDist);
+            Noise.noise(outMapData.HeightMap, mapSize, Octaves, WorldScale * scale, Persistence, Lacunarity, Seed, /*new Vector2(Offset.x, Offset.y) +*/ lowerLeft, sampleDist, out outMapData.Min, out outMapData.Max);
 
             if (GenerateCalibrationNoise)
                 Noise.calibrationNoise(outMapData.HeightMap, mapSize, WorldScale * scale / sampleDist, Offset);
@@ -235,9 +235,9 @@ namespace Assets.MarchingCubes
 
         }
 
-        public void GenerateVoxelData(MapData mapData, int sampleDistance, float chunkHeight, Dictionary<Color, VoxelMaterial> material, float editorScale, Array3D<VoxelData> outData)
+        public void GenerateVoxelData(MapData mapData, int sampleDistance, float chunkHeight, Dictionary<Color, VoxelMaterial> material, float editorScale, Array3D<VoxelData> outData, out bool isEmpty)
         {
-            VoxelDataGenerator.VoxelDataFromMapData(mapData, sampleDistance, chunkHeight, material, HeightMultiplier * WorldScale * editorScale, MeshHightCurve, outData);
+            VoxelDataGenerator.VoxelDataFromMapData(mapData, sampleDistance, chunkHeight, material, HeightMultiplier * WorldScale * editorScale, MeshHightCurve, outData,out isEmpty);
         }
 
         public void DrawMapInEditor()
@@ -247,7 +247,7 @@ namespace Assets.MarchingCubes
             var mapData = new MapData(mapSize);
 
             // Say center as 0,0, then lowerleft is at:
-            var lowerLeft = Offset * WorldScale*EditorScale - new Vector2(1, 1) * WorldSize / 2 * getLodSampleDistance();
+            var lowerLeft = Offset * WorldScale * EditorScale - new Vector2(1, 1) * WorldSize / 2 * getLodSampleDistance();
 
             GenerateMapData(mapData, lowerLeft, getLodSampleDistance(), mapSize, EditorScale);
 
@@ -276,7 +276,8 @@ namespace Assets.MarchingCubes
 
             var data = new Array3D<VoxelData>(new Point3(1, 1, 1) * mapData.HeightMap.GetLength(0));
 
-            GenerateVoxelData(mapData, sampleDistance, chunkHeight, GetMaterialsDictionary(), EditorScale, data);
+            bool isEmpty;
+            GenerateVoxelData(mapData, sampleDistance, chunkHeight, GetMaterialsDictionary(), EditorScale, data,out isEmpty);
 
             var mesh = VoxelMeshData.CreatePreallocated();
             gen.GenerateMeshFromVoxelData(data, mesh);
@@ -329,31 +330,58 @@ namespace Assets.MarchingCubes
         }
 
         private bool init = false;
-        MapData cacheData;//Not thread safe!
+        //MapData cacheData;//Not thread safe!
+
+        private Dictionary<Thread, MapData> cacheData = new Dictionary<Thread, MapData>(100); // Fixed capacity thread local storage hack!!
+
 
         public void Generate(Point3 start, Point3 chunkSize, int sampleResolution, UniformVoxelData outData)
         {
-            if (!init)
+            MapData mData;
+
+            // Maybe not thread safe :s
+            // Lock for now
+            lock (cacheData)
             {
-                cacheData = new MapData(chunkSize.X);
-                init = true;
+                if (!cacheData.ContainsKey(Thread.CurrentThread))
+                {
+                    // Magic
+                    cacheData[Thread.CurrentThread] = new MapData(chunkSize.X);
+                    if (cacheData.Count > 90) throw new Exception("WARNING might run into threading errors because resize");
+                }
+                mData = cacheData[Thread.CurrentThread];
             }
-            voxelWorldGenerator.GenerateMapData(cacheData, start.ToVector3().TakeXZ(), sampleResolution, chunkSize.X, 1);
-            voxelWorldGenerator.GenerateVoxelData(cacheData, sampleResolution, start.Y,
-                voxelWorldGenerator.GetMaterialsDictionary(), 1, outData.Data);
+            voxelWorldGenerator.GenerateMapData(mData, start.ToVector3().TakeXZ(), sampleResolution, chunkSize.X, 1);
+
+
+            voxelWorldGenerator.GenerateVoxelData(mData, sampleResolution, start.Y,
+                voxelWorldGenerator.GetMaterialsDictionary(), 1, outData.Data,out outData.isEmpty);
 
         }
     }
 
-    public struct MapData
+    public class MapData
     {
         public readonly float[,] HeightMap;
         public readonly Color[] ColorMap;
+        public float Min;
+        public float Max;
+
+
+        public MapData(float[,] heightMap, Color[] colorMap, float min, float max)
+        {
+            HeightMap = heightMap;
+            ColorMap = colorMap;
+            Min = min;
+            Max = max;
+        }
 
         public MapData(int size)
         {
             HeightMap = new float[size, size];
             ColorMap = new Color[size * size];
+            Min = 0;
+            Max = 0;
         }
 
     }

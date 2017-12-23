@@ -39,6 +39,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         private ConcurrentObjectPool<UniformVoxelData> unusedVoxelDataPool;
 
+        private UniformVoxelData emptyChunkShared;
+
         /// <summary>
         /// The depth is used to determine the size of the world
         /// a world of size depth has 2^depth leaf chunks
@@ -66,6 +68,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             unusedVoxelDataPool = new ConcurrentObjectPool<UniformVoxelData>(createEmptyUniformVoxelData, 1000, 1000,
                 MainThreadDispatcher.Instance);
 
+            emptyChunkShared = unusedVoxelDataPool.Take();
         }
 
         public void RunKernel1by1Single(Point3 minInclusive, Point3 maxInclusive, Func<VoxelData, Point3, VoxelData> act, int frame, OctreeNode data)
@@ -271,6 +274,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             var data = unusedVoxelDataPool.Take();
 
             generateInitialChunkData(c.LowerLeft, c.Depth, data);
+            if (data.isEmpty)
+            {
+                unusedVoxelDataPool.Release(data);
+                data = emptyChunkShared;
+            }
+
             lock (pregenCache)
             {
                 pregenCache[c] = data;
@@ -335,6 +344,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private void generateInitialChunkData(Point3 lowerLeft, int depth, UniformVoxelData outData)
         {
             generator.Generate(lowerLeft, ChunkSize + new Point3(1, 1, 1) + new Point3(1, 1, 1), 1 << (this.depth - depth), outData);
+            
         }
 
         public void ResetChunk(OctreeNode octreeNode, int frame)

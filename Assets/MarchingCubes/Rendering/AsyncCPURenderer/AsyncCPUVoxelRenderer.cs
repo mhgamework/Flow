@@ -53,6 +53,7 @@ namespace Assets.MarchingCubes.Rendering
             TemplateMaterial = voxelRenderingEngineScript.TemplateMaterial;
             vertexColorMaterial = voxelRenderingEngineScript.VertexColorMaterial;
             this.voxelRenderingEngineScript = voxelRenderingEngineScript;
+
             this.disableThreadingForDebugging = disableThreadingForDebugging;
 
             this.materialsDictionary = voxelMaterials.ToDictionary(v => v.color, c =>
@@ -99,12 +100,14 @@ namespace Assets.MarchingCubes.Rendering
         private List<ChunkCoord> debugBuf = new List<ChunkCoord>();
         public void Update()
         {
-            Profiler.BeginSample("AsyncCPUVoxelRenderer-PregenerateChunksThread");
             if (disableThreadingForDebugging)
             {
+                Profiler.BeginSample("AsyncCPUVoxelRenderer-PregenerateChunksThread");
+
                 PregenerateChunksThread(999, debugBuf, 4);
+                Profiler.EndSample();
+
             }
-            Profiler.EndSample();
 
         }
 
