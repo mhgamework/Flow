@@ -96,7 +96,7 @@ namespace Assets.MarchingCubes
         }
 
 
-        public OctreeVoxelWorld GetWorld()
+        public OctreeVoxelWorld CreateNewWorld()
         {
             IWorldGenerator persistence = persistenceDict[Generator]();
             var world = new OctreeVoxelWorld(persistence, ChunkSize, WorldDepth);
@@ -216,6 +216,7 @@ namespace Assets.MarchingCubes
             if (GenerateCalibrationNoise)
                 Noise.calibrationNoise(outMapData.HeightMap, mapSize, WorldScale * scale / sampleDist, Offset);
 
+  
 
             for (int x = 0; x < mapSize; x++)
                 for (int z = 0; z < mapSize; z++)
@@ -225,7 +226,13 @@ namespace Assets.MarchingCubes
                     {
                         if (height <= Regions[i].Height)
                         {
-                            outMapData.ColorMap[x + z * mapSize] = Regions[i].Color;
+                            //var world = (new Vector2(x, z) * sampleDist + lowerLeft) / (WorldScale * scale);
+                            //var noise = Mathf.PerlinNoise(world.x, world.y);
+
+                            var color = Regions[i].Color;
+                            //color.r += noise * 0.3f;
+
+                            outMapData.ColorMap[x + z * mapSize] = color;
                             break;
                         }
 

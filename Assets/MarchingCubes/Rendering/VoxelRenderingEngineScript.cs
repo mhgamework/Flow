@@ -61,7 +61,7 @@ namespace Assets.MarchingCubes.Rendering
             var rendererObject = new GameObject("Renderer");
             rendererObject.transform.SetParent(transform);
 
-            var world = World.GetWorld(); // createTestWorld();
+            var world = World.CreateNewWorld(); // createTestWorld();
 
 
             if (UseGpuRenderer)
