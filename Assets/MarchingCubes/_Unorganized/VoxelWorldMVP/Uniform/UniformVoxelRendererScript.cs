@@ -33,7 +33,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 meshDataPool = new ConcurrentObjectPool<VoxelMeshData>(() => VoxelMeshData.CreatePreallocated(), Size * Size * Size, 10, new MockDispatcher());
 
             if (World == null)
-                World = new UniformVoxelWorld(new DelegateVoxelWorldGenerator(v => new VoxelData(v.y - 8, MaterialGreen)), new Point3(ChunkSize, ChunkSize, ChunkSize));
+                World = new UniformVoxelWorld(new ConstantVoxelWorldGenerator(-1, MaterialGreen), new Point3(ChunkSize, ChunkSize, ChunkSize));
+            //World = new UniformVoxelWorld(new DelegateVoxelWorldGenerator(v => new VoxelData(v.y - 8, MaterialGreen)), new Point3(ChunkSize, ChunkSize, ChunkSize));
 
 
             if (chunks == null)
