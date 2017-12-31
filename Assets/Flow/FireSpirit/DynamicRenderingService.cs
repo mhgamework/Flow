@@ -62,7 +62,7 @@ namespace Assets.Flow.FireSpirit
             var mesh = VoxelMeshData.CreatePreallocated();
             gen.GenerateMeshFromVoxelData(data, mesh);
 
-            voxelRenderer.setMeshToUnity(mesh);
+            voxelRenderer.setMeshToUnity(mesh,new Vector3(),1);
         }
     }
 }

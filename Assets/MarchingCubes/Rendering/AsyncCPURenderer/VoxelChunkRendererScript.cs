@@ -10,39 +10,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 {
     /// <summary>
     /// Responsible for rendering and physics of a single chunk of a VoxelWorld
-    /// Dynamically updates the renderer based on the dirty feature of the voxel world chunks
-    /// 
-    /// The class has two modes, one where it is self sufficiently updating the voxel data, another where it is used by external update mechanisms. 
-    /// This is switched with AutomaticallyGenerateMesh;
     /// </summary>
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshCollider))]
     [RequireComponent(typeof(MeshRenderer))]
     public class VoxelChunkRendererScript : MonoBehaviour
     {
-        //public Material VoxelMaterial;
-        private UniformVoxelData chunkData;
         public Dictionary<Color, Material> MaterialsDictionary = new Dictionary<Color, Material>();
         public Material VertexColorMaterial;
-
-        public void SetChunk(UniformVoxelData chunkData)
-        {
-            this.chunkData = chunkData;
-        }
-        /// <summary>
-        /// Only used by uniform renderer
-        /// </summary>
-        /// <param name="chunkCoord"></param>
-        /// <param name="chunkSize"></param>
-        public void SetWorldcoords(Point3 chunkCoord, Point3 chunkSize)
-        {
-            transform.position = chunkCoord.Multiply(chunkSize);
-        }
-        public void SetWorldcoords(Vector3 lowerLeft, float scale)
-        {
-            transform.localScale = new Vector3(scale, scale, scale);
-            transform.position = lowerLeft;
-        }
 
         /// <summary>
         /// Used to make this component autonomously track the voxel data or a subcomponent of external systems.
@@ -55,17 +30,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private MeshFilter meshFilter;
         private Mesh mesh;
         private MeshRenderer renderer;
-        VoxelChunkMeshGenerator meshGenerator = new VoxelChunkMeshGenerator(new MarchingCubesService());
-
-        private VoxelMeshData lastMeshData = null;
-        private int lastUpdatedFrame = -1;
-
-        // Use this for initialization
-        void Start()
-        {
-            initialize();
-
-        }
 
         public void initialize()
         {
@@ -80,33 +44,13 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             if (renderer == null)
                 renderer = GetComponent<MeshRenderer>();
         }
-
-        // Update is called once per frame
-        void Update()
+        public void setMeshToUnity(VoxelMeshData data, Vector3 lowerLeft, float scale)
         {
-            if (!AutomaticallyGenerateMesh)
-            {
-                if (lastMeshData != null)
-                    setMeshToUnity(lastMeshData);
-                lastMeshData = null;
-                return;
-            }
-            if (chunkData == null) return;
-            if (lastUpdatedFrame >= chunkData.LastChangeFrame) return;
+            initialize();
 
-            var data = VoxelMeshData.CreatePreallocated();
+            transform.localScale = new Vector3(scale, scale, scale);
+            transform.position = lowerLeft;
 
-             meshGenerator.GenerateMeshFromVoxelData(chunkData.Data, data);
-
-            setMeshToUnity(data);
-            lastUpdatedFrame = Time.frameCount;
-        }
-
-
-
-        public void setMeshToUnity(VoxelMeshData data)
-        {
-            Start();
             //if (mesh == null)
             //{
             //    lastMeshData = data;
@@ -126,6 +70,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             else
                 renderer.sharedMaterial = VertexColorMaterial;
         }
+
+
 
     }
 }

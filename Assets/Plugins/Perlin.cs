@@ -182,11 +182,15 @@ public class Perlin
 		y = y / s;
 		z = z / s;
 	}
-	
-	public Perlin()
-	{
+
+    public Perlin():this(0)
+    {
+        
+    }
+	public Perlin(int seed)
+    {
 		int i, j, k;
-		System.Random rnd = new System.Random();
+		System.Random rnd = new System.Random(seed);
 	
 	   for (i = 0 ; i < B ; i++) {
 		  p[i] = i;

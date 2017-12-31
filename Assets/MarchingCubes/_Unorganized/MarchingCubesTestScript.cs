@@ -165,8 +165,9 @@ public class MarchingCubesTestScript : MonoBehaviour
         var data = createChunkData();
 
         data.LastChangeFrame = Time.frameCount;
-        voxelChunkRenderer.SetChunk(data);
-        voxelChunkRenderer.SetWorldcoords(new Point3(0, 0, 0), 1f / (Resolution-1) * Size);
+        throw new NotImplementedException();
+        //voxelChunkRenderer.SetChunk(data);
+        //voxelChunkRenderer.SetWorldcoords(new Point3(0, 0, 0), 1f / (Resolution-1) * Size);
 
     }
 

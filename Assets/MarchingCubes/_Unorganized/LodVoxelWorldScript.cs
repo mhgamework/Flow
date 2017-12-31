@@ -17,7 +17,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// </summary>
     public class LodVoxelWorldScript : MonoBehaviour
     {
-        private UniformVoxelWorldRenderer worldRenderer;
         private VoxelWorldRaycaster raycaster;
 
         public List<Material> Materials = new List<Material>();

@@ -182,15 +182,32 @@ namespace Assets.MarchingCubes.Rendering
             var result = concurrentVoxelGenerator.GetNodeData(getNode(node));
             concurrentVoxelGenerator.RemoveNodeData(getNode(node));
 
-            var ret = createRenderData(result); ;
+            ConcurrentVoxelGenerator.Result result1 = result;
+            Profiler.BeginSample("PRF-RequestChunk");
 
-            activateRenderdata(node, ret);
+            var comp = chunkPool.RequestChunk();
+
+            Profiler.EndSample();
+
+            Profiler.BeginSample("PRF-SetToUnity");
+            var lowerleft = node.LowerLeft.ToVector3() * voxelRenderingEngineScript.RenderScale;
+            var scale = octreeVoxelWorld.GetNodeSize(node.Depth) / (float)(octreeVoxelWorld.ChunkSize.X) * voxelRenderingEngineScript.RenderScale;
+
+            comp.AutomaticallyGenerateMesh = false;
+            comp.MaterialsDictionary = materialsDictionary;
+            comp.VertexColorMaterial = vertexColorMaterial;
+            comp.setMeshToUnity(result1.data,lowerleft,scale);
+            comp.transform.SetParent(transform);
+            comp.gameObject.SetActive(true);
+
+            Profiler.EndSample();
+
 
             frame = result.Frame;
 
             concurrentVoxelGenerator.ReleaseChunkData(result.data);
 
-            return ret;
+            return comp;
         }
         /// <summary>
         /// Warn: Not idempotent!!
@@ -199,39 +216,6 @@ namespace Assets.MarchingCubes.Rendering
         public void HideChunk(VoxelChunkRendererScript renderObject)
         {
             chunkPool.ReleaseChunk(renderObject);
-        }
-
-        private VoxelChunkRendererScript createRenderData(ConcurrentVoxelGenerator.Result result)
-        {
-            Profiler.BeginSample("PRF-RequestChunk");
-
-            var comp = chunkPool.RequestChunk();
-
-            Profiler.EndSample();
-
-            Profiler.BeginSample("PRF-SetToUnity");
-
-
-            comp.AutomaticallyGenerateMesh = false;
-            comp.MaterialsDictionary = materialsDictionary;
-            comp.VertexColorMaterial = vertexColorMaterial;
-            comp.setMeshToUnity(result.data);
-            comp.transform.SetParent(transform);
-            comp.gameObject.SetActive(true);
-
-            Profiler.EndSample();
-
-            return comp;
-        }
-
-        private void activateRenderdata(ChunkCoord node, VoxelChunkRendererScript renderDataOrNull)
-        {
-            var comp = renderDataOrNull;
-            comp.MaterialsDictionary = materialsDictionary;
-            comp.SetWorldcoords(node.LowerLeft.ToVector3() * voxelRenderingEngineScript.RenderScale, octreeVoxelWorld.GetNodeSize(node.Depth) / (float)(octreeVoxelWorld.ChunkSize.X)* voxelRenderingEngineScript.RenderScale); // TOOD: DANGEROES
-
-            comp.transform.SetParent(transform);
-            //comp.gameObject.SetActive(true);
         }
 
 
