@@ -8,51 +8,26 @@ using UnityEngine;
 namespace Assets.SimpleGame.Scripts
 {
     [ExecuteInEditMode]
-    public class PlaneGeneratorScript : MonoBehaviour, IVoxelObject
+    public class PlaneGeneratorScript : BaseVoxelObjectScript
     {
-        public UniformVoxelRendererScript UniformRenderer;
 
         public float Radius = 10;
         public Color Color;
 
 
-        private bool changed = false;
-
-        public void Update()
+        protected override void onChange()
         {
-            if (!changed && !transform.hasChanged) return;
-
-
             Min = (transform.position - Radius * Vector3.one);
             Max = (transform.position + Radius * Vector3.one);
 
-            Min = Min.ChangeY( transform.position.y - 0.01f);
-            Max = Max.ChangeY( transform.position.y + 0.01f);
-
-
-            changed = false;
-            transform.hasChanged = false;
-            IsChanged = true;
+            Min = Min.ChangeY(transform.position.y - 0.01f);
+            Max = Max.ChangeY(transform.position.y + 0.01f);
         }
 
-        private void OnValidate()
-        {
-            changed = true;
-
-        }
-
-        public bool IsChanged { get; private set; }
-        public Vector3 Min { get; private set; }
-        public Vector3 Max { get; private set; }
-        public void Sdf(Point3 p, VoxelData v, out float density, out Color color)
+        public override void Sdf(Point3 p, VoxelData v, out float density, out Color color)
         {
             density = p.Y - transform.position.y;
             color = Color;
-        }
-
-        public void RemoveChanged()
-        {
-            IsChanged = false;
         }
     }
 }

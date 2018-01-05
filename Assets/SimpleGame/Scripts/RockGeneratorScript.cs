@@ -6,13 +6,12 @@ using UnityEngine;
 
 namespace Assets.SimpleGame.Scripts
 {
-    [ExecuteInEditMode]
-    public class RockGeneratorScript : MonoBehaviour, IVoxelObject
+    public class RockGeneratorScript : BaseVoxelObjectScript
     {
-        public UniformVoxelRendererScript UniformRenderer;
 
         public int Seed = 0;
         public Color RockColor;
+
         public float Radius;
 
         private bool changed = false;
@@ -23,41 +22,25 @@ namespace Assets.SimpleGame.Scripts
         public float noise2CoordScale = 1;
         private Perlin perlin;
 
-        public void Update()
+     
+        protected override void onChange()
         {
-            if (!changed && !transform.hasChanged) return;
             perlin = new Perlin(Seed);
 
-            var extendedRadius = Radius + 2;
-            Min = (transform.position - extendedRadius * Vector3.one).ToFloored();
-            Max = (transform.position + extendedRadius * Vector3.one).ToFloored();
-
-            changed = false;
-            transform.hasChanged = false;
-            IsChanged = true;
-
+            var extendedRadius = Radius + noise2Scale + noiseScale;
+            Min = (transform.position - extendedRadius * Vector3.one);
+            Max = (transform.position + extendedRadius * Vector3.one);
         }
 
-        private void OnValidate()
+        public override void Sdf(Point3 p, VoxelData v, out float density, out Color color)
         {
-            changed = true;
-
-        }
-
-        public bool IsChanged { get; private set; }
-        public Vector3 Min { get; private set; }
-        public Vector3 Max { get; private set; }
-        public void Sdf(Point3 p, VoxelData v, out float density, out Color color)
-        {
+            if (perlin == null)
+                perlin = new Perlin(Seed);
             density = (p.ToVector3() - transform.position).magnitude - Radius;
-            density += perlin.Noise(p.X * noiseCoordScale, p.Y * noiseCoordScale, p.Z * noiseCoordScale) * noiseScale;
-            density += perlin.Noise(p.X * noise2CoordScale, p.Y * noise2CoordScale, p.Z * noise2CoordScale) * noise2Scale;
+            var local = p - transform.position;
+            density += perlin.Noise(local.x * noiseCoordScale, local.y * noiseCoordScale, local.z * noiseCoordScale) * noiseScale;
+            density += perlin.Noise(local.x * noise2CoordScale, local.y * noise2CoordScale, local.z * noise2CoordScale) * noise2Scale;
             color = RockColor;
-        }
-
-        public void RemoveChanged()
-        {
-            IsChanged = false;
         }
     }
 }

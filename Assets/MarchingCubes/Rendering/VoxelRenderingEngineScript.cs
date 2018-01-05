@@ -62,14 +62,14 @@ namespace Assets.MarchingCubes.Rendering
             var rendererObject = new GameObject("Renderer");
             rendererObject.transform.SetParent(transform);
 
-            octreeVoxelWorld = World.CreateNewWorld();
+            octreeVoxelWorld = new OctreeVoxelWorld(new ConstantVoxelWorldGenerator(-1, new VoxelMaterial(Color.black)), 8, 6);//World.CreateNewWorld();
 
 
             if (UseGpuRenderer)
-                concurrentGenerator = createGpuRenderer( octreeVoxelWorld);
+                concurrentGenerator = createGpuRenderer(octreeVoxelWorld);
             else
                 concurrentGenerator = createCPURenderer();
-       
+
             renderingService = new AsyncCPUVoxelRenderer(
                 concurrentGenerator,
                 chunkPool,
@@ -80,7 +80,7 @@ namespace Assets.MarchingCubes.Rendering
                 !enableMultithreading
             );
 
-            clipmapsOctreeService = new ClipmapsOctreeService(octreeVoxelWorld, renderingService,LodDistanceCurve, LodDistanceCurveEnd);
+            clipmapsOctreeService = new ClipmapsOctreeService(octreeVoxelWorld, renderingService, LodDistanceCurve, LodDistanceCurveEnd);
 
 
         }
@@ -93,7 +93,7 @@ namespace Assets.MarchingCubes.Rendering
 
         private IConcurrentVoxelGenerator createGpuRenderer(OctreeVoxelWorld world)
         {
-            return new GpuVoxelMeshGenerator(GPUShader,world);
+            return new GpuVoxelMeshGenerator(GPUShader, world);
         }
 
         private IConcurrentVoxelGenerator createCPURenderer()
@@ -102,7 +102,7 @@ namespace Assets.MarchingCubes.Rendering
             var marchingCubesService = new MarchingCubesService();
             var meshGenerator = new VoxelChunkMeshGenerator(marchingCubesService);
 
-            var ret =new ConcurrentVoxelGenerator(meshGenerator,!enableMultithreading);
+            var ret = new ConcurrentVoxelGenerator(meshGenerator, !enableMultithreading);
             ret.Start(); // WARN dont forget
 
             return ret;
