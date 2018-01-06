@@ -24,10 +24,11 @@ namespace Assets.SimpleGame.Scripts
             Max = Max.ChangeY(transform.position.y + 0.01f);
         }
 
-        public override void Sdf(Point3 p, VoxelData v, out float density, out Color color)
+        public override bool Sdf(Point3 p, VoxelData v, out float density, out Color color)
         {
             density = p.Y - transform.position.y;
             color = Color;
+            return false;
         }
     }
 }

@@ -39,13 +39,14 @@ namespace Assets.SimpleGame.Scripts
             c = new Translation(new Rotation(new Cylinder(TreeBaseSize, SegmentLength), transform.rotation), transform.position);
         }
 
-        public override void Sdf(Point3 p, VoxelData v, out float density, out Color color)
+        public override bool Sdf(Point3 p, VoxelData v, out float density, out Color color)
         {
             density = c.Sdf(p);
             if (noise)
                 density += perlin.Noise(p.X * noiseCoordScale, p.Y * noiseCoordScale, p.Z * noiseCoordScale) * noiseScale;
             //v.Density += perlin.Noise(p.X * noise2CoordScale, p.Y* noise2CoordScale, p.Z* noise2CoordScale) * noise2Scale;
             color = WoodColor;
+            return false;
         }
     }
 }

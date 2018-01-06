@@ -8,6 +8,6 @@ namespace Assets.SimpleGame.Scripts
     {
         Vector3 Min { get;  }
         Vector3 Max { get;  }
-        void Sdf(Point3 point3, VoxelData voxelData, out float density, out Color color);
+        bool Sdf(Point3 point3, VoxelData voxelData, out float density, out Color color);
     }
 }

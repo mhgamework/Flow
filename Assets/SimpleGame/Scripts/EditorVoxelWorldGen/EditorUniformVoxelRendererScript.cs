@@ -35,8 +35,6 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
         public bool update = false;
         public int ChunkSize = 8;
 
-        private ConcurrentObjectPool<VoxelMeshData> meshDataPool;
-        private ConcurrentObjectPool<UniformVoxelData> voxelDataPool;
         private UniformVoxelData uniformVoxelData;
         private VoxelMeshData voxelMeshData;
 
@@ -49,6 +47,7 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
         public Transform ChunkRenderPool;
 
         [SerializeField]
+        [HideInInspector]
         private List<RenderInfo> renderInfos = new List<RenderInfo>();
 
         [Serializable]
@@ -84,7 +83,7 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
                 foreach (var info in renderInfos)
                 {
                     if (info.renderer == null) continue;
-                    chunkDict[info.Chunk] = renderer;
+                    chunkDict[info.Chunk] = info.renderer;
                 }
             }
 
@@ -114,6 +113,8 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
 
             if (update)
             {
+                uniformVoxelData = null;
+                voxelMeshData = null;
                 chunkDict.Clear();
                 renderInfos.Clear();
                 foreach (var r in ChunkRenderPool.GetComponentsInChildren<VoxelChunkRendererScript>(true).ToArray())
@@ -218,8 +219,11 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
 
         private void addDirtyChunks(IVoxelObject voxelObject)
         {
-            var min = (voxelObject.Min / ((ChunkSize - 1) * Resolution)).ToFloored();
-            var max = (voxelObject.Max / ((ChunkSize - 1) * Resolution)).ToCeiled();
+            var voxelObjectMin = voxelObject.Min - Vector3.one;
+            var voxelObjectMax = voxelObject.Max + Vector3.one;
+
+            var min = (voxelObjectMin / ((ChunkSize - 1) * Resolution)).ToFloored();
+            var max = (voxelObjectMax / ((ChunkSize - 1) * Resolution)).ToCeiled();
 
             addDirtyChunks(min, max);
         }

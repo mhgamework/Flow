@@ -74,9 +74,9 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
                             Color color;
                             float density;
 
-                            o.Sdf(pWorld, data, out density, out color);
+                            var didMergeWithPrevious = o.Sdf(pWorld, data, out density, out color);
 
-                            if (first || density < data.Density)
+                            if (first || density < data.Density || didMergeWithPrevious)
                             {
                                 data.Density = density;
                                 data.Material = materials.GetOrCreate(color, createMaterial);

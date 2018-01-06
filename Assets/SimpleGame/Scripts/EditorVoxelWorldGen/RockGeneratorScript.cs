@@ -22,17 +22,17 @@ namespace Assets.SimpleGame.Scripts
         public float noise2CoordScale = 1;
         private Perlin perlin;
 
-     
+
         protected override void onChange()
         {
             perlin = new Perlin(Seed);
 
-            var extendedRadius = Radius + noise2Scale + noiseScale;
+            var extendedRadius = Radius + (noise2Scale + noiseScale) * 0.5f; // I think the perlin is between -0.5 -> 0.5
             Min = (transform.position - extendedRadius * Vector3.one);
             Max = (transform.position + extendedRadius * Vector3.one);
         }
 
-        public override void Sdf(Point3 p, VoxelData v, out float density, out Color color)
+        public override bool Sdf(Point3 p, VoxelData v, out float density, out Color color)
         {
             if (perlin == null)
                 perlin = new Perlin(Seed);
@@ -41,6 +41,8 @@ namespace Assets.SimpleGame.Scripts
             density += perlin.Noise(local.x * noiseCoordScale, local.y * noiseCoordScale, local.z * noiseCoordScale) * noiseScale;
             density += perlin.Noise(local.x * noise2CoordScale, local.y * noise2CoordScale, local.z * noise2CoordScale) * noise2Scale;
             color = RockColor;
+
+            return false;
         }
     }
 }
