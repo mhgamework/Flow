@@ -32,7 +32,7 @@ namespace Assets.SimpleGame.Scripts
             Max = (transform.position + extendedRadius * Vector3.one);
         }
 
-        public override bool Sdf(Point3 p, VoxelData v, out float density, out Color color)
+        public override void Sdf(Point3 p, VoxelData v, out float density, out Color color)
         {
             if (perlin == null)
                 perlin = new Perlin(Seed);
@@ -42,7 +42,6 @@ namespace Assets.SimpleGame.Scripts
             density += perlin.Noise(local.x * noise2CoordScale, local.y * noise2CoordScale, local.z * noise2CoordScale) * noise2Scale;
             color = RockColor;
 
-            return false;
         }
     }
 }

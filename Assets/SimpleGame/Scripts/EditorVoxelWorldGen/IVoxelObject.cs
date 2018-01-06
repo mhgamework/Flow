@@ -6,8 +6,9 @@ namespace Assets.SimpleGame.Scripts
 {
     public interface IVoxelObject
     {
+        bool Subtract { get; }
         Vector3 Min { get;  }
         Vector3 Max { get;  }
-        bool Sdf(Point3 point3, VoxelData voxelData, out float density, out Color color);
+        void Sdf(Point3 point3, VoxelData voxelData, out float density, out Color color);
     }
 }

@@ -8,6 +8,14 @@ namespace Assets.SimpleGame.Scripts
     [ExecuteInEditMode]
     public abstract class BaseVoxelObjectScript : MonoBehaviour, IVoxelObject
     {
+        [SerializeField]
+        private bool subtract;
+
+        public bool Subtract
+        {
+            get { return subtract; }
+        }
+
         public void Update()
         {
             if (transform.hasChanged)
@@ -31,7 +39,7 @@ namespace Assets.SimpleGame.Scripts
 
         public Vector3 Min { get; protected set; }
         public Vector3 Max { get; protected set; }
-        public abstract bool Sdf(Point3 p, VoxelData v, out float density, out Color color);
+        public abstract void Sdf(Point3 p, VoxelData v, out float density, out Color color);
 
         private void OnDrawGizmosSelected()
         {
