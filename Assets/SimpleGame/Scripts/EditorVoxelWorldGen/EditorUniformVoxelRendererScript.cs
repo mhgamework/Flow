@@ -115,6 +115,7 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
             {
                 uniformVoxelData = null;
                 voxelMeshData = null;
+                if (chunkDict == null) chunkDict = new Dictionary<Point3, VoxelChunkRendererScript>();
                 chunkDict.Clear();
                 renderInfos.Clear();
                 foreach (var r in ChunkRenderPool.GetComponentsInChildren<VoxelChunkRendererScript>(true).ToArray())

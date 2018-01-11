@@ -6,6 +6,7 @@ using Assets.MarchingCubes.Rendering.ClipmapsOctree;
 using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
+using Assets.SimpleGame.Scripts.EditorVoxelWorldGen;
 using Assets.VR;
 using DirectX11;
 using UnityEngine;
@@ -18,10 +19,8 @@ namespace Assets.MarchingCubes.Rendering
         public float RenderScale = 1;
         public bool UseGpuRenderer = false;
         public UnityEngine.ComputeShader GPUShader;
-        /// <summary>
-        /// Temporary, should be a generic world plugin
-        /// </summary>
-        public VoxelWorldGenerator World;
+
+        public OctreeVoxelWorldScript World;
 
         public Camera LODCamera;
         public float LODDistanceFactor = 1.2f;
@@ -36,7 +35,8 @@ namespace Assets.MarchingCubes.Rendering
         public Material TemplateMaterial;
         public Material VertexColorMaterial;
 
-        public bool enableMultithreading = true;
+        public bool enableMultithreadingWorldGen = true;
+        public bool enableMultithreadingMeshGen = true;
 
         private ClipmapsOctreeService clipmapsOctreeService;
 
@@ -62,7 +62,8 @@ namespace Assets.MarchingCubes.Rendering
             var rendererObject = new GameObject("Renderer");
             rendererObject.transform.SetParent(transform);
 
-            octreeVoxelWorld = new OctreeVoxelWorld(new ConstantVoxelWorldGenerator(-1, new VoxelMaterial(Color.black)), 8, 6);//World.CreateNewWorld();
+            octreeVoxelWorld = World.CreateNewWorld();
+            // new OctreeVoxelWorld(new ConstantVoxelWorldGenerator(-1, new VoxelMaterial(Color.black)), 8, 6);//World.CreateNewWorld();
 
 
             if (UseGpuRenderer)
@@ -73,11 +74,11 @@ namespace Assets.MarchingCubes.Rendering
             renderingService = new AsyncCPUVoxelRenderer(
                 concurrentGenerator,
                 chunkPool,
-                World.VoxelMaterials,
+                null,
                 octreeVoxelWorld,
                 rendererObject.transform,
                 this,
-                !enableMultithreading
+                !enableMultithreadingWorldGen
             );
 
             clipmapsOctreeService = new ClipmapsOctreeService(octreeVoxelWorld, renderingService, LodDistanceCurve, LodDistanceCurveEnd);
@@ -102,7 +103,7 @@ namespace Assets.MarchingCubes.Rendering
             var marchingCubesService = new MarchingCubesService();
             var meshGenerator = new VoxelChunkMeshGenerator(marchingCubesService);
 
-            var ret = new ConcurrentVoxelGenerator(meshGenerator, !enableMultithreading);
+            var ret = new ConcurrentVoxelGenerator(meshGenerator, !enableMultithreadingMeshGen);
             ret.Start(); // WARN dont forget
 
             return ret;

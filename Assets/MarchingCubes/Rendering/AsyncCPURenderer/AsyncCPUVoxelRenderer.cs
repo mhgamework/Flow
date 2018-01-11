@@ -33,7 +33,7 @@ namespace Assets.MarchingCubes.Rendering
 
         private List<ConcurrentVoxelGenerator.Task> tempTaskList = new List<ConcurrentVoxelGenerator.Task>();
 
-        private Dictionary<ChunkCoord, OctreeNode> nodeLookup = new Dictionary<ChunkCoord, OctreeNode>( new ChunkCoord.Comparer());
+        private Dictionary<ChunkCoord, OctreeNode> nodeLookup = new Dictionary<ChunkCoord, OctreeNode>(new ChunkCoord.Comparer());
 
         public int UnavailableChunks { get; private set; }
 
@@ -56,12 +56,13 @@ namespace Assets.MarchingCubes.Rendering
 
             this.disableThreadingForDebugging = disableThreadingForDebugging;
 
-            this.materialsDictionary = voxelMaterials.ToDictionary(v => v.color, c =>
-            {
-                var mat = new Material(TemplateMaterial);
-                mat.color = c.color;
-                return mat;
-            });
+            if (voxelMaterials != null)
+                this.materialsDictionary = voxelMaterials.ToDictionary(v => v.color, c =>
+                {
+                    var mat = new Material(TemplateMaterial);
+                    mat.color = c.color;
+                    return mat;
+                });
 
             if (!disableThreadingForDebugging)
             {
@@ -72,7 +73,7 @@ namespace Assets.MarchingCubes.Rendering
                 t = new Thread(() => testThread(2));
                 t.Start();
             }
-         
+
         }
 
         private Queue<ChunkCoord> parallelGen = new Queue<ChunkCoord>();
@@ -93,7 +94,7 @@ namespace Assets.MarchingCubes.Rendering
                 Debug.LogError(e);
                 throw;
             }
-       
+
 
         }
 
@@ -146,7 +147,7 @@ namespace Assets.MarchingCubes.Rendering
             for (int i = 0; i < tasks.Count; i++)
             {
                 var c = tasks[i];
-                if ( !octreeVoxelWorld.HasChunkDataAvailable(c))
+                if (!octreeVoxelWorld.HasChunkDataAvailable(c))
                 {
                     lock (parallelGen)
                     {
@@ -196,7 +197,7 @@ namespace Assets.MarchingCubes.Rendering
             comp.AutomaticallyGenerateMesh = false;
             comp.MaterialsDictionary = materialsDictionary;
             comp.VertexColorMaterial = vertexColorMaterial;
-            comp.setMeshToUnity(result1.data,lowerleft,scale);
+            comp.setMeshToUnity(result1.data, lowerleft, scale);
             comp.transform.SetParent(transform);
             comp.gameObject.SetActive(true);
 

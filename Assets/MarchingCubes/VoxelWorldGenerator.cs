@@ -14,7 +14,7 @@ using UnityEngine;
 
 namespace Assets.MarchingCubes
 {
-    /// <summary>
+   /// <summary>
     /// Temporary unity script to control the world config
     /// </summary>
     public class VoxelWorldGenerator : MonoBehaviour

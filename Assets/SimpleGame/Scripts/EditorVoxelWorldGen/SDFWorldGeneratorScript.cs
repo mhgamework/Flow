@@ -47,7 +47,8 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
             outData.isEmpty = tempList.Count == 0;
 
             if (outData.isEmpty) return;
-            Profiler.BeginSample("SampleSDFs");
+
+            //Profiler.BeginSample("SampleSDFs");
             var bounds = new Bounds();
             bounds.SetMinMax(min, max);
             var outDataData = outData.Data;
@@ -98,7 +99,7 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
 
                     }
 
-            Profiler.EndSample();
+            //Profiler.EndSample();
         }
 
         private static VoxelMaterial createMaterial(Color c)
