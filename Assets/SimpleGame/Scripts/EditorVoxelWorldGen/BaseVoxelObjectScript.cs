@@ -15,6 +15,10 @@ namespace Assets.SimpleGame.Scripts
         {
             get { return subtract; }
         }
+        public void Start()
+        {
+            onChange(); // Init at runtime
+        }
 
         public void Update()
         {

@@ -48,7 +48,7 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
 
             if (outData.isEmpty) return;
 
-            //Profiler.BeginSample("SampleSDFs");
+            Profiler.BeginSample("SampleSDFs");
             var bounds = new Bounds();
             bounds.SetMinMax(min, max);
             var outDataData = outData.Data;
@@ -88,7 +88,9 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
                             else if (first || density < data.Density )
                             {
                                 data.Density = density;
+                                Profiler.BeginSample("Material");
                                 data.Material = materials.GetOrCreate(color, createMaterial);
+                                Profiler.EndSample();
                             }
 
                             first = false;
@@ -99,7 +101,7 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
 
                     }
 
-            //Profiler.EndSample();
+            Profiler.EndSample();
         }
 
         private static VoxelMaterial createMaterial(Color c)

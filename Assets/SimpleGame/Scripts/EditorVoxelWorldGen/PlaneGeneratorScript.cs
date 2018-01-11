@@ -4,6 +4,7 @@ using Assets.MarchingCubes.VoxelWorldMVP;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Assets.SimpleGame.Scripts
 {
@@ -20,7 +21,7 @@ namespace Assets.SimpleGame.Scripts
         public float Color3Depth;
         public Color Color3;
 
-
+        private Vector3 pos;
 
         protected override void onChange()
         {
@@ -29,11 +30,13 @@ namespace Assets.SimpleGame.Scripts
 
             Min = Min.ChangeY(transform.position.y - Depth);
             Max = Max.ChangeY(transform.position.y + 0.01f);
+
+            pos = transform.position; // Cache pos
         }
 
         public override void Sdf(Point3 p, VoxelData v, out float density, out Color color)
         {
-            var d = p.Y - transform.position.y;
+            var d = p.Y - pos.y;
             density = d;
             if (d < -Color3Depth)
                 color = Color3;

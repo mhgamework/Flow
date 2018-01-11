@@ -17,10 +17,12 @@ public class SimpleGameInputScript : MonoBehaviour
 
     public float DigSize = 3;
 
+    private Vector3 playerStartPos;
+
     // Use this for initialization
     void Start()
     {
-
+        playerStartPos = Player.position;
     }
 
     // Update is called once per frame
@@ -33,6 +35,10 @@ public class SimpleGameInputScript : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F))
         {
             ShootSphere();
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Player.position = playerStartPos;
         }
     }
 
