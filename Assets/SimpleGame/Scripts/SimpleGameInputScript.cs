@@ -19,6 +19,8 @@ public class SimpleGameInputScript : MonoBehaviour
 
     private Vector3 playerStartPos;
 
+    public Transform CubeGhost;
+
     // Use this for initialization
     void Start()
     {
@@ -28,10 +30,11 @@ public class SimpleGameInputScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        updateGhost();
         if (Input.GetMouseButtonDown(0))
-        {
-            Dig();
-        }
+            Dig(1);
+        if (Input.GetMouseButtonDown(1))
+            Dig(-1);
         if (Input.GetKeyDown(KeyCode.F))
         {
             ShootSphere();
@@ -40,6 +43,20 @@ public class SimpleGameInputScript : MonoBehaviour
         {
             Player.position = playerStartPos;
         }
+    }
+
+    private void updateGhost()
+    {
+        RaycastHit raycastHit;
+        var res = Raycast(out raycastHit);
+        CubeGhost.gameObject.SetActive(res);
+        if (!res) return;
+        var b = worldToDigCubeCell(raycastHit);
+
+        CubeGhost.position = b.center;
+        CubeGhost.localScale = b.extents * 2;
+
+
     }
 
     private void ShootSphere()
@@ -51,22 +68,40 @@ public class SimpleGameInputScript : MonoBehaviour
 
     }
 
-    private void Dig()
+    private void Dig(int mode)
     {
         RaycastHit raycastHit;
-        var res = Physics.Raycast(Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0)), out raycastHit, 100);
+        var res = Raycast(out raycastHit);
         if (!res) return;
+
+
+        var b = worldToDigCubeCell(raycastHit);
 
         var w = Renderer.GetWorld();
 
-        var min = raycastHit.point - Vector3.one * DigSize / 2f;
-        var max = raycastHit.point + Vector3.one * DigSize / 2f;
-
-        w.RunKernel1by1(Renderer.ToVoxelSpace(min).ToFloored(), Renderer.ToVoxelSpace(max).ToCeiled(), (data, p) =>
+        w.RunKernel1by1(b.min.ToPoint3Rounded(), b.max.ToPoint3Rounded(), (data, p) =>
         {
-            data.Density = -1;
+            data.Density = mode;
             return data;
         }, Time.frameCount);
 
+    }
+
+    private Bounds worldToDigCubeCell(RaycastHit raycastHit)
+    {
+        
+        var pos = raycastHit.point;
+        pos = DigSize * (((pos + Vector3.one * Renderer.RenderScale) / DigSize).ToFloored().ToVector3() + 0.5f * Vector3.one) - Vector3.one * Renderer.RenderScale;
+        var min = pos - Vector3.one * DigSize / 2f;
+        var max = pos + Vector3.one * DigSize / 2f;
+
+        var b = new Bounds();
+        b.SetMinMax(Renderer.ToVoxelSpace(min).ToFloored(), Renderer.ToVoxelSpace(max).ToCeiled());
+        return b;
+    }
+
+    private static bool Raycast(out RaycastHit raycastHit)
+    {
+        return Physics.Raycast(Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0)), out raycastHit, 100);
     }
 }
