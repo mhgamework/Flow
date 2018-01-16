@@ -1,6 +1,7 @@
 ﻿// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
 #pragma kernel CSTriangle
+#pragma kernel CreateDrawProceduralArgs
 
 struct CellIntermediate {
 	uint3 cellIndex;
@@ -28,6 +29,7 @@ StructuredBuffer<CellIntermediate> inCellsBuffer;
 
 StructuredBuffer<CellCoord> cellCoordBuffer;
 
+
 struct DrawProceduralArgs {
 	int vertexCount;
 	int instanceCount;
@@ -35,15 +37,15 @@ struct DrawProceduralArgs {
 	int startInstanceLocation;
 };
 
-//StructuredBuffer<int>
-//StructuredBuffer<DrawProceduralArgs> vertexCountBuffer;
+StructuredBuffer<uint> countBuffer;
+RWStructuredBuffer<DrawProceduralArgs> drawProceduralArgsBuffer;
 
 float time;
 
 //define SIZE 9
 //#define SIZE (16+1)
 //#define SIZE (16+2)
-#define SIZE (64+1)
+#define SIZE (128+1)
 
 float hash1(float2 p)
 {
@@ -108,8 +110,14 @@ float wobblyPlane(uint3 p) {
 	return (float)(p.y) - 8.0 + sin((float)p.x+time);
 }
 
+float plane(uint3 p) {
+	return (float)(p.y) - 8.0;
+}
+
+
 float sdf(uint3 p) {
 	
+	//return plane(p);
 	return wobblyPlane(p);
 	return movingSphere(p);
 
@@ -614,7 +622,10 @@ void CSTriangle(uint3 myId : SV_DispatchThreadID)
 		t.b = gridP[1];
 		t.c = gridP[2];*/
 
-		trianglesBuffer.Append(t);//[id.x] = 55;
+		trianglesBuffer.Append(t);
+
+		
+		//[id.x] = 55;
 		//trianglesBuffer.Append(vertlist[triTableEntry[i+2]]);//[id.x] = 55;
 		//trianglesBuffer.Append(vertlist[triTableEntry[i+1]]);//[id.x] = 55;
 		//triangles.Add(vertlist[triTableEntry[i]] + offset);
@@ -631,5 +642,14 @@ void CSTriangle(uint3 myId : SV_DispatchThreadID)
 
 }
 
+[numthreads(1, 1, 1)]
+void CreateDrawProceduralArgs() {
+	DrawProceduralArgs args;
 
-
+	
+	args.vertexCount = countBuffer[0]*3;
+	args.instanceCount = 1;
+	args.startVertexLocation = 0;
+	args.startInstanceLocation = 0;
+	drawProceduralArgsBuffer[0] = args;
+}

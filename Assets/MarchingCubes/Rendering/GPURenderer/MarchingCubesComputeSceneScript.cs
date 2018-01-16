@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -39,11 +40,11 @@ namespace Assets.MarchingCubes.ComputeShader
             var cellsBuffer = new ComputeBuffer(size * size * size, 4 * 3 + 4, ComputeBufferType.Append);
             var countBuffer = new ComputeBuffer(3, 4, ComputeBufferType.IndirectArguments);
             countBuffer.SetData(new[] { 0, 1, 1 });
-            var trianglesBuffer = new ComputeBuffer((size + 1) * (size + 1) * (size + 1) * 12, 4 * 3 * 3,
+            // Change to vertex buffer
+            var trianglesBuffer = new ComputeBuffer((size + 1) * (size + 1) * (size + 1) * 12 * 3, 4 * 3 ,
                 ComputeBufferType.Append);
 
             var drawProceduralIndirectBuffer = new ComputeBuffer(1, 4 * 4, ComputeBufferType.IndirectArguments); // Must set this otherwise silently fails!!
-
 
             return new Buffers(densityBuffer, cellsBuffer, countBuffer, trianglesBuffer, cellCoordBuffer, drawProceduralIndirectBuffer);
         }
@@ -60,8 +61,8 @@ namespace Assets.MarchingCubes.ComputeShader
     {
         public UnityEngine.ComputeShader shader;
         private Mesh mesh;
-        private Buffers buffers;
-        int configCellSize = 64;
+        //private Buffers buffers;
+        int configCellSize = 128;
 
         private List<Chunk> chunks = new List<Chunk>();
 
@@ -74,7 +75,7 @@ namespace Assets.MarchingCubes.ComputeShader
             var filter = GetComponent<MeshFilter>();
             filter.mesh = new Mesh();
             mesh = filter.mesh;
-            buffers = createBuffers(configCellSize);
+            //buffers = createBuffers(configCellSize);
 
             var repeat = 1;
             var entireSize = configCellSize * repeat;
@@ -114,19 +115,21 @@ namespace Assets.MarchingCubes.ComputeShader
             var c = chunks[0];
             runCalculateTrianglesShader(shader, c.sdf, configCellSize, c.buffers);
 
-            ComputeBuffer.CopyCount(c.buffers.TrianglesBuffer, c.buffers.CountBuffer, 0);
+            createDrawProceduralBuffer(c.buffers);
+            //ComputeBuffer.CopyCount(c.buffers.TrianglesBuffer, c.buffers.DrawProceduralIndirectBuffer, 0);
 
-            var output = retrieveCalculationOutput(c.buffers);
+            //var output = retrieveTrianglesCount(c.buffers);
 
-            c.buffers.DrawProceduralIndirectBuffer.SetData(new uint[] { (uint)(output.Length), 1, 0, 0 });
+            //c.buffers.DrawProceduralIndirectBuffer.SetData(new uint[] { (uint)(output.Length), 1, 0, 0 });
 
 
             material.SetPass(0);
             material.SetBuffer("buf_Points", c.buffers.TrianglesBuffer);
 
-            Graphics.DrawProceduralIndirect(MeshTopology.Triangles, c.buffers.DrawProceduralIndirectBuffer, 0);
-            //Graphics.DrawProcedural(MeshTopology.Triangles, output.Length);
+            //Graphics.DrawProceduralIndirect(MeshTopology.Triangles, c.buffers.DrawProceduralIndirectBuffer, 0);
+            Graphics.DrawProceduralIndirect(MeshTopology.Triangles, c.buffers.DrawProceduralIndirectBuffer);
         }
+
 
 
         private void updateRenderer()
@@ -269,6 +272,8 @@ namespace Assets.MarchingCubes.ComputeShader
         }
         private static void retrieveVertices(Buffers buffers, Vector3[] outVertices, int trianglesCount)
         {
+            throw new NotImplementedException(
+                "Triangles buffer was changed to vertices, so might need retesting of this.");
             //Triangle[] output = new Triangle[trianglesCount];
             if (trianglesCount > buffers.TrianglesArrayBuffer.Length)
                 throw new System.Exception("Num triangles generated on gpu exceeds predefined buffer size");
@@ -292,7 +297,7 @@ namespace Assets.MarchingCubes.ComputeShader
 
             buffers.CountBuffer.GetData(argsData2);
             var trianglesCount = argsData2[0];
-            return trianglesCount;
+            return trianglesCount/3; // was changed to vertices
         }
 
         private static void runCalculateTrianglesShader(UnityEngine.ComputeShader shader, float[] sdf, int size, Buffers buffers)
@@ -344,6 +349,17 @@ namespace Assets.MarchingCubes.ComputeShader
             shader.SetFloat("time", Time.timeSinceLevelLoad);
             //shader.Dispatch(shader.FindKernel("CSTriangle"), cellCount, 1, 1);
             shader.DispatchIndirect(shader.FindKernel("CSTriangle"), buffers.CountBuffer); // cellCount, 1, 1);
+        }
+
+
+        private void createDrawProceduralBuffer(Buffers cBuffers)
+        {
+
+            ComputeBuffer.CopyCount(cBuffers.TrianglesBuffer, cBuffers.CountBuffer, 0);
+
+            shader.SetBuffer(shader.FindKernel("CreateDrawProceduralArgs"), "countBuffer", cBuffers.CountBuffer);
+            shader.SetBuffer(shader.FindKernel("CreateDrawProceduralArgs"), "drawProceduralArgsBuffer", cBuffers.DrawProceduralIndirectBuffer);
+            shader.Dispatch(shader.FindKernel("CreateDrawProceduralArgs"),1,1,1); // cellCount, 1, 1);
         }
 
         public static void runCellGatheringKernel(UnityEngine.ComputeShader shader, int size, Buffers buffers, Point3 cellCoord = new Point3(), int sampleResolution = 1)
