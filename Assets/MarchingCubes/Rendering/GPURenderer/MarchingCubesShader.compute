@@ -28,10 +28,22 @@ StructuredBuffer<CellIntermediate> inCellsBuffer;
 
 StructuredBuffer<CellCoord> cellCoordBuffer;
 
+struct DrawProceduralArgs {
+	int vertexCount;
+	int instanceCount;
+	int startVertexLocation;
+	int startInstanceLocation;
+};
+
+//StructuredBuffer<int>
+//StructuredBuffer<DrawProceduralArgs> vertexCountBuffer;
+
+float time;
+
 //define SIZE 9
 //#define SIZE (16+1)
-#define SIZE (16+2)
-//#define SIZE (64+1)
+//#define SIZE (16+2)
+#define SIZE (64+1)
 
 float hash1(float2 p)
 {
@@ -77,7 +89,7 @@ float fbm_9(float2 x)
 	float s = 0.55;
 	float a = 0.0;
 	float b = 0.5;
-	for (int i = 0; i<9; i++)
+	for (int i = 0; i < 9; i++)
 	{
 		float n = noise(x);
 		a += b*n;
@@ -88,13 +100,22 @@ float fbm_9(float2 x)
 	return a;
 }
 
+float movingSphere(uint3 p) {
+	float3 pos = float3(sin(time) * 5, cos(time) * 6, sin(time)*cos(time) * 7)*0.1 + float3(32, 32, 32);
+	return length(pos - (float3)p) - 2;
+}
+float wobblyPlane(uint3 p) {
+	return (float)(p.y) - 8.0 + sin((float)p.x+time);
+}
 
 float sdf(uint3 p) {
-	//return (float)(p.y) - 8.0;
+	
+	return wobblyPlane(p);
+	return movingSphere(p);
+
 	//return dot(frac((float3)p / 8.0) - 4.0, float3(1,1,1));
 	//return length((float3)p - float3(800, 800, 800)) - 500;
-	//return -(fbm_9(p.xz*0.002)*200.0+100.0 - p.y); // First Cool working terrain!!!
-	return -(fbm_9(p.xz*0.0005)*800.0 + 400.0 - p.y); // First Cool working terrain!!!
+	//return -(fbm_9(p.xz*0.0005)*800.0 + 400.0 - p.y); // First Cool working terrain!!!
 	//return -( sin(p.x*0.05)*20 + sin(p.z*0.001)*100 + 200 - p.y);
 }
 
@@ -569,13 +590,13 @@ void CSTriangle(uint3 myId : SV_DispatchThreadID)
 		VertexInterp(isolevel, gridP[3], gridP[7], gridVals[3], gridVals[7]);
 
 
-	//Triangle t;
+	//Triangle t2;
 
-	//t.a = gridP[0];
-	//t.b = gridP[1];
-	//t.c = gridP[2];//float3(0, myId.x, 0);
+	//t2.a = gridP[0];
+	//t2.b = gridP[1];
+	//t2.c = gridP[2];//float3(0, myId.x, 0);
 
-	//trianglesBuffer.Append(t);//[id.x] = 55;
+	//trianglesBuffer.Append(t2);//[id.x] = 55;
 
 	//return;
 	/* Create the triangle */
