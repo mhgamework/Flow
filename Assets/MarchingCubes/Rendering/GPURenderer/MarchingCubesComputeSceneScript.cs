@@ -113,9 +113,14 @@ namespace Assets.MarchingCubes.ComputeShader
         //public void OnPostRender()
         {
             var c = chunks[0];
+
             runCalculateTrianglesShader(shader, c.sdf, configCellSize, c.buffers);
+            
+
+            Profiler.BeginSample("Procbuffer");
 
             createDrawProceduralBuffer(c.buffers);
+            Profiler.EndSample();
             //ComputeBuffer.CopyCount(c.buffers.TrianglesBuffer, c.buffers.DrawProceduralIndirectBuffer, 0);
 
             //var output = retrieveTrianglesCount(c.buffers);
@@ -302,12 +307,20 @@ namespace Assets.MarchingCubes.ComputeShader
 
         private static void runCalculateTrianglesShader(UnityEngine.ComputeShader shader, float[] sdf, int size, Buffers buffers)
         {
-            setSdfToBuffer(sdf, buffers);
+            Profiler.BeginSample("setSdfToBuffer");
 
+            setSdfToBuffer(sdf, buffers);
+            Profiler.EndSample();
+
+            Profiler.BeginSample("runCellGatheringKernel");
 
             runCellGatheringKernel(shader, size, buffers);
+            Profiler.EndSample();
+            Profiler.BeginSample("runTriangleKernel");
 
             runTriangleKernel(shader, buffers);
+            Profiler.EndSample();
+
         }
 
         public static CellIntermediate[] getCellBufferData(Buffers buffers)

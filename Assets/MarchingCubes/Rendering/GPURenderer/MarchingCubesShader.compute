@@ -107,7 +107,7 @@ float movingSphere(uint3 p) {
 	return length(pos - (float3)p) - 2;
 }
 float wobblyPlane(uint3 p) {
-	return (float)(p.y) - 8.0 + sin((float)p.x+time);
+	return (float)(p.y) - 8.0 + sin((float)p.x + time);
 }
 
 float plane(uint3 p) {
@@ -116,7 +116,7 @@ float plane(uint3 p) {
 
 
 float sdf(uint3 p) {
-	
+
 	//return plane(p);
 	return wobblyPlane(p);
 	return movingSphere(p);
@@ -493,22 +493,23 @@ an edge between two vertices, each with their own scalar value
 */
 float3 VertexInterp(float isolevel, float3 p1, float3 p2, float valp1, float valp2)
 {
-	//TODO isolevel is zero so optimization is pousibblee
-	float mu;
-	float3 p;
+	return lerp(p1, p2, (isolevel - valp1) / (valp2 - valp1)); // TODO test
+	////TODO isolevel is zero so optimization is pousibblee
+	//float mu;
+	//float3 p;
 
-	if (abs(isolevel - valp1) < 0.00001)
-		return (p1);
-	if (abs(isolevel - valp2) < 0.00001)
-		return (p2);
-	if (abs(valp1 - valp2) < 0.00001)
-		return (p1);
-	mu = (isolevel - valp1) / (valp2 - valp1);
-	p.x = (float)(p1.x + mu * (p2.x - p1.x));
-	p.y = (float)(p1.y + mu * (p2.y - p1.y));
-	p.z = (float)(p1.z + mu * (p2.z - p1.z));
+	//if (abs(isolevel - valp1) < 0.00001)
+	//	return (p1);
+	//if (abs(isolevel - valp2) < 0.00001)
+	//	return (p2);
+	//if (abs(valp1 - valp2) < 0.00001)
+	//	return (p1);
+	//mu = (isolevel - valp1) / (valp2 - valp1);
+	//p.x = (float)(p1.x + mu * (p2.x - p1.x));
+	//p.y = (float)(p1.y + mu * (p2.y - p1.y));
+	//p.z = (float)(p1.z + mu * (p2.z - p1.z));
 
-	return (p);
+	//return (p);
 
 }
 
@@ -557,9 +558,8 @@ void CSTriangle(uint3 myId : SV_DispatchThreadID)
 	gridVals[6] = sdf(worldId + uint3(1, 1, 0)*sampleResolution);
 	gridVals[7] = sdf(worldId + uint3(0, 1, 0)*sampleResolution);
 
-
-	// MH TODO these ifs are pointless on GPU
-	/* Find the vertices where the surface intersects the cube */
+	// MH: I thought these ifs were pointless, but they give a marginal (5%) speed increase in profiler
+/* Find the vertices where the surface intersects the cube */
 	if ((edgeTable[cubeindex] & 1) > 0)
 		vertlist[0] =
 		VertexInterp(isolevel, gridP[0], gridP[1], gridVals[0], gridVals[1]);
@@ -597,6 +597,18 @@ void CSTriangle(uint3 myId : SV_DispatchThreadID)
 		vertlist[11] =
 		VertexInterp(isolevel, gridP[3], gridP[7], gridVals[3], gridVals[7]);
 
+	//vertlist[0] = float3(1,1,1);
+	//vertlist[1] = float3(1, 1, 1);
+	//vertlist[2] = float3(1, 1, 1);
+	//vertlist[3] = float3(1, 1, 1);
+	//vertlist[4] = float3(1, 1, 1);
+	//vertlist[5] = float3(1, 1, 1);
+	//vertlist[6] = float3(1, 1, 1);
+	//vertlist[7] = float3(1, 1, 1);
+	//vertlist[8] = float3(1, 1, 1);
+	//vertlist[9] = float3(1, 1, 1);
+	//vertlist[10] = float3(1, 1, 1);
+	//vertlist[11] = float3(1, 1, 1);
 
 	//Triangle t2;
 
@@ -624,7 +636,7 @@ void CSTriangle(uint3 myId : SV_DispatchThreadID)
 
 		trianglesBuffer.Append(t);
 
-		
+
 		//[id.x] = 55;
 		//trianglesBuffer.Append(vertlist[triTableEntry[i+2]]);//[id.x] = 55;
 		//trianglesBuffer.Append(vertlist[triTableEntry[i+1]]);//[id.x] = 55;
@@ -646,8 +658,8 @@ void CSTriangle(uint3 myId : SV_DispatchThreadID)
 void CreateDrawProceduralArgs() {
 	DrawProceduralArgs args;
 
-	
-	args.vertexCount = countBuffer[0]*3;
+
+	args.vertexCount = countBuffer[0] * 3;
 	args.instanceCount = 1;
 	args.startVertexLocation = 0;
 	args.startInstanceLocation = 0;
