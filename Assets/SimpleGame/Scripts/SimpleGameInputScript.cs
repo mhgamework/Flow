@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Assets.MarchingCubes;
 using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.VoxelWorldMVP;
@@ -21,6 +22,10 @@ public class SimpleGameInputScript : MonoBehaviour
 
     public Transform CubeGhost;
 
+    public Color DirtColor;
+    public Color StoneColor;
+    public Color WoodColor;
+
     // Use this for initialization
     void Start()
     {
@@ -32,9 +37,54 @@ public class SimpleGameInputScript : MonoBehaviour
     {
         updateGhost();
         if (Input.GetMouseButtonDown(0))
-            Dig(1);
+        {
+            RaycastHit raycastHit;
+            var res = Raycast(out raycastHit);
+            if (res)
+            {
+                var b = worldToDigCubeCell(raycastHit);
+
+                var w = Renderer.GetWorld();
+
+                var mats = new List<VoxelMaterial>();
+
+                w.RunKernel1by1(b.min.ToPoint3Rounded(), b.max.ToPoint3Rounded(), (data, p) =>
+                {
+                    mats.Add(data.Material);
+                    return data;
+                }, Time.frameCount);
+
+
+                Dig(1);
+
+                if (mats.Any(v => v.color == StoneColor))
+                {
+                    Assets.SimpleGame.Scripts.PlayerScript.Instance.StoreItems("stone", 1);
+                }
+                else if (mats.Any(v => v.color == WoodColor))
+                {
+                    Assets.SimpleGame.Scripts.PlayerScript.Instance.StoreItems("wood", 1);
+                }
+                else
+                {
+                    Assets.SimpleGame.Scripts.PlayerScript.Instance.StoreItems("dirt", 1);
+                }
+
+            }
+
+        }
         if (Input.GetMouseButtonDown(1))
-            Dig(-1);
+        {
+            var pl = Assets.SimpleGame.Scripts.PlayerScript.Instance;
+            if (pl.GetNumItems("dirt") > 0)
+            {
+                pl.TakeItems("dirt", 1);
+                Dig(-1);
+
+            }
+
+
+        }
         if (Input.GetKeyDown(KeyCode.F))
         {
             ShootSphere();
@@ -89,7 +139,7 @@ public class SimpleGameInputScript : MonoBehaviour
 
     private Bounds worldToDigCubeCell(RaycastHit raycastHit)
     {
-        
+
         var pos = raycastHit.point;
         pos = DigSize * (((pos + Vector3.one * Renderer.RenderScale) / DigSize).ToFloored().ToVector3() + 0.5f * Vector3.one) - Vector3.one * Renderer.RenderScale;
         var min = pos - Vector3.one * DigSize / 2f;
