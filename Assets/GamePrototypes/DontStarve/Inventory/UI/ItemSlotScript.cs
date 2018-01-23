@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
 using Assets.DontStarve.Inventory;
+using UnityEngine.UI;
 
 public class ItemSlotScript : MonoBehaviour, IPointerClickHandler
 {
@@ -10,10 +11,14 @@ public class ItemSlotScript : MonoBehaviour, IPointerClickHandler
     public InteractableInventoryUIScript inventoryUI;
     public int SlotNum;
     public InventoryUIStack uiStack;
+
+    private Color startBackgroundColor;
     // Use this for initialization
     void Start()
     {
+        startBackgroundColor = GetComponent<Image>().color;
     }
+
 
     // Update is called once per frame
     void Update()
@@ -126,5 +131,16 @@ public class ItemSlotScript : MonoBehaviour, IPointerClickHandler
     {
         var s = GetInventory().GetSlot(SlotNum);
         uiStack.UpdateUI(s);
+    }
+
+    public void SetBackgroundColor(Color color)
+    {
+        GetComponent<Image>().color = color;
+    }
+
+    public void ResetBackgroundColor()
+    {
+        GetComponent<Image>().color = startBackgroundColor;
+
     }
 }

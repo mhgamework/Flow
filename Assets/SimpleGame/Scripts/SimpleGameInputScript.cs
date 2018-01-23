@@ -4,6 +4,7 @@ using System.Linq;
 using Assets.MarchingCubes;
 using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.VoxelWorldMVP;
+using Assets.SimpleGame.Scripts;
 using MHGameWork.TheWizards;
 using UnityEngine;
 
@@ -76,13 +77,23 @@ public class SimpleGameInputScript : MonoBehaviour
         if (Input.GetMouseButtonDown(1))
         {
             var pl = Assets.SimpleGame.Scripts.PlayerScript.Instance;
-            if (pl.GetNumItems("dirt") > 0)
+
+
+            var selectedItem = HotbarScript.Instance.GetSelectedInventoryItem();
+            if (!selectedItem.IsEmpty)
             {
-                pl.TakeItems("dirt", 1);
-                Dig(-1);
+                Color c;
+                if (selectedItem.ResourceType == "stone")
+                    c = StoneColor;
+                else if (selectedItem.ResourceType == "wood")
+                    c = WoodColor;
+                else
+                    c = DirtColor;
+
+                pl.TakeItems(selectedItem.ResourceType, 1);
+                Dig(-1,new VoxelMaterial(c));
 
             }
-
 
         }
         if (Input.GetKeyDown(KeyCode.F))
@@ -93,6 +104,11 @@ public class SimpleGameInputScript : MonoBehaviour
         {
             Player.position = playerStartPos;
         }
+
+        if (Input.mouseScrollDelta.y < 0)
+            HotbarScript.Instance.SelectNext();
+        if (Input.mouseScrollDelta.y > 0)
+            HotbarScript.Instance.SelectPrevious();
     }
 
     private void updateGhost()
@@ -118,7 +134,7 @@ public class SimpleGameInputScript : MonoBehaviour
 
     }
 
-    private void Dig(int mode)
+    private void Dig(int mode, VoxelMaterial c = null)
     {
         RaycastHit raycastHit;
         var res = Raycast(out raycastHit);
@@ -132,6 +148,8 @@ public class SimpleGameInputScript : MonoBehaviour
         w.RunKernel1by1(b.min.ToPoint3Rounded(), b.max.ToPoint3Rounded(), (data, p) =>
         {
             data.Density = mode;
+            if (c != null)
+                data.Material = c;
             return data;
         }, Time.frameCount);
 

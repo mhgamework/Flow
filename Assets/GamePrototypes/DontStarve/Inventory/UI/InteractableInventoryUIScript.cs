@@ -52,6 +52,11 @@ public class InteractableInventoryUIScript : MonoBehaviour
         }
     }
 
+    public ItemSlotScript GetSlot(int num)
+    {
+        return transform.GetChild(num).GetComponent<ItemSlotScript>();
+    }
+
 
     public void SetInventory(InventoryScript inventoryScript)
     {
