@@ -5,6 +5,8 @@ namespace Assets.SimpleGame.Scripts
     public class PlayerScript : Singleton<PlayerScript>
     {
         public InventoryScript HotbarInventory;
+        public float Health = 80;
+        public float MaxHealth = 100;
 
         public Vector3 GetPlayerPosition()
         {
