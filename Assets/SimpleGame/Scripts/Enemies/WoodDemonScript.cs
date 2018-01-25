@@ -5,6 +5,8 @@ namespace Assets.SimpleGame.Scripts.Enemies
 {
     public class WoodDemonScript : MonoBehaviour
     {
+        public float PlayerDist = 1;
+        public float AttackInterval = 1;
         public float MoveSpeed = 1;
         public float distToGround = 1;
         public float JumpSpeed = 5;
@@ -26,8 +28,24 @@ namespace Assets.SimpleGame.Scripts.Enemies
         private float timeStuck = 0;
 
         private Vector3 lastPos;
+
+
+        private float lastAttack = float.MinValue;
+
         public void FixedUpdate()
         {
+            if ((player.GetPlayerPosition() - transform.position).magnitude < PlayerDist)
+            {
+                // Attack!
+                if (lastAttack + AttackInterval < Time.timeSinceLevelLoad)
+                {
+                    lastAttack = Time.timeSinceLevelLoad;
+                    player.TakeDamage(10);
+                }
+                return;
+
+            }
+
             //Debug.Log(canJump() + "    " + isStuck());
             if (isStuck()) timeStuck += Time.fixedDeltaTime;
             else timeStuck = 0;

@@ -19,7 +19,6 @@ public class SimpleGameInputScript : MonoBehaviour
 
     public float DigSize = 3;
 
-    private Vector3 playerStartPos;
 
     public Transform CubeGhost;
 
@@ -30,13 +29,15 @@ public class SimpleGameInputScript : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        playerStartPos = Player.position;
+ 
+
     }
 
     // Update is called once per frame
     void Update()
     {
         updateGhost();
+
         if (Input.GetMouseButtonDown(0))
         {
             RaycastHit raycastHit;
@@ -102,7 +103,7 @@ public class SimpleGameInputScript : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
-            Player.position = playerStartPos;
+            Assets.SimpleGame.Scripts.PlayerScript.Instance.Respawn();
         }
 
         if (Input.mouseScrollDelta.y < 0)
