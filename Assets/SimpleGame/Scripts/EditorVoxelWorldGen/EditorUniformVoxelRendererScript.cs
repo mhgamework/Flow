@@ -6,19 +6,25 @@ using Assets.Reusable;
 using Assets.Reusable.Threading;
 using DirectX11;
 using MHGameWork.TheWizards;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.Profiling;
 
 namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
 {
     [ExecuteInEditMode]
+#if UNITY_EDITOR
     [InitializeOnLoad]
+#endif
     public class EditorUniformVoxelRendererScript : Singleton<EditorUniformVoxelRendererScript>
     {
         static EditorUniformVoxelRendererScript()
         {
+#if UNITY_EDITOR
             EditorApplication.update += GlobalUpdate;
+#endif
         }
         static void GlobalUpdate()
         {
@@ -145,9 +151,9 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
                     var hasUpdatedNonEmpty = updateChunk(chunk.X, chunk.Y, chunk.Z);
                     if (!hasUpdatedNonEmpty) i--;// Do an extra
                 }
-
+#if UNITY_EDITOR
                 if (dirtyList.Count > 0) EditorUtility.SetDirty(this);
-
+#endif
                 Debug.Log("Dirty " + dirtyList.Count);
 
             }
@@ -213,8 +219,9 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
 
         public void NotifyChanged(IVoxelObject voxelObject)
         {
+#if UNITY_EDITOR
             EditorUtility.SetDirty(this);
-
+#endif
             addDirtyChunks(voxelObject);
         }
 
