@@ -38,6 +38,9 @@ public class SimpleGameInputScript : MonoBehaviour
     {
         updateGhost();
 
+        if (Input.GetKeyDown(KeyCode.KeypadPlus)) DayNightCycleScript.Instance.ChangeTimeRelative(0.1f);
+        if (Input.GetKeyDown(KeyCode.KeypadMinus)) DayNightCycleScript.Instance.ChangeTimeRelative(-0.1f);
+
         if (Input.GetMouseButtonDown(0))
         {
             RaycastHit raycastHit;

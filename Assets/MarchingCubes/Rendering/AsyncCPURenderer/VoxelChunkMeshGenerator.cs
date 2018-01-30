@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Profiling;
+using Random = UnityEngine.Random;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {
@@ -212,6 +213,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
                 outData.indices.Add(iV + 1);
 
             }
+
+            randomizeColors(outVertexColors);
+
+
             // Double the verts so normals can be correctly calculated
             outVertices.AddRange(outVertices);
             outVertexColors.AddRange(outVertexColors);
@@ -221,5 +226,27 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         }
 
+        private void randomizeColors(List<Color> outVertexColors)
+        {
+            for (int i = 0; i < outVertexColors.Count; i++)
+            {
+                var c = outVertexColors[i];
+                float h, s, v;
+                Color.RGBToHSV(c, out h, out s, out v);
+
+
+                var amount = 0.03f;
+                //c.r += (((i / 3 + 444) * 311 % 97) / 97f - 0.5f) * amount;// Random.value*0.1f;
+                //c.g += (((i / 3) * 311 % 97) / 97f - 0.5f) * amount;// Random.value*0.1f;
+                //c.b += (((i / 3 + 7451) * 311 % 97) / 97f - 0.5f) * amount;// Random.value*0.1f;
+
+                s += (((i / 3 + 444) * 311 % 97) / 97f - 0.5f) * amount;
+                v += (((i / 3) * 311 % 97) / 97f - 0.5f) * amount;
+
+                outVertexColors[i] = Color.HSVToRGB(h, s, v);
+                //c.g += Random.value*0.1f;
+                //c.b += Random.value*0.1f;
+            }
+        }
     }
 }

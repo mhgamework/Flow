@@ -7,10 +7,10 @@ namespace Assets.MarchingCubes.SdfModeling
         private readonly DistObject d1;
         private readonly DistObject d2;
 
-        public Subtraction(DistObject d1, DistObject d2)
+        public Subtraction(DistObject d2, DistObject d1)
         {
-            this.d1 = d2;
-            this.d2 = d1;
+            this.d1 = d1;
+            this.d2 = d2;
         }
 
         public override float Sdf(Vector3 p)
