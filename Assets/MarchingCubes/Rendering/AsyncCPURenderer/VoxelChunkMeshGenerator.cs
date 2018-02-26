@@ -214,6 +214,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             }
 
+            // Adds some sparkle to the colors ;) not exactly what i want but yeah.
             randomizeColors(outVertexColors);
 
 

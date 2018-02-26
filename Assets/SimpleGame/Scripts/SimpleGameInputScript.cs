@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Assets.MarchingCubes;
 using Assets.MarchingCubes.Rendering;
+using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.SimpleGame.Scripts;
 using MHGameWork.TheWizards;
@@ -29,7 +30,7 @@ public class SimpleGameInputScript : MonoBehaviour
     // Use this for initialization
     void Start()
     {
- 
+
 
     }
 
@@ -95,7 +96,7 @@ public class SimpleGameInputScript : MonoBehaviour
                     c = DirtColor;
 
                 pl.TakeItems(selectedItem.ResourceType, 1);
-                Dig(-1,new VoxelMaterial(c));
+                Dig(-1, new VoxelMaterial(c));
 
             }
 
@@ -144,18 +145,43 @@ public class SimpleGameInputScript : MonoBehaviour
         var res = Raycast(out raycastHit);
         if (!res) return;
 
+        if (mode > 0)
+        {
+            raycastHit.point -= raycastHit.normal * DigSize;
+        }
 
         var b = worldToDigCubeCell(raycastHit);
 
         var w = Renderer.GetWorld();
 
-        w.RunKernel1by1(b.min.ToPoint3Rounded(), b.max.ToPoint3Rounded(), (data, p) =>
-        {
-            data.Density = mode;
-            if (c != null)
-                data.Material = c;
-            return data;
-        }, Time.frameCount);
+        var f = 1.1f;
+        //if (mode > 0) f = 0.9f;
+        var box = new Box(b.extents.x*f, b.extents.y * f, b.extents.z * f);
+        var t = new Translation(box, b.center);
+
+        w.RunKernel1by1(b.min.ToPoint3Rounded() - new DirectX11.Point3(2, 2, 2), b.max.ToPoint3Rounded() + new DirectX11.Point3(2, 2, 2), (data, p) =>
+            {
+                if (mode > 0)
+                {
+                    var cubeD = t.Sdf(p);
+                    var newDensity = Mathf.Max(data.Density, -cubeD);
+
+                    data.Density = newDensity;
+
+
+                }
+                else
+                {
+                    var cubeD = t.Sdf(p);
+                    var newDensity = Mathf.Min(data.Density, cubeD);
+                    if (newDensity != data.Density)
+                        data.Material = c;
+
+                    data.Density = newDensity;
+                }
+
+                return data;
+            }, Time.frameCount);
 
     }
 

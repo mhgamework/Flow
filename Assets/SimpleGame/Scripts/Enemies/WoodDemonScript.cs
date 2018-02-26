@@ -1,5 +1,7 @@
-﻿using Assets.MarchingCubes.Rendering;
+﻿using System.Collections.Generic;
+using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.SdfModeling;
+using Assets.SimpleGame.Voxel;
 using MHGameWork.TheWizards;
 using UnityEngine;
 
@@ -31,6 +33,12 @@ namespace Assets.SimpleGame.Scripts.Enemies
         public bool isDigging = false;
 
 
+        public bool IsRanger = false;
+        public float FireRange = 20f;
+        public float ProjectileSpeed = 5;
+        public ProjectileScript ProjectilePrefab;
+
+
         private PlayerScript player;
         private Rigidbody rigidbody;
 
@@ -39,6 +47,8 @@ namespace Assets.SimpleGame.Scripts.Enemies
         {
             player = PlayerScript.Instance;
             rigidbody = GetComponent<Rigidbody>();
+
+            StartCoroutine(watchPlayerPos().GetEnumerator());
         }
 
         private Vector3 desiredPos;
@@ -52,34 +62,34 @@ namespace Assets.SimpleGame.Scripts.Enemies
 
         public void FixedUpdate()
         {
-          
+
             if (DayNightCycleScript.Instance.IsDay())
             {
                 Hide();
                 return;
             }
 
-
             Show();
+
 
             if (!canDetectPlayer())
             {
                 TryRandomWalk();
                 return;
-
             }
 
-            //if (IsDigger && isWayBlocked(player.GetPlayerPosition()))
-            //{
-            //    Debug.Log("Blocked");
-            //    dig(player.GetPlayerPosition());
-            //    return;
-            //}
             if (IsDigger)
             {
                 dig(player.GetPlayerPosition());
             }
-            if (CanAttackPlayer())
+
+
+            if (IsRanger && hasLineOfSight(player.GetPlayerPosition()) && isInFireRange(player.GetPlayerPosition()))
+            {
+                TryFire(player.GetPlayerPosition());
+                return;
+            }
+            if (!IsRanger && CanAttackPlayer())
             {
                 // Attack!
                 if (lastAttack + AttackInterval < Time.timeSinceLevelLoad)
@@ -93,6 +103,56 @@ namespace Assets.SimpleGame.Scripts.Enemies
 
             //Debug.Log(canJump() + "    " + isStuck());
             MoveTo(player.GetPlayerPosition());
+        }
+
+
+        private void TryFire(Vector3 target)
+        {
+            if (lastAttack + AttackInterval > Time.timeSinceLevelLoad) return;
+
+            lastAttack = Time.timeSinceLevelLoad;
+
+
+            var proj = Instantiate(ProjectilePrefab);
+
+            var dir = (player.GetPlayerPosition() - transform.position).normalized;
+            // Predict target
+            proj.LaunchAtTargetPredicted(transform.position + dir.ChangeY(0).normalized * 1, player.GetPlayerPosition() + Vector3.up,
+                (player.GetPlayerPosition() - prevPlayerPos) / 0.5f);
+
+
+
+        }
+
+        private Vector3 prevPlayerPos;
+        IEnumerable<YieldInstruction> watchPlayerPos()
+        {
+            for (; ; )
+            {
+                var pos = player.GetPlayerPosition();
+                yield return new WaitForSeconds(0.5f);
+                prevPlayerPos = pos;
+            }
+
+        }
+
+        private bool hasLineOfSight(Vector3 target)
+        {
+            var diff = -(transform.position - target);
+            var ray = new Ray(transform.position, diff.normalized);
+            Debug.DrawLine(ray.origin, ray.origin + diff);
+            var res = Physics.RaycastAll(ray, diff.magnitude); // Assume no collider on player
+            if (res.Length == 0) return false;
+            if (res[0].collider.GetComponentInParent<PlayerScript>() != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool isInFireRange(Vector3 pos)
+        {
+            return (pos - transform.position).magnitude < FireRange;
         }
 
         private void dig(Vector3 target)
@@ -121,25 +181,30 @@ namespace Assets.SimpleGame.Scripts.Enemies
                 * Matrix4x4.Rotate(Quaternion.LookRotation((target - this.transform.position).normalized, Vector3.up))
                 );
 
-            bool hasDug = false;
-            Renderer.GetWorld().RunKernel1by1((this.transform.position - Vector3.one * 3).ToFloored(),
-                (this.transform.position + Vector3.one * 3).ToCeiled(),
-                (d, p) =>
-                {
-                    var newDensity = Mathf.Max(d.Density, -transform.Sdf(p));
+            var b = new Bounds();
+            b.SetMinMax(this.transform.position - Vector3.one * 3, (this.transform.position + Vector3.one * 3));
 
-                    hasDug = hasDug || (newDensity - d.Density > 0.01);
+            isDigging = VoxelEditingFunctions.Subtract(Renderer.GetWorld(), transform, b);
+
+            //bool hasDug = false;
+            //Renderer.GetWorld().RunKernel1by1((this.transform.position - Vector3.one * 3).ToFloored(),
+            //    (this.transform.position + Vector3.one * 3).ToCeiled(),
+            //    (d, p) =>
+            //    {
+            //        var newDensity = Mathf.Max(d.Density, -transform.Sdf(p));
+
+            //        hasDug = hasDug || (newDensity - d.Density > 0.01);
 
 
-                    d.Density = newDensity;
+            //        d.Density = newDensity;
 
 
 
-                    return d;
-                }, Time.frameCount);
+            //        return d;
+            //    }, Time.frameCount);
 
-            Debug.Log(isDigging);
-            isDigging = hasDug;
+            //Debug.Log(isDigging);
+            //isDigging = hasDug;
         }
 
         private bool isWayBlocked(Vector3 target)
