@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Assets.GamePrototypes.DontStarve;
 
 public class HudScript : MonoBehaviour {
 

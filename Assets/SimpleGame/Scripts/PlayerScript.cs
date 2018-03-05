@@ -9,7 +9,11 @@ namespace Assets.SimpleGame.Scripts
         public float Health = 80;
         public float MaxHealth = 100;
 
+        public bool AirSpellCasting = false;
+
         private Vector3 playerStartPos;
+
+
 
 
         public void Start()
@@ -53,6 +57,11 @@ namespace Assets.SimpleGame.Scripts
         {
             transform.position = playerStartPos;
             Health = 100;
+        }
+
+        public void ToggleAirSpellCasting()
+        {
+            AirSpellCasting = !AirSpellCasting;
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.EventSystems;
 using System;
+using Assets.GamePrototypes.DontStarve;
 using Assets.UnityAdditions;
 
 public class FirePitScript : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler

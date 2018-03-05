@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Assets.GamePrototypes.DontStarve;
 using UnityEngine;
 
 namespace Assets

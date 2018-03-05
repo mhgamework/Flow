@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using a;
 using Assets.UnityAdditions;
 using DirectX11;
 using MHGameWork.TheWizards;
@@ -7,7 +8,7 @@ using UnityEngine;
 
 namespace Assets.Flow.WardDrawing
 {
-    public class WardDrawInput : MonoBehaviour
+    public class WardDrawInputScript : MonoBehaviour
     {
         private List<List<Vector3>> Lines = new List<List<Vector3>>();
         private List<List<Vector3>> Target = new List<List<Vector3>>();
@@ -17,40 +18,29 @@ namespace Assets.Flow.WardDrawing
         public Vector3 TargetShapeOffset = new Vector3();
         public bool set = false;
 
-        public Transform GridPoint;
+        public Transform CylinderLine;
 
         public int Size;
         public float GridCellSize;
         public float PointSize;
         public float SelectedPointSize;
 
-        //private Dictionary<Point3, GameObject> dict = new Dictionary<Point3, GameObject>();
+        private Dictionary<Point3, GameObject> dict = new Dictionary<Point3, GameObject>();
 
-        private GameObject selected;
-        private Point3 selectedCell;
-        private Vector3 targetPoint;
-        private Plane drawPlane;
 
-        private GameObject GridContainer;
+        private GameObject LineContainer;
+
+        public Transform MouseParticles;
+
+        public OrbGridScript orbGridScript;
 
         public void Start()
         {
 
             Lines.Add(new List<Vector3>());
 
-            GridContainer = new GameObject("GridContainer");
-            GridContainer.transform.SetParent(transform);
-            var localOffset = new Vector3(Size / 2f, Size / 2f, 0);
-            for (int x = 0; x < Size; x++)
-                for (int y = 0; y < Size; y++)
-                {
-                    var p = Instantiate(GridPoint.gameObject, GridContainer.transform);
-                    p.transform.position = new Vector3(x, y) * GridCellSize - localOffset;
-                    p.transform.localScale = new Vector3(1, 1, 1) * PointSize;
-                    //dict.Add(new Point3(x, y, 0), p);
-                }
-
-            SetPlane(new Vector3(), Vector3.forward);
+            LineContainer = new GameObject("LineContainer");
+            LineContainer.transform.SetParent(transform, false);
 
             for (int i = 0; i < TargetShapeEditor.Count; i++)
             {
@@ -69,11 +59,10 @@ namespace Assets.Flow.WardDrawing
                 TargetShapeEditor = toEditor(Lines);
                 set = false;
             }
-            updateSelected();
             //if (selected != null)
             if (Input.GetMouseButtonDown(0))
             {
-                Lines.Last().Add(selectedCell);
+                Lines.Last().Add(orbGridScript.HoveredPointWorld);
             }
             else if (Input.GetMouseButtonDown(1))
             {
@@ -88,17 +77,65 @@ namespace Assets.Flow.WardDrawing
 
 
             var matcher = new WardComparer();
+
             var matches = matcher.Match(Lines, Target);
 
+            Lines.Last().Add(orbGridScript.CursorPointWorld);
+
+            DrawCylinderShape(Lines, LineContainer.transform);
+            Lines.Last().Remove(orbGridScript.CursorPointWorld);
+
+
             DrawShape(Target, Color.gray);
-            Lines.Last().Add(targetPoint);
+            Lines.Last().Add(orbGridScript.CursorPointWorld);
             DrawShape(Lines, Color.white);
-            Lines.Last().Remove(targetPoint);
+            Lines.Last().Remove(orbGridScript.CursorPointWorld);
 
             if (matches.Any())
             {
                 DrawShape(matches.OrderByDescending(m => m.MatchingXLines.Count).First().MatchingXLines, Color.yellow);
 
+            }
+
+            MouseParticles.position = orbGridScript.CursorPointWorld;
+
+        }
+
+        private void DrawCylinderShape(List<List<Vector3>> lines, Transform container)
+        {
+            var i = 0;
+            foreach (var l in Lines)
+            {
+                i = DrawCylinderLine(GetLinePoints(l).ToList(), LineContainer.transform, i);
+
+            }
+            ClearCylinderLines(container, i);
+
+        }
+
+        private int DrawCylinderLine(List<Vector3> points, Transform container, int start)
+        {
+            int i = 0;
+            for (; i + 1 < points.Count; i++)
+            {
+                if (i + start == container.childCount)
+                    Instantiate(CylinderLine, container);
+
+                var c = container.GetChild(i + start);
+                c.gameObject.SetActive(true);
+                c.position = points[i];
+                c.LookAt(points[i + 1]);
+                c.localScale = new Vector3(1, 1, (points[i] - points[i + 1]).magnitude);
+            }
+
+            return i + start;
+        }
+
+        private static void ClearCylinderLines(Transform container, int i)
+        {
+            for (; i < container.childCount; i++)
+            {
+                container.GetChild(i).gameObject.SetActive(false);
             }
         }
 
@@ -144,35 +181,23 @@ namespace Assets.Flow.WardDrawing
                 }
             }
         }
-
-        private void updateSelected()
+        private IEnumerable<Vector3> GetShapePoints(List<List<Vector3>> lines)
         {
-            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-
-            float enter;
-            drawPlane.Raycast(ray, out enter);
-            Debug.DrawRay(ray.origin, ray.direction);
-
-            targetPoint = ray.GetPoint(enter);
-
-            Debug.DrawRay(ray.GetPoint(enter), ray.direction);
-
-
-            var cell = (targetPoint * (1f / GridCellSize)).ToPoint3Rounded();
-            //if (selected != null)
-            //{
-            //    selected.transform.localScale = new Vector3(1, 1, 1) * PointSize;
-            //    selected = null;
-
-            //}
-            //if (dict.ContainsKey(cell))
-            //{
-            //selected = dict[cell];
-            //selected.transform.localScale = new Vector3(1, 1, 1) * SelectedPointSize;
-            selectedCell = cell;
-            //}
+            foreach (var l in lines)
+            {
+                foreach (var vector3 in GetLinePoints(l)) yield return vector3;
+            }
         }
+
+        private IEnumerable<Vector3> GetLinePoints(List<Vector3> l)
+        {
+            for (int i = 0; i < l.Count - 1; i++)
+            {
+                foreach (var p in GetCatmullSplinePoints(l, i)) yield return p;
+            }
+        }
+
+
 
 
         public static Vector3 GetPoint(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
@@ -196,9 +221,7 @@ namespace Assets.Flow.WardDrawing
                 t * t * p2;
         }
 
-
-        //Display a spline between 2 points derived with the Catmull-Rom spline algorithm
-        void DisplayCatmullRomSpline(List<Vector3> controlPointsList, int pos, Color color)
+        IEnumerable<Vector3> GetCatmullSplinePoints(List<Vector3> controlPointsList, int pos)
         {
             var a = pos - 1;
             var b = pos;
@@ -226,7 +249,7 @@ namespace Assets.Flow.WardDrawing
 
             //How many times should we loop?
             int loops = Mathf.FloorToInt(1f / resolution);
-
+            yield return lastPos;
             for (int i = 1; i <= loops; i++)
             {
                 //Which t position are we at?
@@ -235,12 +258,31 @@ namespace Assets.Flow.WardDrawing
                 //Find the coordinate between the end points with a Catmull-Rom spline
                 Vector3 newPos = GetCatmullRomPosition(t, p0, p1, p2, p3);
 
+                yield return newPos;
                 //Draw this line segment
-                Debug.DrawLine(lastPos, newPos, color);
+                //Debug.DrawLine(lastPos, newPos, color);
 
                 //Save this pos so we can draw the next line segment
                 lastPos = newPos;
             }
+        }
+
+        //Display a spline between 2 points derived with the Catmull-Rom spline algorithm
+        void DisplayCatmullRomSpline(List<Vector3> controlPointsList, int pos, Color color)
+        {
+            Vector3 lastPos = new Vector3();
+            bool first = true;
+            foreach (var p in GetCatmullSplinePoints(controlPointsList, pos))
+            {
+                if (!first)
+                {
+                    Debug.DrawLine(lastPos, p, color);
+
+                }
+                first = false;
+                lastPos = p;
+            }
+
         }
 
 
@@ -270,17 +312,7 @@ namespace Assets.Flow.WardDrawing
 
         public void SetPlane(Vector3 point, Vector3 normal)
         {
-            point = point.ToPoint3Rounded().ToVector3();
-            GridContainer.transform.position = point;
-            GridContainer.transform.LookAt(point + normal);
-            var euler = GridContainer.transform.rotation.eulerAngles;
-            euler.x = Mathf.Round(euler.x / 90f) * 90f;
-            euler.y = Mathf.Round(euler.y /90f) * 90f;
-            euler.z = Mathf.Round(euler.z / 90f) * 90f;
-            GridContainer.transform.rotation = Quaternion.Euler(euler);
-
-
-            drawPlane = new Plane(GridContainer.transform.forward, point);
+            orbGridScript.SetPlane(point, normal);
 
 
 

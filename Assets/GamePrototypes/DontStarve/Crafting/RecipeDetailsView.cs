@@ -4,6 +4,7 @@ using Assets.DontStarve.Crafting;
 using System;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Assets.GamePrototypes.DontStarve;
 using Assets.UnityAdditions;
 using MHGameWork.TheWizards.DualContouring;
 

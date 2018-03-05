@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 using Assets.UnityAdditions;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.GamePrototypes.DontStarve;
 
 public class Tree : MonoBehaviour, IInteractable, IPointerEnterHandler, IPointerExitHandler
 {

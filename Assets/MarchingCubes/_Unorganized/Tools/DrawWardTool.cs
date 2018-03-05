@@ -15,7 +15,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private GameObject sphereGizmo;
         private Vector3 point;
         private Vector3 normal;
-        private WardDrawInput wardDrawInput;
+        private WardDrawInputScript wardDrawInput;
 
 
         public string Name
@@ -33,7 +33,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void Start()
         {
-            wardDrawInput = GetComponent<WardDrawInput>();
+            wardDrawInput = GetComponent<WardDrawInputScript>();
         }
 
         void IState.Start()

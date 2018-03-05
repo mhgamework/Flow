@@ -2,6 +2,7 @@
 using System.Collections;
 using Assets;
 using System;
+using Assets.GamePrototypes.DontStarve;
 
 public class Mushroom : MonoBehaviour,IInteractable {
 
