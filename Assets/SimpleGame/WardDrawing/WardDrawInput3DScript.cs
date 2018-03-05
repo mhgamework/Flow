@@ -2,7 +2,7 @@
 using MHGameWork.TheWizards;
 using UnityEngine;
 
-namespace Assets.Flow.WardDrawing
+namespace Assets.SimpleGame.WardDrawing
 {
     public class WardDrawInput3D : MonoBehaviour
     {

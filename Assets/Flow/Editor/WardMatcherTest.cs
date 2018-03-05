@@ -5,7 +5,7 @@ using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.Flow.WardDrawing;
+using Assets.SimpleGame.WardDrawing;
 
 public class WardMatcherTest
 {

@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-namespace Assets.Flow.WardDrawing
+namespace Assets.SimpleGame.WardDrawing
 {
     public class WardComparer
     {

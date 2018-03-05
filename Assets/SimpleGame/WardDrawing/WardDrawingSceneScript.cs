@@ -1,5 +1,4 @@
-﻿using Assets.Flow.WardDrawing;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
 namespace Assets.SimpleGame.WardDrawing

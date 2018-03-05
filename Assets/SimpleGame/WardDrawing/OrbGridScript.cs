@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Assets.Flow.WardDrawing;
+﻿using System.Collections.Generic;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
 
-namespace a
+namespace Assets.SimpleGame.WardDrawing
 {
     public class OrbGridScript : MonoBehaviour
     {
@@ -29,6 +26,8 @@ namespace a
 
         private GameObject GridContainer;
 
+        public bool UseCircle = true;
+
         public Vector3 CursorPointWorld
         {
             get { return targetPoint; }
@@ -44,16 +43,16 @@ namespace a
             GridContainer = new GameObject("GridContainer");
             GridContainer.transform.SetParent(transform, false);
 
-            var Size = Radius * 2 + 1;
 
-            for (int x = 0; x < Size; x++)
-                for (int y = 0; y < Size; y++)
+            for (int x = -Radius; x <= Radius; x++)
+                for (int y = -Radius; y <= Radius; y++)
                 {
+                    if (x * x + y * y > Radius * Radius) continue;
                     var p = Instantiate(GridPoint.gameObject, GridContainer.transform);
                     p.gameObject.SetActive(true);
-                    p.transform.localPosition = (new Vector3(x, y) - new Vector3(Radius, Radius, 0));
+                    p.transform.localPosition = (new Vector3(x, y,0)) * GridCellSize;
                     p.transform.localScale = new Vector3(1, 1, 1) * PointSize * GridCellSize;
-                    dict.Add(new Point3(x - Radius, y - Radius, 0), p);
+                    dict.Add(new Point3(x, y, 0), p);
                 }
             SetPlane(new Vector3(), Vector3.forward);
         }
@@ -74,6 +73,8 @@ namespace a
 
             var localPoint = transform.worldToLocalMatrix.MultiplyPoint(targetPoint);
 
+            Debug.DrawLine(CursorPointWorld, CursorPointWorld + Vector3.up, Color.red);
+            Debug.DrawLine(HoveredPointWorld, CursorPointWorld + Vector3.up, Color.green);
 
             var cell = (localPoint * (1f / GridCellSize)).ToPoint3Rounded();
             if (hoveredGridPoint != null)
@@ -109,8 +110,8 @@ namespace a
         public void SetPlane(Vector3 point, Vector3 normal)
         {
             //point = point.ToPoint3Rounded().ToVector3();
-            GridContainer.transform.position = point;
-            GridContainer.transform.LookAt(point + normal);
+            transform.position = point;
+            transform.LookAt(point + normal);
             /*var euler = GridContainer.transform.rotation.eulerAngles;
             euler.x = Mathf.Round(euler.x / 90f) * 90f;
             euler.y = Mathf.Round(euler.y / 90f) * 90f;
@@ -118,7 +119,7 @@ namespace a
             GridContainer.transform.rotation = Quaternion.Euler(euler);*/
 
 
-            drawPlane = new Plane(GridContainer.transform.forward, point);
+            drawPlane = new Plane(transform.forward, point);
 
 
 
