@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using DirectX11;
 using UnityEngine;
 
 namespace Assets.SimpleGame.WardDrawing
@@ -10,14 +11,24 @@ namespace Assets.SimpleGame.WardDrawing
         public GameObject CylinderLine;
         public float Thickness = 1;
 
+        private bool shapeSet = false;
+
         public void Start()
         {
-            DrawCylinderShape(new []{Points}.ToList(), transform);
+            if (!shapeSet) // For editor
+                DrawCylinderShape(new[] { Points }.ToList(), transform);
         }
 
         public void SetShape(List<List<Vector3>> lines)
         {
+            shapeSet = true;
             DrawCylinderShape(lines, transform);
+        }
+        public void SetShape(List<List<Point3>> lines, Matrix4x4 world)
+        {
+            shapeSet = true;
+
+            DrawCylinderShape(lines.Select(l => l.Select(p => world.MultiplyPoint(p.ToVector3())).ToList()).ToList(), transform);
         }
 
         private void DrawCylinderShape(List<List<Vector3>> lines, Transform container)

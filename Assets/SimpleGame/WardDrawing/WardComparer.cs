@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using DirectX11;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -6,11 +7,11 @@ namespace Assets.SimpleGame.WardDrawing
 {
     public class WardComparer
     {
-        public List<PartialMatch> Match(List<List<Vector3>> x, List<List<Vector3>> target)
+        public List<PartialMatch> Match(List<List<Point3>> x, List<List<Point3>> target)
         {
             x = normalizeShape(x);
             target = normalizeShape(target);
-            var offsets = new List<Vector3>();
+            var offsets = new List<Point3>();
             foreach (var l in x)
             {
                 // Use each line as starting point
@@ -18,7 +19,7 @@ namespace Assets.SimpleGame.WardDrawing
 
                 foreach (var k in target)
                 {
-                    Vector3 offset;
+                    Point3 offset;
                     if (!matchLine(l, k, out offset)) continue;
                     offsets.Add(offset);
                 }
@@ -29,14 +30,15 @@ namespace Assets.SimpleGame.WardDrawing
             foreach (var offset in offsets)
             {
                 var pMatch = new PartialMatch();
-                var matches = new List<List<Vector3>>();
+                var matches = new List<List<Point3>>();
                 // Rate the offset
                 foreach (var l in x)
                 {
                     if (!hasMatch(l, target, offset)) continue;
                     matches.Add(l);
                 }
-                pMatch.ExactMatch = matches.Count == x.Count;
+                //Was: pMatch.ExactMatch = matches.Count == x.Count;
+                pMatch.ExactMatch = matches.Count == target.Count;
                 pMatch.MatchingXLines = matches;
                 pMatch.X = x;
                 pMatch.Target = target;
@@ -47,7 +49,7 @@ namespace Assets.SimpleGame.WardDrawing
             return ret;
         }
 
-        private static List<List<Vector3>> normalizeShape(List<List<Vector3>> x)
+        private static List<List<Point3>> normalizeShape(List<List<Point3>> x)
         {
             x = x.Where(k => k.Count > 1).ToList();
 
@@ -55,7 +57,7 @@ namespace Assets.SimpleGame.WardDrawing
 
         }
 
-        private bool hasMatch(List<Vector3> x, List<List<Vector3>> target, Vector3 offset)
+        private bool hasMatch(List<Point3> x, List<List<Point3>> target, Point3 offset)
         {
             foreach (var l in target)
             {
@@ -64,7 +66,7 @@ namespace Assets.SimpleGame.WardDrawing
             return false;
         }
 
-        private bool matchLineWithOffset(List<Vector3> x, List<Vector3> targetLine, Vector3 offset)
+        private bool matchLineWithOffset(List<Point3> x, List<Point3> targetLine, Point3 offset)
         {
             if (x.Count != targetLine.Count) return false;
             if (isLoop(x) && isLoop(targetLine))
@@ -126,7 +128,7 @@ namespace Assets.SimpleGame.WardDrawing
         }
 
 
-        private bool matchLine(List<Vector3> x, List<Vector3> target, out Vector3 offset)
+        private bool matchLine(List<Point3> x, List<Point3> target, out Point3 offset)
         {
             offset = target[0] - x[0];
 
@@ -155,12 +157,12 @@ namespace Assets.SimpleGame.WardDrawing
             return false;
         }
 
-        private bool match(Vector3 x, Vector3 y)
+        private bool match(Point3 x, Point3 y)
         {
-            return (x - y).sqrMagnitude < 0.001;
+            return (x.ToVector3() - y.ToVector3()).sqrMagnitude < 0.001;
         }
 
-        private bool isLoop(List<Vector3> x)
+        private bool isLoop(List<Point3> x)
         {
             return match(x[0], x[x.Count - 1]);
         }
@@ -168,10 +170,10 @@ namespace Assets.SimpleGame.WardDrawing
 
         public class PartialMatch
         {
-            public List<List<Vector3>> X;
-            public List<List<Vector3>> Target;
+            public List<List<Point3>> X;
+            public List<List<Point3>> Target;
             public Vector3 Offset;
-            public List<List<Vector3>> MatchingXLines;
+            public List<List<Point3>> MatchingXLines;
             public bool ExactMatch;
         }
     }

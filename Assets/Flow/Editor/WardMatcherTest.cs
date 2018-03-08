@@ -6,16 +6,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.SimpleGame.WardDrawing;
+using DirectX11;
 
 public class WardMatcherTest
 {
 
-    private Vector3 a = new Vector3(0, 0, 0);
-    private Vector3 b = new Vector3(1, 1, 1);
-    private Vector3 aOff = new Vector3(50, 50, 50);
-    private Vector3 bOff = new Vector3(51, 51, 51);
-    private Vector3 c = new Vector3(-2, 2, 2);
-    private Vector3 d = new Vector3(3, 3, 3);
+    private Point3 a = new Point3(0, 0, 0);
+    private Point3 b = new Point3(1, 1, 1);
+    private Point3 aOff = new Point3(50, 50, 50);
+    private Point3 bOff = new Point3(51, 51, 51);
+    private Point3 c = new Point3(-2, 2, 2);
+    private Point3 d = new Point3(3, 3, 3);
     [Test]
     public void TestMatchSimpleLine()
     {
@@ -163,11 +164,11 @@ public class WardMatcherTest
 
     }
 
-    private List<Vector3> create(params Vector3[] line)
+    private List<Point3> create(params Point3[] line)
     {
         return line.ToList();
     }
-    private List<List<Vector3>> create(params List<Vector3>[] lines)
+    private List<List<Point3>> create(params List<Point3>[] lines)
     {
         return lines.ToList();
     }

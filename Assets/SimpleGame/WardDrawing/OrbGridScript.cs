@@ -38,6 +38,11 @@ namespace Assets.SimpleGame.WardDrawing
             get { return transform.TransformPoint(selectedCell.ToVector3() * GridCellSize); }
         }
 
+        public Point3 HoveredPointLocal
+        {
+            get { return selectedCell; }
+        }
+
         public void Start()
         {
             GridContainer = new GameObject("GridContainer");

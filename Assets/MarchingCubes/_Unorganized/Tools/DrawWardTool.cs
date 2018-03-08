@@ -38,12 +38,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         void IState.Start()
         {
-            wardDrawInput.Show();
+            //wardDrawInput.Show();
         }
 
         void IState.Stop()
         {
-            wardDrawInput.Hide();
+            //wardDrawInput.Hide();
         }
 
         void IState.Update(RaycastHit? raycast)
