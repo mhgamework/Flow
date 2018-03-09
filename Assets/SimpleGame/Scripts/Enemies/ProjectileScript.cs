@@ -120,13 +120,15 @@ namespace Assets.SimpleGame.Scripts.Enemies
 
         private void DestroyTerrain()
         {
-            if (VoxelRenderer.GetWorld() == null) return;
+            var world = SimpleGameStartupScript.Instance.RenderingEngine.GetWorld();
+            if (world == null) return;
+
             var s = new Ball(transform.position, ProjectileExplosionRadius);
 
             var b = new Bounds();
             b.SetMinMax((this.transform.position - Vector3.one * ProjectileExplosionRadius), (this.transform.position + Vector3.one * ProjectileExplosionRadius));
 
-            VoxelEditingFunctions.Subtract(VoxelRenderer.GetWorld(), s, b);
+            VoxelEditingFunctions.Subtract(world, s, b);
         }
 
 

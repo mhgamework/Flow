@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Assets.SimpleGame.Scripts
 {
-    public class SimpleGameStartupScript : MonoBehaviour
+    public class SimpleGameStartupScript : Singleton<SimpleGameStartupScript>
     {
         public VoxelRenderingEngineScript RenderingEngine;
         public Transform RootScene;

@@ -28,6 +28,11 @@ namespace Assets.SimpleGame.Scripts
             return transform.position;
         }
 
+        public Transform GetCameraTransform()
+        {
+            return GetComponentInChildren<Camera>().transform;
+        }
+
         public void StoreItems(string type , int amount)
         {
             HotbarInventory.AddResources(type, amount);

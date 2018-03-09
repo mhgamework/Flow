@@ -20,12 +20,12 @@ namespace Assets.SimpleGame.WardDrawing
 
         public static Ward Create(params Point3[][] lines)
         {
-            return new Ward(lines.Select(CreateLine).ToList());
+            return new Ward(lines.Select(s =>CreateLine(s).ToList()).ToList());
         }
 
-        public static List<Point3> CreateLine(params Point3[] points)
+        public static Point3[] CreateLine(params Point3[] points)
         {
-            return points.ToList();
+            return points;
         }
     }
 }

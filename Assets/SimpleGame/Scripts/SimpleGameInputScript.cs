@@ -7,6 +7,7 @@ using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame.WardDrawing;
+using Assets.SimpleGame.Wards;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
@@ -32,7 +33,7 @@ public class SimpleGameInputScript : MonoBehaviour
     public Color StoneColor;
     public Color WoodColor;
 
-    private Ward lightWard;
+    public List<AbstractWardSpell> Spells;
     public GameObject LightPrefab;
     // Use this for initialization
     void Start()
@@ -42,37 +43,31 @@ public class SimpleGameInputScript : MonoBehaviour
     }
     private void OnEnable()
     {
-        lightWard = Ward.Create(new Point3(0, 1, 0), new Point3(1, 0, 0), new Point3(0, -1, 0), new Point3(-1, 0, 0), new Point3(0, 1, 0));
-
-        WardDrawingModeScript.SetWards(new List<Ward>(new []{ lightWard }));
+        WardDrawingModeScript.SetWards(Spells.Select(s => s.Ward).ToList());
 
         WardDrawingModeScript.OnCorrectWard += OnCorrectWard;
     }
 
     private void OnCorrectWard(Ward obj)
     {
-        if (obj == lightWard)
-        {
-            var camTransform = FirstPersonController.GetComponentInChildren<Camera>().transform;
-
-            var inst = Instantiate(LightPrefab, camTransform.position + camTransform.forward * 1,
-                camTransform.rotation, transform);
-            inst.GetComponentInChildren<MeshWardViewScript>().SetShape(lightWard.Shape, inst.transform.localToWorldMatrix);
-            PlayerScript.Instance.AirSpellCasting = false;
-            updateWardDrawingState();
-        }
+        var spell = Spells.FirstOrDefault(s => s.Ward == obj);
+        if (spell == null) return;
+        spell.Cast(PlayerScript.Instance);
+        updateWardDrawingState();
     }
 
     // Update is called once per frame
     void Update()
     {
+
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             PlayerScript.Instance.ToggleAirSpellCasting();
             updateWardDrawingState();
+
         }
 
-        
+
         if (PlayerScript.Instance.AirSpellCasting)
         {
             updateGhost(false);
@@ -151,7 +146,7 @@ public class SimpleGameInputScript : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.KeypadPlus)) DayNightCycleScript.Instance.ChangeTimeRelative(0.1f);
         if (Input.GetKeyDown(KeyCode.KeypadMinus)) DayNightCycleScript.Instance.ChangeTimeRelative(-0.1f);
 
-     
+
         if (Input.GetKeyDown(KeyCode.R))
         {
             Assets.SimpleGame.Scripts.PlayerScript.Instance.Respawn();
@@ -216,7 +211,7 @@ public class SimpleGameInputScript : MonoBehaviour
 
         var f = 1.1f;
         //if (mode > 0) f = 0.9f;
-        var box = new Box(b.extents.x*f, b.extents.y * f, b.extents.z * f);
+        var box = new Box(b.extents.x * f, b.extents.y * f, b.extents.z * f);
         var t = new Translation(box, b.center);
 
         w.RunKernel1by1(b.min.ToPoint3Rounded() - new DirectX11.Point3(2, 2, 2), b.max.ToPoint3Rounded() + new DirectX11.Point3(2, 2, 2), (data, p) =>
