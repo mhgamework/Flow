@@ -43,14 +43,20 @@ namespace Assets.SimpleGame.WardDrawing
 
         public void Start()
         {
-            wardScriptableObject = new WardScriptableObject();
-            ClearCurrentShape();
+           
 
             //for (int i = 0; i < TargetShapeEditor.Count; i++)
             //{
             //    if (TargetShapeEditor[i] == new Vector3(-1, -1, -1)) continue;
             //    TargetShapeEditor[i] += TargetShapeOffset;
             //}
+
+        }
+
+        private void OnEnable()
+        {
+            wardScriptableObject = new WardScriptableObject();
+            ClearCurrentShape();
         }
 
         private void ClearCurrentShape()

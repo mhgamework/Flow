@@ -24,7 +24,7 @@ namespace Assets.SimpleGame.WardDrawing
 
         private List<Ward> wards;
 
-        public void Start()
+        public void OnEnable()
         {
             updateState();
             wards = new[] { Ward1, Ward2 }.Select(WardDrawingUtils.UnflattenShape).Select(k => new Ward(k)).ToList();

@@ -7,6 +7,7 @@ using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame.WardDrawing;
+using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
@@ -20,6 +21,7 @@ public class SimpleGameInputScript : MonoBehaviour
 
     public VoxelRenderingEngineScript Renderer;
     public FirstPersonController FirstPersonController;
+    public WardDrawingModeScript WardDrawingModeScript;
 
     public float DigSize = 3;
 
@@ -30,13 +32,35 @@ public class SimpleGameInputScript : MonoBehaviour
     public Color StoneColor;
     public Color WoodColor;
 
-    public WardDrawInputScript WardDrawInput;
-
+    private Ward lightWard;
+    public GameObject LightPrefab;
     // Use this for initialization
     void Start()
     {
 
 
+    }
+    private void OnEnable()
+    {
+        lightWard = Ward.Create(new Point3(0, 1, 0), new Point3(1, 0, 0), new Point3(0, -1, 0), new Point3(-1, 0, 0), new Point3(0, 1, 0));
+
+        WardDrawingModeScript.SetWards(new List<Ward>(new []{ lightWard }));
+
+        WardDrawingModeScript.OnCorrectWard += OnCorrectWard;
+    }
+
+    private void OnCorrectWard(Ward obj)
+    {
+        if (obj == lightWard)
+        {
+            var camTransform = FirstPersonController.GetComponentInChildren<Camera>().transform;
+
+            var inst = Instantiate(LightPrefab, camTransform.position + camTransform.forward * 1,
+                camTransform.rotation, transform);
+            inst.GetComponentInChildren<MeshWardViewScript>().SetShape(lightWard.Shape, inst.transform.localToWorldMatrix);
+            PlayerScript.Instance.AirSpellCasting = false;
+            updateWardDrawingState();
+        }
     }
 
     // Update is called once per frame
@@ -45,17 +69,12 @@ public class SimpleGameInputScript : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             PlayerScript.Instance.ToggleAirSpellCasting();
-            if (PlayerScript.Instance.AirSpellCasting)
-            {
-
-            }
+            updateWardDrawingState();
         }
 
-        FirstPersonController.enabled = !PlayerScript.Instance.AirSpellCasting;
+        
         if (PlayerScript.Instance.AirSpellCasting)
         {
-            Cursor.lockState = CursorLockMode.None; // Doesnt work in editor: CursorLockMode.Confined;
-            Cursor.visible = true;
             updateGhost(false);
         }
         else
@@ -142,6 +161,18 @@ public class SimpleGameInputScript : MonoBehaviour
             HotbarScript.Instance.SelectNext();
         if (Input.mouseScrollDelta.y > 0)
             HotbarScript.Instance.SelectPrevious();
+    }
+
+    private void updateWardDrawingState()
+    {
+        WardDrawingModeScript.SetModeEnabled(PlayerScript.Instance.AirSpellCasting);
+        FirstPersonController.enabled = !PlayerScript.Instance.AirSpellCasting;
+
+        if (PlayerScript.Instance.AirSpellCasting)
+        {
+            var camTransform = FirstPersonController.GetComponentInChildren<Camera>().transform;
+            WardDrawingModeScript.SetPlane(camTransform.position + camTransform.forward * 1, -camTransform.forward);
+        }
     }
 
     private void updateGhost(bool enabled)

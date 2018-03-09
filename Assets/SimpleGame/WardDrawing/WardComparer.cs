@@ -17,6 +17,7 @@ namespace Assets.SimpleGame.WardDrawing
                 // Use each line as starting point
                 // Ignoring rotations
 
+
                 foreach (var k in target)
                 {
                     Point3 offset;

@@ -45,20 +45,27 @@ namespace Assets.SimpleGame.WardDrawing
 
         public void Start()
         {
+            init();
+        }
+
+        private void init()
+        {
+            if (GridContainer != null) return;
             GridContainer = new GameObject("GridContainer");
             GridContainer.transform.SetParent(transform, false);
 
 
             for (int x = -Radius; x <= Radius; x++)
-                for (int y = -Radius; y <= Radius; y++)
-                {
-                    if (x * x + y * y > Radius * Radius) continue;
-                    var p = Instantiate(GridPoint.gameObject, GridContainer.transform);
-                    p.gameObject.SetActive(true);
-                    p.transform.localPosition = (new Vector3(x, y,0)) * GridCellSize;
-                    p.transform.localScale = new Vector3(1, 1, 1) * PointSize * GridCellSize;
-                    dict.Add(new Point3(x, y, 0), p);
-                }
+            for (int y = -Radius; y <= Radius; y++)
+            {
+                if (x * x + y * y > Radius * Radius) continue;
+                var p = Instantiate(GridPoint.gameObject, GridContainer.transform);
+                p.gameObject.SetActive(true);
+                p.transform.localPosition = (new Vector3(x, y, 0)) * GridCellSize;
+                p.transform.localScale = new Vector3(1, 1, 1) * PointSize * GridCellSize;
+                dict.Add(new Point3(x, y, 0), p);
+            }
+
             SetPlane(new Vector3(), Vector3.forward);
         }
 
@@ -114,6 +121,7 @@ namespace Assets.SimpleGame.WardDrawing
 
         public void SetPlane(Vector3 point, Vector3 normal)
         {
+            init();
             //point = point.ToPoint3Rounded().ToVector3();
             transform.position = point;
             transform.LookAt(point + normal);
