@@ -11,26 +11,8 @@ namespace Assets.SimpleGame.Wards
     [CreateAssetMenu(fileName = "SpawnSpell", menuName = "Flow/SpawnSpell")]
     public class SpawnSpell : AbstractWardSpell
     {
-        public string WardShape;
 
         public GameObject Prefab;
-
-        public SpawnSpell()
-        {
-
-
-        }
-        private void OnEnable()
-        {
-            if (WardShape == "light")
-                Ward = Ward.Create(new Point3(0, 1, 0), new Point3(1, 0, 0), new Point3(0, -1, 0), new Point3(-1, 0, 0), new Point3(0, 1, 0));
-            else if (WardShape == "explosion")
-                Ward = Ward.Create(
-                    Ward.CreateLine(new Point3(1, 1, 0), new Point3(-1, -1, 0)),
-                    Ward.CreateLine(new Point3(1, -1, 0), new Point3(-1, 1, 0)));
-            else
-                Ward = Ward.Create(new Point3(0, 1, 0), new Point3(1, 0, 0), new Point3(0, -1, 0), new Point3(-1, 0, 0), new Point3(0, 1, 0));
-        }
 
         public override void Cast(PlayerScript player)
         {

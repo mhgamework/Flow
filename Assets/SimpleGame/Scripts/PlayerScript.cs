@@ -1,5 +1,7 @@
 ﻿using Assets.SimpleGame.Scripts.UI;
+using Assets.SimpleGame.Wards;
 using UnityEngine;
+using UnityStandardAssets.Characters.FirstPerson;
 
 namespace Assets.SimpleGame.Scripts
 {
@@ -13,14 +15,24 @@ namespace Assets.SimpleGame.Scripts
 
         private Vector3 playerStartPos;
 
+        public EntityScript Entity { get; set; }
+        private FirstPersonController firstPersonController;
 
+        public float BaseMovementSpeed;
 
 
         public void Start()
         {
             playerStartPos = transform.position;
-
+            Entity = GetComponent<EntityScript>();
+            firstPersonController = GetComponent<FirstPersonController>();
         }
+
+        public void Update()
+        {
+            firstPersonController.SpeedMultiplier = Entity.SpeedMultiplier;
+        }
+
 
 
         public Vector3 GetPlayerPosition()

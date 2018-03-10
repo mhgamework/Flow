@@ -220,6 +220,7 @@ namespace Assets.SimpleGame.Scripts.Enemies
 
         private bool canDetectPlayer()
         {
+            if (player.Entity.Invisible) return false;
             return ((player.GetPlayerPosition() - transform.position).magnitude < PlayerDetectionDistance);
         }
 
