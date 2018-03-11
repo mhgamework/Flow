@@ -10,6 +10,6 @@ namespace Assets.SimpleGame.Wards
         public abstract void StartEffect(EntityScript entity);
         public abstract void EndEffect(EntityScript entity);
 
-        public abstract void Update(EntityScript entityScript);
+        public abstract void UpdateEffect(EntityScript entityScript);
     }
 }

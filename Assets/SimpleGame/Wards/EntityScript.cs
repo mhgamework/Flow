@@ -22,7 +22,7 @@ namespace Assets.SimpleGame.Wards
             for (var i = 0; i < StatusEffects.Count; i++)
             {
                 var s = StatusEffects[i];
-                s.Effect.Update(this);
+                s.Effect.UpdateEffect(this);
                 if (!(s.StartTime + s.Effect.Duration > Time.timeSinceLevelLoad))
                 {
                     s.Effect.EndEffect(this);

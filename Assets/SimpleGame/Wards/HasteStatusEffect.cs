@@ -18,7 +18,7 @@ namespace Assets.SimpleGame.Wards
 
         }
 
-        public override void Update(EntityScript entityScript)
+        public override void UpdateEffect(EntityScript entityScript)
         {
         }
     }

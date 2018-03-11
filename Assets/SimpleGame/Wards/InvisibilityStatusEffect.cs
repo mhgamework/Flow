@@ -17,7 +17,7 @@ namespace Assets.SimpleGame.Wards
             entity.Invisible = false;
         }
 
-        public override void Update(EntityScript entityScript)
+        public override void UpdateEffect(EntityScript entityScript)
         {
         }
     }

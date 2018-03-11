@@ -98,15 +98,15 @@ public class SimpleGameInputScript : MonoBehaviour
 
                     if (mats.Any(v => v.color == StoneColor))
                     {
-                        Assets.SimpleGame.Scripts.PlayerScript.Instance.StoreItems("stone", 1);
+                        PlayerScript.Instance.StoreItems("stone", 1);
                     }
                     else if (mats.Any(v => v.color == WoodColor))
                     {
-                        Assets.SimpleGame.Scripts.PlayerScript.Instance.StoreItems("wood", 1);
+                        PlayerScript.Instance.StoreItems("wood", 1);
                     }
                     else
                     {
-                        Assets.SimpleGame.Scripts.PlayerScript.Instance.StoreItems("dirt", 1);
+                        PlayerScript.Instance.StoreItems("dirt", 1);
                     }
 
                 }
