@@ -25,7 +25,7 @@ namespace Assets.SimpleGame.Wards
                     );
             else if (WardShape == "explosion")
                 Ward = Ward.Create(
-                    Ward.CreateLine(new Point3(1, 1, 0), new Point3(-1, -2, 0)),
+                    Ward.CreateLine(new Point3(1, 1, 0), new Point3(-1, -1, 0)),
                     Ward.CreateLine(new Point3(1, -1, 0), new Point3(-1, 1, 0)));
             else if (WardShape == "haste")
                 Ward = Ward.Create(
