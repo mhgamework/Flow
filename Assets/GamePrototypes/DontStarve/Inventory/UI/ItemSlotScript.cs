@@ -2,7 +2,6 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
-using Assets.DontStarve.Inventory;
 using UnityEngine.UI;
 
 public class ItemSlotScript : MonoBehaviour, IPointerClickHandler

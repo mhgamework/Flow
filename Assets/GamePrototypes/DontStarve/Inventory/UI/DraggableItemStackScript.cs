@@ -2,7 +2,6 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.EventSystems;
-using Assets.DontStarve.Inventory;
 
 public class DraggableItemStackScript : MonoBehaviour
 {
@@ -17,11 +16,11 @@ public class DraggableItemStackScript : MonoBehaviour
         return FindObjectOfType<DraggableItemStackScript>();
     }
 
-    public ItemType GetDraggingItemType()
-    {
-        if (!IsDragging) return null;
-        return stack.GetItemType();
-    }
+    //public ItemType GetDraggingItemType()
+    //{
+    //    if (!IsDragging) return null;
+    //    return stack.GetItemType();
+    //}
 
     // Use this for initialization
     void Start()

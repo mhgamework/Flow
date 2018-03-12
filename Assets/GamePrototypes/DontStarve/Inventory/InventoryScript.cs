@@ -3,7 +3,6 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.DontStarve.Inventory;
 
 /// <summary>
 /// Inventory that has a number of slots
@@ -95,11 +94,6 @@ public class InventoryScript : MonoBehaviour
         }
 
         public bool IsEmpty { get { return ResourceType == "" || Amount == 0; } }
-
-        public ItemType GetItemType()   
-        {
-            return ResourceTypesScript.Instance().GetItemTypeForIdentifier(ResourceType);
-        }
 
         public override String ToString()
         {
