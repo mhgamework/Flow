@@ -5,11 +5,13 @@ using Assets.MarchingCubes;
 using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
+using Assets.SimpleGame.Items;
 using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame.WardDrawing;
 using Assets.SimpleGame.Wards;
 using DirectX11;
 using MHGameWork.TheWizards;
+using UnityEditor;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
@@ -23,6 +25,8 @@ public class SimpleGameInputScript : MonoBehaviour
     public VoxelRenderingEngineScript Renderer;
     public FirstPersonController FirstPersonController;
     public WardDrawingModeScript WardDrawingModeScript;
+
+    public MagicParticleSpellItem tempMagicParticleSpellItem;
 
     public float DigSize = 3;
 
@@ -56,6 +60,7 @@ public class SimpleGameInputScript : MonoBehaviour
         updateWardDrawingState();
     }
 
+
     // Update is called once per frame
     void Update()
     {
@@ -67,81 +72,7 @@ public class SimpleGameInputScript : MonoBehaviour
 
         }
 
-
-        if (PlayerScript.Instance.AirSpellCasting)
-        {
-            updateGhost(false);
-        }
-        else
-        {
-            updateGhost(true);
-            if (Input.GetMouseButtonDown(0))
-            {
-                RaycastHit raycastHit;
-                var res = Raycast(out raycastHit);
-                if (res)
-                {
-                    var b = worldToDigCubeCell(raycastHit);
-
-                    var w = Renderer.GetWorld();
-
-                    var mats = new List<VoxelMaterial>();
-
-                    w.RunKernel1by1(b.min.ToPoint3Rounded(), b.max.ToPoint3Rounded(), (data, p) =>
-                    {
-                        mats.Add(data.Material);
-                        return data;
-                    }, Time.frameCount);
-
-
-                    Dig(1);
-
-                    if (mats.Any(v => v.color == StoneColor))
-                    {
-                        PlayerScript.Instance.StoreItems("stone", 1);
-                    }
-                    else if (mats.Any(v => v.color == WoodColor))
-                    {
-                        PlayerScript.Instance.StoreItems("wood", 1);
-                    }
-                    else
-                    {
-                        PlayerScript.Instance.StoreItems("dirt", 1);
-                    }
-
-                }
-
-            }
-            if (Input.GetMouseButtonDown(1))
-            {
-                var pl = Assets.SimpleGame.Scripts.PlayerScript.Instance;
-
-
-                var selectedItem = HotbarScript.Instance.GetSelectedInventoryItem();
-                if (!selectedItem.IsEmpty)
-                {
-                    Color c;
-                    if (selectedItem.ResourceType == "stone")
-                        c = StoneColor;
-                    else if (selectedItem.ResourceType == "wood")
-                        c = WoodColor;
-                    else
-                        c = DirtColor;
-
-                    pl.TakeItems(selectedItem.ResourceType, 1);
-                    Dig(-1, new VoxelMaterial(c));
-
-                }
-
-            }
-            if (Input.GetKeyDown(KeyCode.F))
-            {
-                ShootSphere();
-            }
-        }
-
-
-
+        doTool();
 
         if (Input.GetKeyDown(KeyCode.KeypadPlus)) DayNightCycleScript.Instance.ChangeTimeRelative(0.1f);
         if (Input.GetKeyDown(KeyCode.KeypadMinus)) DayNightCycleScript.Instance.ChangeTimeRelative(-0.1f);
@@ -156,6 +87,99 @@ public class SimpleGameInputScript : MonoBehaviour
             HotbarScript.Instance.SelectNext();
         if (Input.mouseScrollDelta.y > 0)
             HotbarScript.Instance.SelectPrevious();
+
+
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            ShootSphere();
+        }
+    }
+
+
+    void doTool()
+    {
+
+        if (PlayerScript.Instance.AirSpellCasting)
+        {
+            updateGhost(false);
+            return;
+        }
+
+        if (HotbarScript.Instance.GetSelectedInventoryItem().ResourceType == "magicprojectile" && HotbarScript.Instance.GetSelectedInventoryItem().Amount > 0)
+        {
+            // Hacky!
+            var spellItem = tempMagicParticleSpellItem;
+            spellItem.UpdateTool(PlayerScript.Instance);
+            updateGhost(false);
+            return;
+        }
+
+        {
+            updateGhost(true);
+            updateToolDig();
+        }
+
+    }
+
+    private void updateToolDig()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            RaycastHit raycastHit;
+            var res = Raycast(out raycastHit);
+            if (res)
+            {
+                var b = worldToDigCubeCell(raycastHit);
+
+                var w = Renderer.GetWorld();
+
+                var mats = new List<VoxelMaterial>();
+
+                w.RunKernel1by1(b.min.ToPoint3Rounded(), b.max.ToPoint3Rounded(), (data, p) =>
+                {
+                    mats.Add(data.Material);
+                    return data;
+                }, Time.frameCount);
+
+
+                Dig(1);
+
+                if (mats.Any(v => v.color == StoneColor))
+                {
+                    PlayerScript.Instance.StoreItems("stone", 1);
+                }
+                else if (mats.Any(v => v.color == WoodColor))
+                {
+                    PlayerScript.Instance.StoreItems("wood", 1);
+                }
+                else
+                {
+                    PlayerScript.Instance.StoreItems("dirt", 1);
+                }
+            }
+        }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            var pl = Assets.SimpleGame.Scripts.PlayerScript.Instance;
+
+
+            var selectedItem = HotbarScript.Instance.GetSelectedInventoryItem();
+            if (!selectedItem.IsEmpty)
+            {
+                Color c;
+                if (selectedItem.ResourceType == "stone")
+                    c = StoneColor;
+                else if (selectedItem.ResourceType == "wood")
+                    c = WoodColor;
+                else
+                    c = DirtColor;
+
+                pl.TakeItems(selectedItem.ResourceType, 1);
+                Dig(-1, new VoxelMaterial(c));
+            }
+        }
+
     }
 
     private void updateWardDrawingState()

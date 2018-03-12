@@ -37,6 +37,13 @@ namespace Assets.SimpleGame.Wards
                     Ward.CreateLine(new Point3(-2, -1, 0), new Point3(2, -1, 0), new Point3(2, 1, 0), new Point3(-2, 1, 0), new Point3(-2, -1, 0)),
                     Ward.CreateLine(new Point3(0, -1, 0), new Point3(0, 1, 0))
                 );
+            else if (WardShape == "magicprojectile")
+                Ward = Ward.Create(
+                    Ward.CreateLine(new Point3(-1, 0, 0), new Point3(0, 1, 0), new Point3(1, 0, 0)),
+                    Ward.CreateLine(new Point3(-1, -1, 0), new Point3(0, 0, 0), new Point3(1, -1, 0)),
+                    Ward.CreateLine(new Point3(-1, -2, 0), new Point3(0, -1, 0), new Point3(1, 0-2, 0))
+
+                );
             else
                 Ward = Ward.Create(new Point3(0, 1, 0), new Point3(1, 0, 0), new Point3(0, -1, 0), new Point3(-1, 0, 0), new Point3(0, 1, 0));
         }

@@ -11,6 +11,8 @@ namespace Assets.SimpleGame.Wards
 
         public bool Invisible;
         public float SpeedMultiplier = 1;
+        public float Health;
+        public float MaxHealth;
 
         private void OnEnable()
         {
@@ -20,7 +22,7 @@ namespace Assets.SimpleGame.Wards
         public void Update()
         {
             for (var i = 0; i < StatusEffects.Count; i++)
-            {
+            { 
                 var s = StatusEffects[i];
                 s.Effect.UpdateEffect(this);
                 if (!(s.StartTime + s.Effect.Duration > Time.timeSinceLevelLoad))
@@ -51,6 +53,13 @@ namespace Assets.SimpleGame.Wards
         {
             public AbstractStatusEffect Effect;
             public float StartTime;
+        }
+
+        public void TakeDamage(float damage)
+        {
+            Health -= damage;
+            if (Health < 0)
+                Destroy(gameObject);
         }
     }
 }

@@ -2,6 +2,7 @@
 using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.SdfModeling;
 using Assets.SimpleGame.Voxel;
+using Assets.SimpleGame.Wards;
 using MHGameWork.TheWizards;
 using UnityEngine;
 
@@ -43,12 +44,16 @@ namespace Assets.SimpleGame.Scripts.Enemies
         private Rigidbody rigidbody;
 
         public Transform Model;
+
+        //private EntityScript Entity;
+
         public void Start()
         {
             player = PlayerScript.Instance;
             rigidbody = GetComponent<Rigidbody>();
 
             StartCoroutine(watchPlayerPos().GetEnumerator());
+            //Entity = GetComponent<EntityScript>();
         }
 
         private Vector3 desiredPos;
@@ -272,7 +277,7 @@ namespace Assets.SimpleGame.Scripts.Enemies
         }
 
         private void Show()
-        {
+        {  
             Model.gameObject.SetActive(true);
             rigidbody.isKinematic = false;
         }
