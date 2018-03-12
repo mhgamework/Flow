@@ -1,6 +1,4 @@
-﻿using Assets.MarchingCubes.VoxelWorldMVP;
-using UnityEngine;
-using UnityStandardAssets.Vehicles.Ball;
+﻿using UnityEngine;
 
 namespace Assets.MarchingCubes.SdfModeling
 {
