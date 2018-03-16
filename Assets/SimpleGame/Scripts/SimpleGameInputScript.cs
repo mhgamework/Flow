@@ -11,7 +11,6 @@ using Assets.SimpleGame.WardDrawing;
 using Assets.SimpleGame.Wards;
 using DirectX11;
 using MHGameWork.TheWizards;
-using UnityEditor;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 
