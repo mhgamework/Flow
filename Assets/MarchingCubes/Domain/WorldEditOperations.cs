@@ -18,24 +18,48 @@ namespace Assets.MarchingCubes.Domain
             var weights = new[] { 1, 0, 1 };
             weights = weights.Select(f => f / weights.Sum()).ToArray();
 
+            //EasingFunction.EaseInCirc()
             var plane = new Plane(Vector3.up, point + Vector3.up * Time.deltaTime);
-
-            world.RunKernelXbyXUnrolled(point.ToFloored() - radius, point.ToCeiled() + radius, (data, p) =>
+            world.RunKernel3by3(point.ToFloored() - radius, point.ToCeiled() + radius, (data, p) =>
             {
+                var iVal = 1 + 3 * (1 + 3 * 1);
+                var val = data[iVal];
+
+                var signChange = false;
+                for (int i = 0; i < data.Length; i++)
+                {
+                    if (i == iVal) continue;
+                    //var signChange = (data[0].Density * data[1].Density) <= 0 || (data[2].Density * data[1].Density) <= 0;
+                    signChange |= (data[i].Density * val.Density) <= 0;
+                }
+
+                // If there is a sign changes, increase dist
+
+                var d = data[1].Density;
+                //var d = Mathf.Min(data[0].Density + 1, data[1].Density, data[2].Density + 1);
+
+                if ((p - point).magnitude <= radius.X)
+                    if (signChange)
+                        d -= Time.deltaTime;
 
 
-                var val = data[1];
-                //if ((p - point).magnitude <= range)
+                var change = Time.deltaTime * (mode == 0 ? -1 : 1);
 
-                var d = Mathf.Min(data[0].Density + 1, data[1].Density, data[2].Density + 1);
-                var distToPlane = plane.GetDistanceToPoint(p);
+                change = EasingFunction.EaseInCirc(change, 0, Mathf.Clamp01((radius.X - (p - point).magnitude) / radius.X));
 
-                var change = distToPlane - d;
-                var changeAbs = Mathf.Abs(change);
-                var changeDir = Mathf.Sign(change);
+                d = Mathf.Clamp(val.Density, -1, 1);
+                d = d - change;
 
-                //d = (data[0].Density + data[2].Density) * 0.5f;
-                d = d + changeDir * Mathf.Min(Time.deltaTime, changeAbs);// -= Time.deltaTime;
+                ////if ((p - point).magnitude <= range)
+
+                //var distToPlane = plane.GetDistanceToPoint(p);
+
+                //var change = distToPlane - d;
+                //var changeAbs = Mathf.Abs(change);
+                //var changeDir = Mathf.Sign(change);
+
+                ////d = (data[0].Density + data[2].Density) * 0.5f;
+                //d = d + changeDir * Mathf.Min(Time.deltaTime, changeAbs);// -= Time.deltaTime;
 
                 //var d = 0f;
                 //for (int i = 0; i < weights.Length; i++)
@@ -50,7 +74,7 @@ namespace Assets.MarchingCubes.Domain
                     return val;
                 }
                 return val;
-            }, 3, currentFrameCount);
+            }, currentFrameCount);
         }
 
         /// <summary>

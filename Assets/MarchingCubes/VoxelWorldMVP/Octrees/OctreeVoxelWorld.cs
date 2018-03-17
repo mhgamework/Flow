@@ -156,6 +156,51 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
             setVoxelDataArray(minInclusive, maxInclusive, frame, visited, data, kernelSize);
         }
+
+        /// <summary>
+        /// Kernelsize must be an odd number, larger than 1
+        /// </summary>
+        /// <param name="minInclusive"></param>
+        /// <param name="maxInclusive"></param>
+        /// <param name="act"></param>
+        /// <param name="kernelSize"></param>
+        /// <param name="frame"></param>
+        public void RunKernel3by3(Point3 minInclusive, Point3 maxInclusive, Func<VoxelData[], Point3, VoxelData> act, int frame)
+        {
+
+            int RealkernelSize = 3;
+
+            List<OctreeNode> visited = new List<OctreeNode>();
+
+            var pass = new VoxelData[RealkernelSize * RealkernelSize * RealkernelSize];
+
+            var halfKernelSize = (RealkernelSize - 1) / 2;
+
+            // Extend for edges
+            minInclusive -= new Point3(1, 1, 1) * halfKernelSize;
+            maxInclusive += new Point3(1, 1, 1) * halfKernelSize;
+            var diff = maxInclusive - minInclusive + new Point3(1, 1, 1);
+            var data = getVoxelDataArray(minInclusive, maxInclusive, visited);
+
+            // Run kernel
+            for (int x = minInclusive.X + halfKernelSize; x <= maxInclusive.X - halfKernelSize; x++)
+                for (int y = minInclusive.Y + halfKernelSize; y <= maxInclusive.Y - halfKernelSize; y++)
+                    for (int z = minInclusive.Z + halfKernelSize; z <= maxInclusive.Z - halfKernelSize; z++)
+                    {
+                        for (int ix = -halfKernelSize; ix <= halfKernelSize; ix++)
+                            for (int iy = -halfKernelSize; iy <= halfKernelSize; iy++)
+                                for (int iz = -halfKernelSize; iz <= halfKernelSize; iz++)
+                                {
+                                    pass[(ix+halfKernelSize) + RealkernelSize * ((iy + halfKernelSize) + RealkernelSize * (iz + halfKernelSize))] = data[flatten(new Point3(x + ix, y + iy, z + iz) - minInclusive, diff)];
+                                }
+
+                        data[flatten(new Point3(x, y, z) - minInclusive, diff)] = act(pass, new Point3(x, y, z));
+                    }
+
+            //visited.Sort((a, b) => a.Depth - b.Depth);
+
+            setVoxelDataArray(minInclusive, maxInclusive, frame, visited, data, halfKernelSize);
+        }
         /// <summary>
         /// Mininclusive and maxinclusive describes the voxeldata array
         /// </summary>
@@ -264,7 +309,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         }
 
-        public void ResetChunk(OctreeNode octreeNode,int frame)
+        public void ResetChunk(OctreeNode octreeNode, int frame)
         {
             octreeNode.VoxelData = generator.Generate(octreeNode.LowerLeft, ChunkSize + new Point3(1, 1, 1) + new Point3(1, 1, 1), 1 << (this.depth - octreeNode.Depth));
             octreeNode.VoxelData.LastChangeFrame = frame;

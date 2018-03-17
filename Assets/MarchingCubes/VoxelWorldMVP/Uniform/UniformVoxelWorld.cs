@@ -71,5 +71,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         {
             throw new NotImplementedException();
         }
+
+        public void RunKernel3by3(Point3 minInclusive, Point3 maxInclusive, Func<VoxelData[], Point3, VoxelData> act, int frame)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
