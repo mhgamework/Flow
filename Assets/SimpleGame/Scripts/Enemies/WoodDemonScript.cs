@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.SdfModeling;
-using Assets.SimpleGame.Voxel;
-using Assets.SimpleGame.Wards;
+using Assets.MarchingCubes.World;
 using MHGameWork.TheWizards;
 using UnityEngine;
 
@@ -189,7 +188,7 @@ namespace Assets.SimpleGame.Scripts.Enemies
             var b = new Bounds();
             b.SetMinMax(this.transform.position - Vector3.one * 3, (this.transform.position + Vector3.one * 3));
 
-            isDigging = VoxelEditingFunctions.Subtract(Renderer.GetWorld(), transform, b);
+            isDigging = new SDFWorldEditingService().Subtract(Renderer.GetWorld(), transform, b);
 
             //bool hasDug = false;
             //Renderer.GetWorld().RunKernel1by1((this.transform.position - Vector3.one * 3).ToFloored(),

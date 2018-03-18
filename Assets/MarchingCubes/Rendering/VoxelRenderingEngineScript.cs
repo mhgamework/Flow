@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Assets.MarchingCubes.Persistence;
@@ -23,6 +24,7 @@ namespace Assets.MarchingCubes.Rendering
         public OctreeVoxelWorldScript World;
 
         public Camera LODCamera;
+        [Range(0.5f,4)]
         public float LODDistanceFactor = 1.2f;
 
         //TODO add render scale
@@ -41,6 +43,7 @@ namespace Assets.MarchingCubes.Rendering
         private ClipmapsOctreeService clipmapsOctreeService;
 
 
+        [NonSerialized]
         private bool init = false;
         private AsyncCPUVoxelRenderer renderingService;
 
@@ -55,6 +58,9 @@ namespace Assets.MarchingCubes.Rendering
         }
         private void initialize()
         {
+            if (init) return;
+            init = true;
+
             var chunkPoolObject = new GameObject("ChunkPool");
             chunkPoolObject.transform.SetParent(transform);
             var chunkPool = chunkPoolObject.AddComponent<VoxelChunkRendererPoolScript>();
@@ -83,11 +89,11 @@ namespace Assets.MarchingCubes.Rendering
 
             clipmapsOctreeService = new ClipmapsOctreeService(octreeVoxelWorld, renderingService, LodDistanceCurve, LodDistanceCurveEnd);
 
-
         }
 
         public OctreeVoxelWorld GetWorld()
         {
+            initialize();
             return octreeVoxelWorld;
         }
 
@@ -112,11 +118,7 @@ namespace Assets.MarchingCubes.Rendering
 
         public void Update()
         {
-            if (!init)
-            {
-                initialize();
-                init = true;
-            }
+            initialize();
             clipmapsOctreeService.LODDistanceFactor = LODDistanceFactor;
             clipmapsOctreeService.UpdateRendererState(LODCamera.transform.position / RenderScale);
 

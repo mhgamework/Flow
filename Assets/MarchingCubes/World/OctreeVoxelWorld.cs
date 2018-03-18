@@ -270,8 +270,12 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             if (n.VoxelData == emptyChunkShared)
             {
                 var newData = unusedVoxelDataPool.Take();
-                n.VoxelData.Data.ForEach((d, p) => newData.Data[p] = d);
+                newData.isEmpty = false;
+                n.VoxelData.Data.ForEach((d, p) => newData.Data[p] = new VoxelData( float.MaxValue,null)); // Assume empty means all air
+
                 n.VoxelData = newData;
+
+
                 n.VoxelData.LastChangeFrame = 0;
             }
         }
@@ -282,15 +286,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         /// <param name="c"></param>
         public void PregenerateChunk(ChunkCoord c)
         {
-            var data = unusedVoxelDataPool.Take();
-
-            generateInitialChunkData(c.LowerLeft, c.Depth, data);
-            if (data.isEmpty)
-            {
-                unusedVoxelDataPool.Release(data);
-                data = emptyChunkShared;
-            }
-
+            var data = generateInitialChunkDataAndWrap(c.LowerLeft, c.Depth);
+         
             lock (pregenCache)
             {
                 pregenCache[c] = data;
@@ -332,8 +329,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             }
             if (!res)
             {
-                data = unusedVoxelDataPool.Take();
-                generateInitialChunkData(octreeNode.LowerLeft, octreeNode.Depth, data); // Generate synchronously
+                data = generateInitialChunkDataAndWrap(octreeNode.LowerLeft, octreeNode.Depth); // Generate synchronously
                 Debug.Log("Generating chunk synchronously!");
             }
             octreeNode.VoxelData = data;
@@ -352,7 +348,19 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             return data;
         }
 
-        private void generateInitialChunkData(Point3 lowerLeft, int depth, UniformVoxelData outData)
+        private UniformVoxelData generateInitialChunkDataAndWrap(Point3 lowerLeft, int depth)
+        {
+            var data = unusedVoxelDataPool.Take();
+
+            generateInitialChunkDataRaw(lowerLeft, depth, data);
+            if (data.isEmpty)
+            {
+                unusedVoxelDataPool.Release(data);
+                data = emptyChunkShared;
+            }
+            return data;
+        }
+        private void generateInitialChunkDataRaw(Point3 lowerLeft, int depth, UniformVoxelData outData)
         {
             generator.Generate(lowerLeft, ChunkSize + new Point3(1, 1, 1) + new Point3(1, 1, 1), 1 << (this.depth - depth), outData);
             
@@ -360,7 +368,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void ResetChunk(OctreeNode octreeNode, int frame)
         {
-            generateInitialChunkData(octreeNode.LowerLeft, octreeNode.Depth, octreeNode.VoxelData);
+            generateInitialChunkDataRaw(octreeNode.LowerLeft, octreeNode.Depth, octreeNode.VoxelData);
             octreeNode.VoxelData.LastChangeFrame = frame;
         }
 

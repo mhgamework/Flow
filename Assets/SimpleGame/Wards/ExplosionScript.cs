@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using Assets.MarchingCubes.SdfModeling;
+using Assets.MarchingCubes.World;
 using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame.Scripts.Enemies;
-using Assets.SimpleGame.Voxel;
 using Assets.SimpleGame.WardDrawing;
 using UnityEngine;
 
@@ -77,7 +77,7 @@ namespace Assets.SimpleGame.Wards
             var b = new Bounds();
             b.SetMinMax((this.transform.position - Vector3.one * ExplosionRadius), (this.transform.position + Vector3.one * ExplosionRadius));
 
-            VoxelEditingFunctions.Subtract(world, s, b);
+            new SDFWorldEditingService() .Subtract(world, s, b);
         }
 
     }

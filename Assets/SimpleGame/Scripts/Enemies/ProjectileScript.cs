@@ -1,7 +1,6 @@
 ﻿using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.SdfModeling;
-using Assets.SimpleGame.Voxel;
-using MHGameWork.TheWizards;
+using Assets.MarchingCubes.World;
 using UnityEngine;
 
 namespace Assets.SimpleGame.Scripts.Enemies
@@ -128,7 +127,7 @@ namespace Assets.SimpleGame.Scripts.Enemies
             var b = new Bounds();
             b.SetMinMax((this.transform.position - Vector3.one * ProjectileExplosionRadius), (this.transform.position + Vector3.one * ProjectileExplosionRadius));
 
-            VoxelEditingFunctions.Subtract(world, s, b);
+            new SDFWorldEditingService().Subtract(world, s, b);
         }
 
 
