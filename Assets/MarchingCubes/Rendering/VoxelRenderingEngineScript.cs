@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using Assets.MarchingCubes.Persistence;
 using Assets.MarchingCubes.Rendering.ClipmapsOctree;
-using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
-using Assets.SimpleGame.Scripts.EditorVoxelWorldGen;
-using Assets.VR;
-using DirectX11;
 using UnityEngine;
 using UnityEngine.UI;
 

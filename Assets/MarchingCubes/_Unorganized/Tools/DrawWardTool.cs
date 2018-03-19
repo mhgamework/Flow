@@ -1,8 +1,4 @@
 using System;
-using System.Linq;
-using Assets.SimpleGame.WardDrawing;
-using DirectX11;
-using MHGameWork.TheWizards;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
@@ -15,7 +11,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private GameObject sphereGizmo;
         private Vector3 point;
         private Vector3 normal;
-        private WardDrawInputScript wardDrawInput;
+        //private WardDrawInputScript wardDrawInput;
 
 
         public string Name
@@ -33,7 +29,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
         public void Start()
         {
-            wardDrawInput = GetComponent<WardDrawInputScript>();
+            throw new NotImplementedException();
+            //wardDrawInput = GetComponent<WardDrawInputScript>();
         }
 
         void IState.Start()
@@ -54,7 +51,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
 
                 point = raycast.Value.point;
                 normal = raycast.Value.normal;
-                wardDrawInput.SetPlane(point, normal);
+                //wardDrawInput.SetPlane(point, normal);
                 return;
             }
 

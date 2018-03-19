@@ -1,11 +1,6 @@
-﻿using MHGameWork.TheWizards.DualContouring.Terrain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Assets.MarchingCubes.Rendering.ClipmapsOctree;
+﻿using Assets.MarchingCubes.Rendering.ClipmapsOctree;
 using DirectX11;
-using UnityEngine;
+using MHGameWork.TheWizards.DualContouring.Terrain;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
 {

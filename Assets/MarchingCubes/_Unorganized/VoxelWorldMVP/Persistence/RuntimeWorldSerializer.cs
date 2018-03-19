@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Assets.MarchingCubes.Persistence;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
-using Assets.UnityAdditions;
 using DirectX11;
 using MHGameWork.TheWizards.DualContouring.Terrain;
 using UnityEngine;

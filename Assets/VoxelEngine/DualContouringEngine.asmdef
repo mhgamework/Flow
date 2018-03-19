@@ -1,0 +1,8 @@
+{
+    "name": "DualContouringEngine",
+    "references": [
+        "TheWizardsTools"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": []
+}

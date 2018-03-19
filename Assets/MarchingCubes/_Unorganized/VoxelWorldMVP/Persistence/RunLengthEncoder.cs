@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using DirectX11;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.Persistence

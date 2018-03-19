@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Assets.MarchingCubes.VoxelWorldMVP;
-using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using Assets.MarchingCubes.VoxelWorldMVP.Persistence;
 using UnityEngine;
 

@@ -1,10 +1,7 @@
-﻿using System;
-using Assets.MarchingCubes.SdfModeling;
-using Assets.MarchingCubes.VoxelWorldMVP;
+﻿using Assets.MarchingCubes.VoxelWorldMVP;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace Assets.SimpleGame.Scripts
 {

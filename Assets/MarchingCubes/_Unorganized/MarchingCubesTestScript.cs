@@ -1,12 +1,10 @@
-﻿using UnityEngine;
-using System.Collections;
-using System;
-using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
-using DirectX11;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using Assets.MarchingCubes;
 using Assets.MarchingCubes.VoxelWorldMVP;
+using DirectX11;
+using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
+using UnityEngine;
 
 /// <summary>
 /// Control script for the marching cubes test screen

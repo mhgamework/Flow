@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using MHGameWork.TheWizards.VoxelEngine.DualContouring.Generation;
 using UnityEngine;
 using UnityEngine.UI;

@@ -1,9 +1,7 @@
-﻿using DirectX11;
-using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using DirectX11;
+using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
 
 namespace Assets.MarchingCubes

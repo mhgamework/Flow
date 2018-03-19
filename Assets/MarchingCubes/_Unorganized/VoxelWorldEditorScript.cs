@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using DirectX11;
 using MHGameWork.TheWizards;
-using MHGameWork.TheWizards.DualContouring;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP

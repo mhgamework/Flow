@@ -1,0 +1,10 @@
+{
+    "name": "MarchingCubesEngine",
+    "references": [
+        "TheWizardsTools",
+        "Reusable",
+        "DualContouringEngine"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": []
+}

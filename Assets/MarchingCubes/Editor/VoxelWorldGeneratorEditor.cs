@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Assets.MarchingCubes;
+﻿using Assets.MarchingCubes;
 using UnityEditor;
 using UnityEngine;
 

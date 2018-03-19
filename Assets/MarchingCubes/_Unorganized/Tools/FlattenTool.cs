@@ -1,8 +1,5 @@
-using System;
 using Assets.MarchingCubes.Domain;
 using Assets.VR;
-using DirectX11;
-using MHGameWork.TheWizards;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP

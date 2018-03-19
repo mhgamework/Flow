@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using Assets.Reusable;
+﻿using Assets.Reusable;
 using Assets.Reusable.Threading;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {

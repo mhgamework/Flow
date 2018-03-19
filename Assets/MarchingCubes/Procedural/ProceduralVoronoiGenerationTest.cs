@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using MHGameWork.TheWizards.VoxelEngine.DualContouring.Generation;
+﻿using MHGameWork.TheWizards.VoxelEngine.DualContouring.Generation;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 namespace Assets.MarchingCubes.Procedural
 {

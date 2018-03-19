@@ -1,18 +1,13 @@
-﻿using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
-using Assets.UnityAdditions;
-using DirectX11;
-using MHGameWork.TheWizards.DualContouring.Terrain;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
 using Assets.MarchingCubes.Rendering.AsyncCPURenderer;
+using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using Assets.Reusable;
 using Assets.Reusable.Threading;
+using DirectX11;
+using MHGameWork.TheWizards.DualContouring.Terrain;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {

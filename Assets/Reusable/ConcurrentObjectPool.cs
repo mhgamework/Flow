@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.Reusable.Threading;
 using UnityEngine.Profiling;
 

@@ -32,9 +32,9 @@ namespace Assets.MarchingCubes.Scenes
 
         private void CreateScene()
         {
-            createSDFPrimitives(new Vector3(0, 0, 0));
+            //createSDFPrimitives(new Vector3(0, 0, 0));
 
-            createPerlinNoise(new Vector3(50, 0, 0));
+            createPerlinNoise(new Vector3(0, 0, 0));
 
             createSDFWithNoise(new Vector3(100, 0, 0));
 
@@ -61,6 +61,11 @@ namespace Assets.MarchingCubes.Scenes
             }
 
         }
+        private void createPerlinNoise(Vector3 vector3)
+        {
+
+        }
+
 
         private void createLocalityPrincipleDemo(Vector3 vector3)
         {
@@ -70,10 +75,7 @@ namespace Assets.MarchingCubes.Scenes
         {
         }
 
-        private void createPerlinNoise(Vector3 vector3)
-        {
-        }
-
+       
 
     }
 }

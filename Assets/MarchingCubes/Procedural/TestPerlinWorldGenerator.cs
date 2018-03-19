@@ -1,6 +1,4 @@
-﻿using System;
-using Assets.MarchingCubes.VoxelWorldMVP;
-using DirectX11;
+﻿using Assets.MarchingCubes.VoxelWorldMVP;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.Procedural

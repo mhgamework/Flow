@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Assets.MarchingCubes.Rendering.AsyncCPURenderer;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
-using Assets.VR;
 using DirectX11;
 using MHGameWork.TheWizards.DualContouring.Terrain;
-using MHGameWork.TheWizards.Graphics;
 using UnityEngine;
 using UnityEngine.Profiling;
 

@@ -1,7 +1,4 @@
-using System;
 using DirectX11;
-using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
-using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP
 {

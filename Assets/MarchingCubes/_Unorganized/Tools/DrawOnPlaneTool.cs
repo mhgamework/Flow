@@ -1,6 +1,5 @@
 using System;
 using DirectX11;
-using MHGameWork.TheWizards;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.VoxelWorldMVP

@@ -1,5 +1,4 @@
-﻿using System;
-using DirectX11;
+﻿using DirectX11;
 using MHGameWork.TheWizards.DualContouring;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;

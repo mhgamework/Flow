@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.Reusable;
 using DirectX11;
