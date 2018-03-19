@@ -301,7 +301,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         /// Lightweight alloc without data gen
         /// </summary>
         /// <param name="octreeNode"></param>
-        private void allocChunkNoData(OctreeNode octreeNode)
+        private  void allocChunkNoData(OctreeNode octreeNode)
         {
             if (octreeNode.Depth == depth) return; // leaf node
             if (octreeNode.Children == null)
@@ -325,7 +325,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             if (!res)
             {
                 data = generateInitialChunkDataAndWrap(octreeNode.LowerLeft, octreeNode.Depth); // Generate synchronously
-                Debug.Log("Generating chunk synchronously!");
+                //Debug.Log("Generating chunk synchronously!");
             }
             octreeNode.VoxelData = data;
             //Profiler.EndSample();
