@@ -13,7 +13,7 @@ using Random = UnityEngine.Random;
 
 namespace Assets.MarchingCubes.Scenes
 {
-    public class SDFRenderingTestScript : MonoBehaviour
+    public class TwoIslandsWorldGenerationScript : MonoBehaviour
     {
         public VoxelRenderingEngineScript VoxelRenderingEngine;
 
@@ -45,17 +45,74 @@ namespace Assets.MarchingCubes.Scenes
 
         private void CreateScene()
         {
-            createSDFPrimitives(new Vector3(0, 0, 0));
 
-            createPerlinNoiseTerrain(new Vector3(0, 0, 0));
+            //var scale = 1f/25;
+            var scale = 1f/4;
 
-            createPerlinNoise(new Vector3(0, 0, 50));
+            var vector3 = new Vector3(100,100,100)*scale;
 
-            createSDFWithNoise(new Vector3(50, 50, 0));
+            float island1Size;
+            Vector3 island1Pos;
 
-            createLocalityPrincipleDemo(new Vector3(100, 0, 0));
+            island1Size = 100f * scale;
+            island1Pos = vector3 + new Vector3(island1Size, island1Size, island1Size)*2;
+
+            addIsland(island1Pos, island1Size, vector3, scale);
+
+            island1Size = 100f * scale*0.5f;
+            island1Pos = vector3 + new Vector3(island1Size, island1Size, island1Size)*2;
+
+            addIsland(island1Pos, island1Size, vector3, scale*0.5f);
+
+            island1Size = 100f * scale * 0.5f*0.5f;
+            island1Pos = vector3 + new Vector3(island1Size, island1Size, island1Size)*2;
+
+            addIsland(island1Pos, island1Size, vector3, scale*0.5f*0.5f);
 
 
+
+            //var island2Size = 100f * scale;
+            //var island2Pos = vector3 + new Vector3(island2Size *6f, island2Size, island2Size) ;
+
+
+            //var island2 = new Ball(island2Pos, island2Size);
+
+            //editingService.AddSDFObject(world, island2, new Bounds(island2Pos, new Vector3(1, 1, 1) * island2Size * 2), new VoxelMaterial(Color.red), 20);
+
+            //createSDFPrimitives(new Vector3(0, 0, 0));
+
+            //createPerlinNoiseTerrain(new Vector3(0, 0, 0));
+
+            //createPerlinNoise(new Vector3(0, 0, 50));
+
+            //createSDFWithNoise(new Vector3(50, 50, 0));
+
+            //createLocalityPrincipleDemo(new Vector3(100, 0, 0));
+
+
+        }
+
+        private void addIsland(Vector3 island1Pos, float island1Size, Vector3 vector3, float scale)
+        {
+            var island1 = new Ball(island1Pos, island1Size);
+
+            //editingService.AddSDFObject(world, island1, new Bounds(island1Pos, new Vector3(1, 1, 1) * island1Size * 2), new VoxelMaterial(Color.red), 20);
+
+
+            var s2 = new Ball(vector3 + new Vector3(1, 1, 1) * 16, 11);
+            var perlin = new TreeEditor.Perlin();
+            perlin.SetSeed(0);
+            var mat = new VoxelMaterial(Color.gray);
+            var size = new Vector3(1, 1, 1) * 32;
+            world.RunKernel1by1((island1Pos - Vector3.one * island1Size * 2).ToFloored(),
+                (island1Pos + Vector3.one * island1Size * 2).ToCeiled(), (v, p) =>
+                {
+                    var coords = p.ToVector3() * 0.03f / scale;
+                    v.Density = island1.Sdf(p);
+                    v.Density += perlin.Noise(coords.x, coords.y, coords.z) * island1Size * 0.1f;
+                    v.Material = mat;
+                    return v;
+                }, 123);
         }
 
         private void createSDFPrimitives(Vector3 vector3)
@@ -79,7 +136,7 @@ namespace Assets.MarchingCubes.Scenes
 
         private void createPerlinNoise(Vector3 vector3)
         {
-            var perlin = new Perlin();
+            var perlin = new TreeEditor.Perlin();
             perlin.SetSeed(0);
             var mat = new VoxelMaterial(Color.gray);
             var size = new Vector3(1, 1, 1) * 32;
@@ -120,7 +177,7 @@ namespace Assets.MarchingCubes.Scenes
         private void createSDFWithNoise(Vector3 vector3)
         {
             var s2 = new Ball(vector3 + new Vector3(1, 1, 1)*16, 11);
-            var perlin = new Perlin();
+            var perlin = new TreeEditor.Perlin();
             perlin.SetSeed(0);
             var mat = new VoxelMaterial(Color.gray);
             var size = new Vector3(1, 1, 1) * 32;
@@ -138,7 +195,7 @@ namespace Assets.MarchingCubes.Scenes
         private void createLocalityPrincipleDemo(Vector3 vector3)
         {
             var s2 = new Ball(vector3 + new Vector3(1, 1, 1) * 32, 24);
-            var perlin = new Perlin();
+            var perlin = new TreeEditor.Perlin();
             perlin.SetSeed(0);
             var mat = new VoxelMaterial(Color.gray);
             var size = new Vector3(1, 1, 1) * 64;
