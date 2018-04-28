@@ -47,7 +47,8 @@ namespace Assets.MarchingCubes.Scenes
         {
 
             //var scale = 1f/25;
-            var scale = 1f/4;
+            //var scale = 1f/10;
+            var scale = 1f/1;
 
             var vector3 = new Vector3(100,100,100)*scale;
 
@@ -59,15 +60,15 @@ namespace Assets.MarchingCubes.Scenes
 
             addIsland(island1Pos, island1Size, vector3, scale);
 
-            island1Size = 100f * scale*0.5f;
-            island1Pos = vector3 + new Vector3(island1Size, island1Size, island1Size)*2;
+            //island1Size = 100f * scale*0.5f;
+            //island1Pos = vector3 + new Vector3(island1Size, island1Size, island1Size)*2;
 
-            addIsland(island1Pos, island1Size, vector3, scale*0.5f);
+            //addIsland(island1Pos, island1Size, vector3, scale*0.5f);
 
-            island1Size = 100f * scale * 0.5f*0.5f;
-            island1Pos = vector3 + new Vector3(island1Size, island1Size, island1Size)*2;
+            //island1Size = 100f * scale * 0.5f*0.5f;
+            //island1Pos = vector3 + new Vector3(island1Size, island1Size, island1Size)*2;
 
-            addIsland(island1Pos, island1Size, vector3, scale*0.5f*0.5f);
+            //addIsland(island1Pos, island1Size, vector3, scale*0.5f*0.5f);
 
 
 
@@ -104,12 +105,18 @@ namespace Assets.MarchingCubes.Scenes
             perlin.SetSeed(0);
             var mat = new VoxelMaterial(Color.gray);
             var size = new Vector3(1, 1, 1) * 32;
-            world.RunKernel1by1((island1Pos - Vector3.one * island1Size * 2).ToFloored(),
-                (island1Pos + Vector3.one * island1Size * 2).ToCeiled(), (v, p) =>
+            world.RunKernel1by1((island1Pos - Vector3.one * island1Size * 4).ToFloored(),
+                (island1Pos + Vector3.one * island1Size *4).ToCeiled(), (v, p) =>
                 {
-                    var coords = p.ToVector3() * 0.03f / scale;
-                    v.Density = island1.Sdf(p);
-                    v.Density += perlin.Noise(coords.x, coords.y, coords.z) * island1Size * 0.1f;
+                    var realP = p.ToVector3();
+                    realP.y = (realP.y - island1Pos.y)/2f + island1Pos.y;
+
+                    var coords = realP * 0.03f / scale;
+                    
+                    v.Density = island1.Sdf(realP) + Mathf.Max(-(realP.y - (island1Pos.y)), 0);// + Mathf.Max((p.Y - (island1Pos.y + 10)), 0)*0.3f;
+
+                    v.Density = Mathf.Max(v.Density,  (realP.y - (island1Pos.y)));
+                    //v.Density += perlin.Noise(coords.x, coords.y, coords.z) * island1Size * 0.3f;
                     v.Material = mat;
                     return v;
                 }, 123);
