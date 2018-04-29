@@ -163,8 +163,8 @@ namespace Assets.MarchingCubes.Scenes
 
                     v.Density = Mathf.Max(v.Density, (realP.y - (island1Pos.y)));
 
-                    //v.Density += perlin.Noise(coords.x, coords.y, coords.z) * island1Size * 0.3f * intensity;
-                    //v.Density += perlin.Noise(coords.x * 3.1f, coords.y * 3.1f, coords.z * 3.1f) * island1Size * 0.1f * intensity;
+                    v.Density += perlin.Noise(coords.x, coords.y, coords.z) * island1Size * 0.3f * intensity;
+                    v.Density += perlin.Noise(coords.x * 3.1f, coords.y * 3.1f, coords.z * 3.1f) * island1Size * 0.1f * intensity;
 
 
 
