@@ -115,7 +115,13 @@ namespace Assets.MarchingCubes.Scenes
             var s2 = new Ball(vector3 + new Vector3(1, 1, 1) * 16, 11);
             var perlin = new TreeEditor.Perlin();
             perlin.SetSeed(1);
+            var perlin2 = new TreeEditor.Perlin();
+            perlin2.SetSeed(2);
+            var perlin3 = new TreeEditor.Perlin();
+            perlin3.SetSeed(3);
             var mat = new VoxelMaterial(Color.gray);
+            var matGold = new VoxelMaterial(Color.yellow);
+            var matIron = new VoxelMaterial(Color.red);
             var size = new Vector3(1, 1, 1) * 32;
 
             //var sum = 0.0;
@@ -145,7 +151,7 @@ namespace Assets.MarchingCubes.Scenes
                     if (caves > 1 || caves < 0) Debug.Log("kaput");
                     caves -= 0.3f;
                     caves = -caves;
-                    caves += Mathf.Clamp(((realP.y - island1Pos.y) - (-island1Size * .1f)) / (0 - (-island1Size * .1f)), 0, 1);
+                    //caves += Mathf.Clamp(((realP.y - island1Pos.y) - (-island1Size * .1f)) / (0 - (-island1Size * .1f)), 0, 1);
                     //v.Density = caves;
 
                     //return v;
@@ -160,6 +166,44 @@ namespace Assets.MarchingCubes.Scenes
                     //v.Density += perlin.Noise(coords.x, coords.y, coords.z) * island1Size * 0.3f * intensity;
                     //v.Density += perlin.Noise(coords.x * 3.1f, coords.y * 3.1f, coords.z * 3.1f) * island1Size * 0.1f * intensity;
 
+
+
+                    var ores = 0F;
+                    
+                    ores += 1 - Mathf.Pow((noise(perlin2, caveCoords * 1.4f) + 0.5f), 3);// * island1Size * 0.1f ;
+                    ores -= 0.5f;
+                    ores += 1 - magicFunc(realP.y - island1Pos.y, -island1Size * 0.2f, -island1Size * 0.8f, 0.1f);
+
+                    var oreDensity = ores;
+                    VoxelMaterial oreMaterial = matGold;
+
+                    ores = 0F;
+                    ores += 1 - Mathf.Pow((noise(perlin3, caveCoords * 1.4f) + 0.5f), 3);// * island1Size * 0.1f ;
+                    ores -= 0.5f;
+                    ores += 1 - magicFunc(realP.y - island1Pos.y, -island1Size * 0.0f, -island1Size * 0.5f, 0.1f);
+
+                    if (ores < oreDensity)
+                    {
+                        oreDensity = ores;
+                        oreMaterial = matIron;
+                    }
+
+                    oreDensity = Mathf.Max(oreDensity, v.Density);
+
+                    if (oreDensity < 0)
+                    {
+                        v.Material = oreMaterial;
+                        v.Density = oreDensity;
+                    }
+
+
+                    //return v;
+
+
+
+
+
+
                     if (-caves > v.Density)
                     {
                         v.Density = -caves;
@@ -169,10 +213,11 @@ namespace Assets.MarchingCubes.Scenes
 
                     return v;
                 }, 123);
+
             //Debug.Log("Count: " + count);
             //Debug.Log("avg: " + sum/count);
-            Debug.Log("Max: " + max);
-            Debug.Log("Min: " + min);
+            //Debug.Log("Max: " + max);
+            //Debug.Log("Min: " + min);
             //world.RunKernel1by1(boundMin.ToFloored(),
             //    boundMax.ToCeiled(), (v, p) =>
             //    {
@@ -206,6 +251,15 @@ namespace Assets.MarchingCubes.Scenes
 
             //        return v;
             //    }, 234);
+        }
+
+        float magicFunc(float height, float start, float stop, float falloff)
+        {
+            if (height > start + falloff) return 0;
+            if (height > start) return 1-(height - start) / (falloff);
+            if (height > stop) return 1;
+            if (height > stop - falloff) return (height - (stop - falloff)) / falloff;
+            return 0;
         }
 
         float noise(TreeEditor.Perlin perlin, Vector3 p)
