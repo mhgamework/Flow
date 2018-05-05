@@ -63,3 +63,5 @@ sysinfo.txt
 /Savegames/Test1.txt
 /savegame2.dat
 /savegame2.txt
+/tempTestData/
+/.vs/config/applicationhost.config
