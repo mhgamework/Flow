@@ -13,9 +13,13 @@ namespace Assets.MarchingCubes.Scenes.Persistence
     /// <summary>
     /// Test for the voxel persistence functionality in this package.
     /// Functions as a scene test
+    /// 
+    /// Test will generate a plane world, save it and load it.
     /// </summary>
     public class PersistenceSceneScriptTest : MonoBehaviour
     {
+        public string WorldToLoad = "";
+
         [SerializeField]
         private VoxelRenderingEngineScript VoxelRenderingEnginePrefab;
 
@@ -27,11 +31,11 @@ namespace Assets.MarchingCubes.Scenes.Persistence
             ensureWorldGenerated(initialWorld);
 
             var voxelWorldPersister = new VoxelWorldPersister();
-            voxelWorldPersister.SaveToFolder("testData/PersistenceSceneScriptTest/world", initialWorld);
+            voxelWorldPersister.SaveToFolder("tempTestData/PersistenceSceneScriptTest/world", initialWorld);
 
 
             voxelWorldPersister = new VoxelWorldPersister();
-            var loadedWorld = voxelWorldPersister.LoadFromFolder("testData/PersistenceSceneScriptTest/world");
+            var loadedWorld = voxelWorldPersister.LoadFromFolder("tempTestData/PersistenceSceneScriptTest/world");
 
             var voxelRenderingEngine = createVoxelRenderingEngine(VoxelRenderingEnginePrefab, loadedWorld); // loadedWorld
 
@@ -82,8 +86,7 @@ namespace Assets.MarchingCubes.Scenes.Persistence
 
         public OctreeVoxelWorld LoadFromFolder(string folder)
         {
-            //var serializer = new RuntimeWorldSerializer(folder + "/voxel");
-            var serializer = new RuntimeWorldSerializer("savegame");
+            var serializer = new RuntimeWorldSerializer(folder + "/voxel");
 
             int depth;
             int chunkSize;

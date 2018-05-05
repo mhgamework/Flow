@@ -56,7 +56,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
         }
         private string getSavegameDat()
         {
-            return savegamePathAndFilenamePrefix + "_raw.dat";
+            return savegamePathAndFilenamePrefix + ".dat";
         }
 
         public VoxelWorldAsset CreateAsset(int minNodeSize)
