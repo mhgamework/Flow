@@ -15,11 +15,11 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
     /// </summary>
     public class RuntimeWorldSerializer : IWorldSerializer
     {
-        private readonly string savegamePath;
+        private readonly string savegamePathAndFilenamePrefix;
 
-        public RuntimeWorldSerializer(string savegamePath)
+        public RuntimeWorldSerializer(string savegamePathAndFilenamePrefix)
         {
-            this.savegamePath = savegamePath;
+            this.savegamePathAndFilenamePrefix = savegamePathAndFilenamePrefix;
         }
 
         public void Save(int changesSinceFrame, VoxelWorldAsset asset, OctreeVoxelWorld world)
@@ -52,11 +52,11 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 
         private string getSavegameTxt()
         {
-            return savegamePath+ ".txt";
+            return savegamePathAndFilenamePrefix + ".txt";
         }
         private string getSavegameDat()
         {
-            return savegamePath+ ".dat";
+            return savegamePathAndFilenamePrefix + "_raw.dat";
         }
 
         public VoxelWorldAsset CreateAsset(int minNodeSize)
@@ -79,6 +79,18 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
             });
         }
 
+        public void ReconstructDepthAndChunkSizeFromSave( out int chunkSize, out int depth)
+        {
+            var metadataAsset = CreateAsset(-1); // Dummy load asset, needs refactor
+
+            LoadFromDisk(metadataAsset, metadataOnly: true);
+
+            // Heuristic to estimate the world depth from the stored data. Take the biggest chunk and assume thats the root. Could be incorrect i guess.
+            var maxResolution = metadataAsset.Versions.SelectMany(v => v.Chunks).Max(c => c.RelativeResolution);
+            depth = (int)Math.Round(Math.Log(maxResolution) / Math.Log(2));
+            chunkSize = metadataAsset.ChunkSize - 1;
+        }
+
         public void SaveToDisk(VoxelWorldAsset asset)
         {
             using (var fs = File.OpenWrite(getSavegameTxt()))
@@ -89,15 +101,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
             }
         }
 
-     
 
-        public void LoadFromDisk(VoxelWorldAsset asset)
+        public void LoadFromDisk(VoxelWorldAsset asset, bool metadataOnly = false)
         {
             using (var fs = File.OpenRead(getSavegameTxt()))
             using (var r = new BinaryReader(File.OpenRead(getSavegameDat())))
             {
                 using (var mode = new RunLengthEncoder.ReadMode(fs))
-                    PersistenceFunc(asset, mode, r, null);
+                    PersistenceFunc(asset, mode, r, null, metadataOnly);
             }
         }
 
@@ -142,7 +153,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
         }
 
 
-        private VoxelWorldAsset PersistenceFunc(VoxelWorldAsset hermiteData, RunLengthEncoder.IMode mode, BinaryReader rData, BinaryWriter wData)
+        private VoxelWorldAsset PersistenceFunc(VoxelWorldAsset hermiteData, RunLengthEncoder.IMode mode, BinaryReader rData, BinaryWriter wData, bool skipChunkData = false)
         {
             mode.required("The Wizards Dual Contouring Engine - Density Grid Format - V1.0");
             mode.comment("ChunkSize ChunkOversize");
@@ -173,13 +184,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
                     var numEls = (hermiteData.ChunkSize + hermiteData.ChunkOversize);
                     numEls = numEls * numEls * numEls;
 
-                    mode.data(wr =>
-                    {
-                        SaveChunk(chunk, wData);
-                    }, r =>
-                   {
-                       LoadChunk(chunk, rData);
-                   });
+                    if (!skipChunkData)
+                        mode.data(wr =>
+                        {
+                            SaveChunk(chunk, wData);
+                        }, r =>
+                       {
+                           LoadChunk(chunk, rData);
+                       });
                 }
 
             }

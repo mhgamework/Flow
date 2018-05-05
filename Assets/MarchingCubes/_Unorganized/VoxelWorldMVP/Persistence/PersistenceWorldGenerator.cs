@@ -18,7 +18,14 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 
         private List<Dictionary<PosAndResolution, SerializedChunk>> optimizedVersions;
 
-        public PersistenceWorldGenerator(IWorldGenerator decorated, VoxelWorldAsset asset, int skipVersions)
+        /// <summary>
+        /// I think skipVersions is the number of version counting from the last one to do not take into account when loading
+        /// A sort of undo-hack. Probably shouldnt be here
+        /// </summary>
+        /// <param name="decorated"></param>
+        /// <param name="asset"></param>
+        /// <param name="skipVersions"></param>
+        public PersistenceWorldGenerator(IWorldGenerator decorated, VoxelWorldAsset asset, int skipVersions =0)
         {
             _decorated = decorated;
             _asset = asset;
@@ -67,7 +74,6 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 
         public void Generate(Point3 start, Point3 chunkSize, int sampleResolution, UniformVoxelData outData)
         {
-            throw new NotImplementedException();
             //UnityEngine.Debug.Log(chunkSize.ToString() + " " + _asset.ChunkSize + " " + _asset.ChunkOversize);
             for (int i = 0; i < 3; i++)
                 if (chunkSize[i] != _asset.ChunkOversize + _asset.ChunkSize) // Should be multiple of the chunk size in the asset, minus the LOD overflow
@@ -86,22 +92,22 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
             if (theChunk != null)
             {
                 //Debug.Log("Loaded chunk " + start + " " + chunkSize + " " + relativeResolution);
-                //return toChunkData(theChunk);
+                toChunkData(theChunk,outData);
+                return;
             }
             // This should mean that there is no change in the chunk data for this sector so use the world generator
             //Debug.Log("Unable to load chunk " + start + " " + chunkSize + " " + relativeResolution);
 
-            //return _decorated.Generate(start, chunkSize, sampleResolution);
+             _decorated.Generate(start, chunkSize, sampleResolution,outData);
         }
 
-        private UniformVoxelData toChunkData(SerializedChunk chunk)
+        private void  toChunkData(SerializedChunk chunk, UniformVoxelData d)
         {
 
-            Profiler.BeginSample("PRF-toCHunkData");
-            var d = new UniformVoxelData();
+            //Profiler.BeginSample("PRF-toCHunkData");
             d.LastChangeFrame = 0;
             var size = _asset.ChunkSize + _asset.ChunkOversize;
-            d.Data = new Array3D<VoxelData>(new Point3(size, size, size));
+            //d.Data = new Array3D<VoxelData>(new Point3(size, size, size));
 
             d.Data.ForEach((v, p) =>
             {
@@ -115,9 +121,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
             });
 
 
-            Profiler.EndSample();
+            //Profiler.EndSample();
 
-            return d;
 
         }
     }

@@ -29,6 +29,8 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private int chunkSize;
         public Point3 ChunkSize { get { return new Point3(chunkSize, chunkSize, chunkSize); } }
 
+        public int ActualLeafChunkSize { get { return ChunkOversize + chunkSize; } }
+
         public OctreeNode Root { get; set; }
         private Dictionary<ChunkCoord, UniformVoxelData> pregenCache; // Temp hacky to async generate nodes
 
@@ -266,7 +268,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             {
                 var newData = unusedVoxelDataPool.Take();
                 newData.isEmpty = false;
-                n.VoxelData.Data.ForEach((d, p) => newData.Data[p] = new VoxelData( float.MaxValue,null)); // Assume empty means all air
+                n.VoxelData.Data.ForEach((d, p) => newData.Data[p] = new VoxelData(float.MaxValue, null)); // Assume empty means all air
 
                 n.VoxelData = newData;
 
@@ -282,7 +284,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public void PregenerateChunk(ChunkCoord c)
         {
             var data = generateInitialChunkDataAndWrap(c.LowerLeft, c.Depth);
-         
+
             lock (pregenCache)
             {
                 pregenCache[c] = data;
@@ -301,7 +303,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         /// Lightweight alloc without data gen
         /// </summary>
         /// <param name="octreeNode"></param>
-        private  void allocChunkNoData(OctreeNode octreeNode)
+        private void allocChunkNoData(OctreeNode octreeNode)
         {
             if (octreeNode.Depth == depth) return; // leaf node
             if (octreeNode.Children == null)
@@ -333,7 +335,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             allocChunkNoData(octreeNode);
         }
 
-     private UniformVoxelData createEmptyUniformVoxelData()
+        private UniformVoxelData createEmptyUniformVoxelData()
         {
             var data = new UniformVoxelData()
             {
@@ -358,7 +360,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         private void generateInitialChunkDataRaw(Point3 lowerLeft, int depth, UniformVoxelData outData)
         {
             generator.Generate(lowerLeft, ChunkSize + new Point3(1, 1, 1) + new Point3(1, 1, 1), 1 << (this.depth - depth), outData);
-            
+
         }
 
         public void ResetChunk(OctreeNode octreeNode, int frame)
@@ -452,6 +454,16 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         public float GetNodeSize(int nodeDepth)
         {
             return getNodeResolution(nodeDepth) * chunkSize;
+        }
+
+        /// <summary>
+        /// Forces a nodes data to be generated and available in memory.
+        /// (since world generation can be lazy, using the worldgenerators)
+        /// </summary>
+        /// <param name="octreeNode"></param>
+        public void ForceGenerate(OctreeNode octreeNode)
+        {
+            allocChunk(octreeNode);
         }
     }
 }

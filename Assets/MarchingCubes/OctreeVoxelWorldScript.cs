@@ -1,4 +1,5 @@
-﻿using Assets.MarchingCubes.VoxelWorldMVP;
+﻿using System;
+using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame.Scripts.EditorVoxelWorldGen;
 using DirectX11;
@@ -8,7 +9,7 @@ using UnityEngine;
 namespace Assets.MarchingCubes
 {
     /// <summary>
-    /// Can currently be either a VoxelWorldGenerator or SDFWorld
+    /// Can currently be either a VoxelWorldGenerator or SDFWorld, or a OctreeVoxelWorld set from code
     /// </summary>
     public class OctreeVoxelWorldScript : MonoBehaviour
     {
@@ -16,14 +17,24 @@ namespace Assets.MarchingCubes
         public SDFWorldGeneratorScript SDFWorld;
         public int SDFChunkSize = 8;
         public int SDFChunkDepth = 2;
+        private OctreeVoxelWorld worldSetFromCodeMode;
 
+        private bool hasInitializationStrategySet()
+        {
+            return GeneratorWorld != null
+                   || SDFWorld != null
+                   || worldSetFromCodeMode != null;
+        }
         public OctreeVoxelWorld CreateNewWorld()
         {
-            if (GeneratorWorld != null && SDFWorld != null)
+            if (!hasInitializationStrategySet())
+                throw new InvalidOperationException("Not world initialization strategy set!");
+            if (GeneratorWorld != null && SDFWorld != null) // SHould also check for worldsetfrom code but wathever
                 throw new System.Exception("Can only set one of the world types1");
 
             if (GeneratorWorld != null) return GeneratorWorld.CreateNewWorld();
             if (SDFWorld != null) return createWorldFromSdf(SDFWorld);
+            if (worldSetFromCodeMode != null) return worldSetFromCodeMode;
 
             throw new System.Exception("No world set");
         }
@@ -49,6 +60,19 @@ namespace Assets.MarchingCubes
             }
             return ret;
         }
+
+        /// <summary>
+        /// Configures this class to use a world created in code, instead of passed through editor
+        /// </summary>
+        /// <param name="world"></param>
+        public void SetWorldDirectlyFromCodeMode(OctreeVoxelWorld world)
+        {
+            if (hasInitializationStrategySet())
+                throw new InvalidOperationException("Already using another kind of world initialization strategy");
+            this.worldSetFromCodeMode = world;
+        }
+
+       
 
         private void pregen(IVoxelObject c, OctreeVoxelWorld ret, int depth)
         {
