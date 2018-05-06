@@ -1,1 +1,2 @@
 Savegames/* filter=lfs diff=lfs merge=lfs -text
+Assets/SimpleGame/_SavedWorlds/**/*.dat filter=lfs diff=lfs merge=lfs -text
