@@ -1,0 +1,690 @@
+The Wizards Dual Contouring Engine - Density Grid Format - V1.0
+# ChunkSize ChunkOversize
+17
+1
+# Versions
+2
+# Version - Num
+0
+# Version - Chunks
+0
+# Version - Num
+1
+# Version - Chunks
+169
+# LowerLeft RelativeResolution LayoutDescription
+0 0 0
+32
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 0 0
+16
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 0 0
+8
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 0 0
+4
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 0 0
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 16 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 0 0
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 0 0
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 0 0
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 16 0
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 0 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 16 0
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 16 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 0 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 16 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 32 0
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 32 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 48 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 0 32
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 16 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 16 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 32 0
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 32 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 48 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 32 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 48 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 32 32
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 32 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 48 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 32 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 48 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 0 32
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 16 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 16 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 16 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 16 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 32 32
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 32 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 32 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 48 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 32 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 48 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 48 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 32 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 48 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 0 0
+4
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 0 0
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 16 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 16 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 32 0
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 32 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 48 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 32 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 48 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 0 32
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 16 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 16 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 16 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 16 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 32 32
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 32 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 32 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 48 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 32 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 48 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 48 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 32 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 48 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 64 0
+4
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 64 0
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 64 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 80 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 64 0
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 64 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 80 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 64 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 80 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 64 32
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 64 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 80 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 64 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 80 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 64 32
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 64 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 64 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 80 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 64 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 80 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 80 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 64 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 80 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 0 64
+4
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 0 64
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 16 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 16 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 0 64
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 16 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 16 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 16 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 16 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 32 64
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 32 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 48 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 32 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 48 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 32 64
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 32 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 32 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 48 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 32 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 48 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 48 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 32 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 48 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 64 0
+4
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 64 0
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 64 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 80 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 64 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 80 16
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 64 32
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 64 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 64 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 80 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 64 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 80 32
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 80 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 64 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 80 48
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 64 64
+4
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+0 64 64
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 64 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 80 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 64 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+16 80 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 64 64
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 64 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 64 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 80 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 64 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 80 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+32 80 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 64 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+48 80 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 0 64
+4
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 0 64
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 16 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 16 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 16 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 16 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 32 64
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 32 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 32 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 48 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 32 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 48 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 48 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 32 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 48 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 64 64
+4
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 64 64
+2
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 64 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 64 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 80 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 64 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 80 64
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+64 80 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 64 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)
+# LowerLeft RelativeResolution LayoutDescription
+80 80 80
+1
+# Layout - Densities * 10000 | Colors : x+size*(y+size*z)

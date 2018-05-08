@@ -41,6 +41,12 @@ namespace Assets.MarchingCubes.Scenes.Persistence
             return world;
         }
 
-       
+
+        public bool HasWorldData(string folder)
+        {
+            var serializer = new RuntimeWorldSerializer(folder + "/voxel");
+
+            return serializer.HasExistingData();
+        }
     }
 }

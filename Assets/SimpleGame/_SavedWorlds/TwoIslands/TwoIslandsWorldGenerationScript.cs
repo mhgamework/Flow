@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Assets.MarchingCubes.Rendering;
+using Assets.MarchingCubes.Scenes.Persistence;
 using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
@@ -15,10 +16,11 @@ namespace Assets.MarchingCubes.Scenes
 {
     public class TwoIslandsWorldGenerationScript : MonoBehaviour
     {
+        public string WorldSaveLocation = "Assets/SimpleGame/_SavedWorlds/TwoIslands";
         public VoxelRenderingEngineScript VoxelRenderingEngine;
 
 
-        private IEditableVoxelWorld world;
+        private OctreeVoxelWorld world;
         private SDFWorldEditingService editingService;
 
         public VoxelWorldGenerator tempVoxelWorldGenerator;
@@ -41,23 +43,41 @@ namespace Assets.MarchingCubes.Scenes
             initialized = true;
             CreateScene();
 
+
+            var persister = new VoxelWorldPersister();
+            if (!persister.HasWorldData(WorldSaveLocation))
+            {
+                persister.SaveToFolder(WorldSaveLocation, world);
+                Debug.Log("Saving generated world!");
+            }
+            else
+            {
+                Debug.Log("Not saving generated world as the save already exists!");
+            }
+
+
         }
 
         private void CreateScene()
         {
+            //createSingleIsland(worldScale: 1, islandSize: 100f);
+            createSingleIsland(worldScale: 1, islandSize: 20f);
+        }
 
+        private void createSingleIsland(int worldScale, float islandSize)
+        {
             //var scale = 1f/25;
-            //var scale = 1f / 10;
+            var scale = 1f / worldScale;
             //var scale = 1f / 4;
             //var scale = 1f / 2;
-            var scale = 1f / 1;
+            //var scale = 1f / 1;
 
-            var vector3 = new Vector3(100, 100, 100) * scale;
+            var vector3 = new Vector3(islandSize, islandSize, islandSize) * scale;
 
             float island1Size;
             Vector3 island1Pos;
 
-            island1Size = 100f * scale;
+            island1Size = islandSize * scale;
             island1Pos = vector3 + new Vector3(island1Size, island1Size, island1Size) * 2;
 
             Vector3 renderCenter = island1Pos;
@@ -68,7 +88,8 @@ namespace Assets.MarchingCubes.Scenes
 
             renderRange = island1Size * 1.5f;
 
-            addIsland(island1Pos, island1Size, vector3, scale, renderCenter - Vector3.one * renderRange, renderCenter + Vector3.one * renderRange);
+            addIsland(island1Pos, island1Size, vector3, scale, renderCenter - Vector3.one * renderRange,
+                renderCenter + Vector3.one * renderRange);
 
             //island1Size = 100f * scale*0.5f;
             //island1Pos = vector3 + new Vector3(island1Size, island1Size, island1Size)*2;
@@ -81,26 +102,11 @@ namespace Assets.MarchingCubes.Scenes
             //addIsland(island1Pos, island1Size, vector3, scale*0.5f*0.5f);
 
 
-
             //var island2Size = 100f * scale;
             //var island2Pos = vector3 + new Vector3(island2Size *6f, island2Size, island2Size) ;
 
 
             //var island2 = new Ball(island2Pos, island2Size);
-
-            //editingService.AddSDFObject(world, island2, new Bounds(island2Pos, new Vector3(1, 1, 1) * island2Size * 2), new VoxelMaterial(Color.red), 20);
-
-            //createSDFPrimitives(new Vector3(0, 0, 0));
-
-            //createPerlinNoiseTerrain(new Vector3(0, 0, 0));
-
-            //createPerlinNoise(new Vector3(0, 0, 50));
-
-            //createSDFWithNoise(new Vector3(50, 50, 0));
-
-            //createLocalityPrincipleDemo(new Vector3(100, 0, 0));
-
-
         }
 
         private void addIsland(Vector3 island1Pos, float island1Size, Vector3 vector3, float scale, Vector3 boundMin, Vector3 boundMax)
@@ -169,7 +175,7 @@ namespace Assets.MarchingCubes.Scenes
 
 
                     var ores = 0F;
-                    
+
                     ores += 1 - Mathf.Pow((noise(perlin2, caveCoords * 1.4f) + 0.5f), 3);// * island1Size * 0.1f ;
                     ores -= 0.5f;
                     ores += 1 - magicFunc(realP.y - island1Pos.y, -island1Size * 0.2f, -island1Size * 0.8f, 0.1f);
@@ -256,7 +262,7 @@ namespace Assets.MarchingCubes.Scenes
         float magicFunc(float height, float start, float stop, float falloff)
         {
             if (height > start + falloff) return 0;
-            if (height > start) return 1-(height - start) / (falloff);
+            if (height > start) return 1 - (height - start) / (falloff);
             if (height > stop) return 1;
             if (height > stop - falloff) return (height - (stop - falloff)) / falloff;
             return 0;
@@ -266,127 +272,6 @@ namespace Assets.MarchingCubes.Scenes
         {
             return perlin.Noise(p.x, p.y, p.z) * (0.5f / 0.6f);
         }
-
-        private void createSDFPrimitives(Vector3 vector3)
-        {
-            // Imperative
-
-            var s2 = new Ball(vector3 + new Vector3(0, 0, 0), 5);
-
-            editingService.AddSDFObject(world, s2, new Bounds(vector3 + new Vector3(0, 0, 0), new Vector3(1, 1, 1) * 10), new VoxelMaterial(Color.red), 20);
-
-
-            for (int i = 0; i < 5; i++)
-            {
-                var sphere = new Ball(vector3 + new Vector3(30, 30, 30) * i, 20);
-
-                editingService.AddSDFObject(world, sphere, new Bounds(vector3 + new Vector3(30, 30, 30) * i, new Vector3(1, 1, 1) * 20 * 2 * 1.5f), new VoxelMaterial(Color.red), 20);
-
-            }
-
-        }
-
-        private void createPerlinNoise(Vector3 vector3)
-        {
-            var perlin = new TreeEditor.Perlin();
-            perlin.SetSeed(0);
-            var mat = new VoxelMaterial(Color.gray);
-            var size = new Vector3(1, 1, 1) * 32;
-            world.RunKernel1by1(vector3.ToFloored(), (vector3 + size).ToCeiled(), (v, p) =>
-            {
-                var coords = p.ToVector3() * 0.11f;
-                v.Density = perlin.Noise(coords.x, coords.y, coords.z);
-                v.Material = mat;
-                return v;
-            }, 123);
-        }
-        private void createPerlinNoiseTerrain(Vector3 vector3)
-        {
-
-
-            bool isEmpty;
-
-            var world = (OctreeVoxelWorld)this.world;
-            var mapData = new MapData(world.ChunkSize.X + 2);
-
-            var helper = new ClipMapsOctree<OctreeNode>();
-
-            helper.VisitTopDown(world.GetNode(new DirectX11.Point3(world.getNodeResolution(8) * world.ChunkSize.X * 3, 0, 0), 8), n =>
-                {
-                    n = world.GetNode(n.LowerLeft, n.Depth);
-                    world.makeUnsharedChunk(n);
-                    tempVoxelWorldGenerator.GenerateMapData(mapData, n.LowerLeft.ToVector3().TakeXZ(),
-                        world.getNodeResolution(n.Depth), world.ChunkSize.X + 2, 0.1f);
-
-                    tempVoxelWorldGenerator.GenerateVoxelData(mapData, world.getNodeResolution(n.Depth), n.LowerLeft.Y,
-                        tempVoxelWorldGenerator.GetMaterialsDictionary(), 0.1f, n.VoxelData.Data, out isEmpty);
-                });
-
-
-
-        }
-
-        private void createSDFWithNoise(Vector3 vector3)
-        {
-            var s2 = new Ball(vector3 + new Vector3(1, 1, 1) * 16, 11);
-            var perlin = new TreeEditor.Perlin();
-            perlin.SetSeed(0);
-            var mat = new VoxelMaterial(Color.gray);
-            var size = new Vector3(1, 1, 1) * 32;
-            world.RunKernel1by1(vector3.ToFloored(), (vector3 + size).ToCeiled(), (v, p) =>
-            {
-                var coords = p.ToVector3() * 0.33f;
-                v.Density = perlin.Noise(coords.x, coords.y, coords.z) * 3;
-                v.Density += s2.Sdf(p);
-                v.Material = mat;
-                return v;
-            }, 123);
-        }
-
-
-        private void createLocalityPrincipleDemo(Vector3 vector3)
-        {
-            var s2 = new Ball(vector3 + new Vector3(1, 1, 1) * 32, 24);
-            var perlin = new TreeEditor.Perlin();
-            perlin.SetSeed(0);
-            var mat = new VoxelMaterial(Color.gray);
-            var size = new Vector3(1, 1, 1) * 64;
-            world.RunKernel1by1(vector3.ToFloored(), (vector3 + size).ToCeiled(), (v, p) =>
-            {
-                var coords = p.ToVector3() * 0.33f;
-                v.Density = perlin.Noise(coords.x, coords.y, coords.z) * 3;
-                v.Density += s2.Sdf(p);
-                v.Material = mat;
-                return v;
-            }, 123);
-
-
-            Random.InitState(0);
-
-            for (int i = 0; i < 10; i++)
-            {
-                var offset = Random.onUnitSphere * Random.Range(35, 45);
-                var range = Random.Range(3, 6);
-
-                s2 = new Ball(vector3 + new Vector3(1, 1, 1) * 32 + offset, range);
-                var center = vector3 + new Vector3(1, 1, 1) * 32 + offset;
-                world.RunKernel1by1((center - Vector3.one * range * 1.3f).ToFloored(), (center + Vector3.one * range * 1.3f).ToCeiled(), (v, p) =>
-                      {
-                          var coords = p.ToVector3() * 0.5f;
-
-                          var n = perlin.Noise(coords.x, coords.y, coords.z) * range * 0.5f;
-                          n += s2.Sdf(p);
-                          if (n < v.Density) v.Density = n;
-
-                          v.Material = mat;
-                          return v;
-                      }, 123);
-            }
-
-        }
-
-
-
 
     }
 }

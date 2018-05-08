@@ -15,6 +15,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
     /// </summary>
     public class RuntimeWorldSerializer : IWorldSerializer
     {
+        /// <summary>
+        /// Density clamping improves run length encoding compression by only storing data where there are surfaces and clamping the rest to a single value
+        /// </summary>
+        public const bool EnableDensityClamping = false; // Disabled for now, as this class doesnt use run length compression yet
         private readonly string savegamePathAndFilenamePrefix;
 
         public RuntimeWorldSerializer(string savegamePathAndFilenamePrefix)
@@ -79,7 +83,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
             });
         }
 
-        public void ReconstructDepthAndChunkSizeFromSave( out int chunkSize, out int depth)
+        public void ReconstructDepthAndChunkSizeFromSave(out int chunkSize, out int depth)
         {
             var metadataAsset = CreateAsset(-1); // Dummy load asset, needs refactor
 
@@ -231,7 +235,10 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
                 n.VoxelData.Data.ForEach((v, p) =>
                 {
                     var index = SerializedChunk.toIndex(p, size);
-                    chunk.Densities[index] = v.Density;
+                    if (EnableDensityClamping)
+                        chunk.Densities[index] = Mathf.Clamp(v.Density, -2, 2); // Clamp to densities to compress space!
+                    else
+                        chunk.Densities[index] = v.Density; // Clamp to densities to compress space!
                     chunk.Colors[index] = v.Material == null ? new Color() : v.Material.color;
                 });
 
@@ -241,5 +248,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
         }
 
 
+        public bool HasExistingData()
+        {
+            return File.Exists(getSavegameDat()) || File.Exists(getSavegameTxt());
+        }
     }
 }
