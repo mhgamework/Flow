@@ -4,6 +4,10 @@ using System.Linq;
 using Assets;
 using UnityEngine.UI;
 
+/// <summary>
+/// Utility script to render objects to textures.
+/// Requires the corresponding preconfigured prefab with camera to work.
+/// </summary>
 public class RenderToTextureScript : MonoBehaviour
 {
     public string RenderingLayer = "ObjectSnapshot";

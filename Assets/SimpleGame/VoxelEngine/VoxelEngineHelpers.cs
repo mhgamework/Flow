@@ -18,12 +18,16 @@ namespace Assets.SimpleGame.VoxelEngine
             new ClipMapsOctree<OctreeNode>().VisitTopDown(world.Root, n => { world.ForceGenerate(n); });
         }
 
-        public static VoxelRenderingEngineScript CreateVoxelRenderingEngine(VoxelRenderingEngineScript prefab, OctreeVoxelWorld world, Func<VoxelRenderingEngineScript, VoxelRenderingEngineScript> unityInstantiate)
+        public static VoxelRenderingEngineScript CreateVoxelRenderingEngine(
+            VoxelRenderingEngineScript prefab,
+            OctreeVoxelWorld world,
+            Func<VoxelRenderingEngineScript, VoxelRenderingEngineScript> unityInstantiate,
+            Camera lodCamera = null)
         {
             var renderer = unityInstantiate(prefab);
             renderer.World = new OctreeVoxelWorldScript();
             renderer.World.SetWorldDirectlyFromCodeMode(world);
-            renderer.LODCamera = Camera.main;
+            renderer.LODCamera = lodCamera ?? Camera.main;
             return renderer;
         }
     }

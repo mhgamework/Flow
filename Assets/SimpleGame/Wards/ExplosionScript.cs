@@ -72,10 +72,12 @@ namespace Assets.SimpleGame.Wards
             var world = SimpleGameStartupScript.Instance.RenderingEngine.GetWorld();
             if (world == null) return;
 
-            var s = new Ball(transform.position, ExplosionRadius);
+            var scale = SimpleGameStartupScript.Instance.RenderingEngine.RenderScale;
+
+            var s = new Ball(transform.position/ scale, ExplosionRadius/ scale);
 
             var b = new Bounds();
-            b.SetMinMax((this.transform.position - Vector3.one * ExplosionRadius), (this.transform.position + Vector3.one * ExplosionRadius));
+            b.SetMinMax((this.transform.position / scale - Vector3.one * ExplosionRadius / scale), (this.transform.position / scale + Vector3.one * ExplosionRadius / scale));
 
             new SDFWorldEditingService() .Subtract(world, s, b);
         }

@@ -15,53 +15,73 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 
     public static T Instance
     {
+        get { return getInstanceInternal(create:true); }
+    }
+
+    public static T GetInstanceOrNull()
+    {
+        return getInstanceInternal(create: false);
+    }
+    public static T InstanceRequired {
         get
         {
-            if (applicationIsQuitting && !Application.isEditor)
-            {
-                Debug.LogWarning("[Singleton] Instance '" + typeof(T) +
-                    "' already destroyed on application quit." +
-                    " Won't create again - returning null.");
-                return null;
-            }
-
-            lock (_lock)
-            {
-                if (_instance == null)
-                {
-                    _instance = (T)FindObjectOfType(typeof(T));
-
-                    if (FindObjectsOfType(typeof(T)).Length > 1)
-                    {
-                        Debug.LogError("[Singleton] Something went really wrong " +
-                            " - there should never be more than 1 singleton!" +
-                            " Reopening the scene might fix it.");
-                        return _instance;
-                    }
-
-                    if (_instance == null)
-                    {
-                        GameObject singleton = new GameObject();
-                        _instance = singleton.AddComponent<T>();
-                        singleton.name = "(singleton) " + typeof(T).ToString();
-
-                        DontDestroyOnLoad(singleton);
-
-                        Debug.Log("[Singleton] An instance of " + typeof(T) +
-                            " is needed in the scene, so '" + singleton +
-                            "' was created with DontDestroyOnLoad.");
-                    }
-                    else
-                    {
-                        Debug.Log("[Singleton] Using instance already created: " +
-                            _instance.gameObject.name);
-                    }
-                }
-
-                return _instance;
-            }
+            var ret = getInstanceInternal(create: false);
+            if (ret == null)
+                throw new System.Exception("No Required singleton instance in the scene of type: " + typeof(T).Name);
+            return ret;
         }
     }
+
+
+    private static T getInstanceInternal(bool create)
+    {
+        if (applicationIsQuitting && !Application.isEditor)
+        {
+            Debug.LogWarning("[Singleton] Instance '" + typeof(T) +
+                             "' already destroyed on application quit." +
+                             " Won't create again - returning null.");
+            return null;
+        }
+
+        lock (_lock)
+        {
+            if (_instance == null)
+            {
+                _instance = (T) FindObjectOfType(typeof(T));
+
+                if (FindObjectsOfType(typeof(T)).Length > 1)
+                {
+                    Debug.LogError("[Singleton] Something went really wrong " +
+                                   " - there should never be more than 1 singleton!" +
+                                   " Reopening the scene might fix it.");
+                    return _instance;
+                }
+
+                if (_instance == null)
+                {
+                    if (!create) return null;
+                    GameObject singleton = new GameObject();
+                    _instance = singleton.AddComponent<T>();
+                    singleton.name = "(singleton) " + typeof(T).ToString();
+
+                    DontDestroyOnLoad(singleton);
+
+                    Debug.Log("[Singleton] An instance of " + typeof(T) +
+                              " is needed in the scene, so '" + singleton +
+                              "' was created with DontDestroyOnLoad.");
+                }
+                else
+                {
+                    Debug.Log("[Singleton] Using instance already created: " +
+                              _instance.gameObject.name);
+                }
+            }
+
+            return _instance;
+        }
+    }
+
+   
 
     private static bool applicationIsQuitting = false;
     /// <summary>

@@ -21,6 +21,12 @@ namespace Assets.SimpleGame.Scripts
         public float BaseMovementSpeed;
 
 
+        public void Initialize(InventoryScript hotbarInventory)
+        {
+            //TODO: THe data for the players inventory should not be in the UI!
+            this.HotbarInventory = hotbarInventory;
+        }
+
         public void Start()
         {
             playerStartPos = transform.position;

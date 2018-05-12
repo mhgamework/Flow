@@ -5,6 +5,7 @@ using Assets.MarchingCubes;
 using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
+using Assets.SimpleGame;
 using Assets.SimpleGame.Items;
 using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame.WardDrawing;
@@ -19,11 +20,8 @@ public class SimpleGameInputScript : MonoBehaviour
     public Rigidbody ShootPrefab;
     public Vector3 ShootStartOffset;
     public float ShootStartVelocity = 1;
-    public Transform Player;
 
-    public VoxelRenderingEngineScript Renderer;
-    public FirstPersonController FirstPersonController;
-    public WardDrawingModeScript WardDrawingModeScript;
+  
 
     public MagicParticleSpellItem tempMagicParticleSpellItem;
 
@@ -38,18 +36,25 @@ public class SimpleGameInputScript : MonoBehaviour
 
     public List<AbstractWardSpell> Spells;
     public GameObject LightPrefab;
-    // Use this for initialization
-    void Start()
-    {
 
 
-    }
-    private void OnEnable()
+    private Transform Player;
+    private VoxelRenderingEngineScript Renderer;
+    private FirstPersonController FirstPersonController;
+    private WardDrawingModeScript WardDrawingModeScript;
+
+    public void Initialize(LocalPlayerScript localPlayer, VoxelRenderingEngineScript voxelRenderer, WardDrawingModeScript wardDrawingModeScript)
     {
+        this.Player = localPlayer.transform;
+        this.Renderer = voxelRenderer;
+        this.FirstPersonController = localPlayer.GetFirstPersonController();
+        this.WardDrawingModeScript = wardDrawingModeScript;
+
         WardDrawingModeScript.SetWards(Spells.Select(s => s.Ward).ToList());
 
         WardDrawingModeScript.OnCorrectWard += OnCorrectWard;
     }
+
 
     private void OnCorrectWard(Ward obj)
     {
@@ -280,4 +285,6 @@ public class SimpleGameInputScript : MonoBehaviour
     {
         return Physics.Raycast(Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0)), out raycastHit, 100);
     }
+
+   
 }

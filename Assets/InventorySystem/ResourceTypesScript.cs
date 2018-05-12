@@ -5,7 +5,7 @@ using System.Linq;
 using Assets;
 //using Assets.DontStarve.Inventory;
 
-public class ResourceTypesScript : MonoBehaviour
+public class ResourceTypesScript : Singleton<ResourceTypesScript>
 {
     [SerializeField]
     private List<ResourceType> Types;
@@ -13,10 +13,9 @@ public class ResourceTypesScript : MonoBehaviour
 
     public static ResourceTypesScript Instance()
     {
-        var ret = FindObjectOfType<ResourceTypesScript>();
-        if (!ret) Debug.LogError("No instance of RenderToTextureScript found in scene!");
-        return ret;
+        return InstanceRequired;
     }
+
 
     // Use this for initialization
     void Start()
