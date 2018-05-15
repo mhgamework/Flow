@@ -1,4 +1,5 @@
-﻿using Assets.SimpleGame.Scripts.UI;
+﻿using System.Linq;
+using Assets.SimpleGame.Scripts.UI;
 using Assets.SimpleGame.Wards;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
@@ -51,9 +52,15 @@ namespace Assets.SimpleGame.Scripts
             return GetComponentInChildren<Camera>().transform;
         }
 
-        public void StoreItems(string type , int amount)
+        public void StoreItems(string type , int amount, bool autoSelect = false)
         {
             HotbarInventory.AddResources(type, amount);
+            if (autoSelect)
+            {
+                var stack = HotbarInventory.Inventory.FirstOrDefault(f => f.ResourceType == type);
+                var index = HotbarInventory.Inventory.IndexOf(stack);
+                HotbarScript.Instance.SelectedSlot = index;
+            }
         }
 
         public int GetNumItems(string type)
@@ -86,5 +93,7 @@ namespace Assets.SimpleGame.Scripts
         {
             AirSpellCasting = !AirSpellCasting;
         }
+
+    
     }
 }

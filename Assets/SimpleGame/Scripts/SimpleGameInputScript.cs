@@ -8,8 +8,10 @@ using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.SimpleGame;
 using Assets.SimpleGame.Items;
 using Assets.SimpleGame.Scripts;
+using Assets.SimpleGame.Tools;
 using Assets.SimpleGame.WardDrawing;
 using Assets.SimpleGame.Wards;
+using Assets.SimpleGame._UtilsToMove;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
@@ -42,6 +44,8 @@ public class SimpleGameInputScript : MonoBehaviour
     private VoxelRenderingEngineScript Renderer;
     private FirstPersonController FirstPersonController;
     private WardDrawingModeScript WardDrawingModeScript;
+
+    private DigTool digTool;
 
     public void Initialize(LocalPlayerScript localPlayer, VoxelRenderingEngineScript voxelRenderer, WardDrawingModeScript wardDrawingModeScript)
     {
@@ -107,6 +111,27 @@ public class SimpleGameInputScript : MonoBehaviour
         {
             updateGhost(false);
             return;
+        }
+
+        if (HotbarScript.Instance.GetSelectedInventoryItem().ResourceType == "digtool" && HotbarScript.Instance.GetSelectedInventoryItem().Amount > 0)
+        {
+            if (digTool == null)
+            {
+                digTool = new DigTool(new VoxelWorldEditingHelper(Renderer, Renderer.GetWorld()));
+                digTool.Start();
+            }
+
+            digTool.Update();
+            return;
+        }
+        else
+        {
+            if (digTool != null)
+            {
+                digTool.Stop();
+                digTool = null;
+            }
+            
         }
 
         if (HotbarScript.Instance.GetSelectedInventoryItem().ResourceType == "magicprojectile" && HotbarScript.Instance.GetSelectedInventoryItem().Amount > 0)

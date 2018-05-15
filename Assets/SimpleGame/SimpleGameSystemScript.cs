@@ -66,6 +66,14 @@ namespace Assets.SimpleGame
             Instantiate(RenderToTextureSystemPrefab);
             Instantiate(ResourceTypesScriptPrefab);
 
+
+            giveStartItems(player.GetPlayer());
+
+        }
+
+        private void giveStartItems(PlayerScript player)
+        {
+            player.StoreItems("digtool", 1);
         }
 
         private void createSky()

@@ -8,7 +8,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
     /// Assumes colliders are created for the voxel chunks
     /// Also interesects non voxels at this point
     /// </summary>
-    class VoxelWorldRaycaster
+    public class VoxelWorldRaycaster
     {
         public RaycastHit? raycast()
         {

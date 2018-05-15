@@ -21,7 +21,7 @@ namespace Assets.SimpleGame
             return GetComponentInChildren<FirstPersonController>();
         }
 
-        private PlayerScript GetPlayer()
+        public PlayerScript GetPlayer()
         {
             return GetComponentInChildren<PlayerScript>();
         }

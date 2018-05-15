@@ -12,12 +12,20 @@ public class ItemSlotScript : MonoBehaviour, IPointerClickHandler
     public InventoryUIStack uiStack;
 
     private Color startBackgroundColor;
+
+    private bool initialized = false;
+
     // Use this for initialization
     void Start()
     {
-        startBackgroundColor = GetComponent<Image>().color;
     }
 
+    void init()
+    {
+        if (initialized) return;
+        startBackgroundColor = GetComponent<Image>().color;
+        initialized = true;
+    }
 
     // Update is called once per frame
     void Update()
@@ -134,6 +142,7 @@ public class ItemSlotScript : MonoBehaviour, IPointerClickHandler
 
     public void SetBackgroundColor(Color color)
     {
+        init(); //Make sure initialized, for when this is called as a startup configuration method
         GetComponent<Image>().color = color;
     }
 

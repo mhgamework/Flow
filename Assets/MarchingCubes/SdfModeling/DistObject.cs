@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.SdfModeling
@@ -57,6 +58,16 @@ namespace Assets.MarchingCubes.SdfModeling
         protected Vector2 xz(Vector3 v)
         {
             return new Vector2(v.x, v.z);
+        }
+
+        public virtual void TransformScale(float f)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual Bounds GetBounds()
+        {
+            throw new NotImplementedException();
         }
     }
 }
