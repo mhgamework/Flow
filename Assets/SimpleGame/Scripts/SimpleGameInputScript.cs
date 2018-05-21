@@ -23,7 +23,7 @@ public class SimpleGameInputScript : MonoBehaviour
     public Vector3 ShootStartOffset;
     public float ShootStartVelocity = 1;
 
-  
+
 
     public MagicParticleSpellItem tempMagicParticleSpellItem;
 
@@ -46,6 +46,9 @@ public class SimpleGameInputScript : MonoBehaviour
     private WardDrawingModeScript WardDrawingModeScript;
 
     private DigTool digTool;
+
+    [SerializeField]
+    private DigToolGizmoScript DigToolGizmoPrefab;
 
     public void Initialize(LocalPlayerScript localPlayer, VoxelRenderingEngineScript voxelRenderer, WardDrawingModeScript wardDrawingModeScript)
     {
@@ -117,11 +120,10 @@ public class SimpleGameInputScript : MonoBehaviour
         {
             if (digTool == null)
             {
-                digTool = new DigTool(new VoxelWorldEditingHelper(Renderer, Renderer.GetWorld()));
-                digTool.Start();
+                digTool = new DigTool(new VoxelWorldEditingHelper(Renderer, Renderer.GetWorld()), DigToolGizmoPrefab);
+                StartCoroutine(digTool.Start().GetEnumerator());
             }
 
-            digTool.Update();
             return;
         }
         else
@@ -131,7 +133,7 @@ public class SimpleGameInputScript : MonoBehaviour
                 digTool.Stop();
                 digTool = null;
             }
-            
+
         }
 
         if (HotbarScript.Instance.GetSelectedInventoryItem().ResourceType == "magicprojectile" && HotbarScript.Instance.GetSelectedInventoryItem().Amount > 0)
@@ -311,5 +313,5 @@ public class SimpleGameInputScript : MonoBehaviour
         return Physics.Raycast(Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0)), out raycastHit, 100);
     }
 
-   
+
 }
