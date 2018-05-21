@@ -6,9 +6,9 @@ using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using Assets.MarchingCubes.World;
+using LibNoise;
 using MHGameWork.TheWizards;
 using MHGameWork.TheWizards.DualContouring.Terrain;
-using TreeEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -119,12 +119,9 @@ namespace Assets.MarchingCubes.Scenes
 
 
             var s2 = new Ball(vector3 + new Vector3(1, 1, 1) * 16, 11);
-            var perlin = new TreeEditor.Perlin();
-            perlin.SetSeed(1);
-            var perlin2 = new TreeEditor.Perlin();
-            perlin2.SetSeed(2);
-            var perlin3 = new TreeEditor.Perlin();
-            perlin3.SetSeed(3);
+            var perlin = 78459842;
+            var perlin2 = 1111111111111;
+            var perlin3 = 3141595265;
             var mat = new VoxelMaterial(Color.gray);
             var matGold = new VoxelMaterial(Color.yellow);
             var matIron = new VoxelMaterial(Color.red);
@@ -169,8 +166,8 @@ namespace Assets.MarchingCubes.Scenes
 
                     v.Density = Mathf.Max(v.Density, (realP.y - (island1Pos.y)));
 
-                    v.Density += perlin.Noise(coords.x, coords.y, coords.z) * island1Size * 0.3f * intensity;
-                    v.Density += perlin.Noise(coords.x * 3.1f, coords.y * 3.1f, coords.z * 3.1f) * island1Size * 0.1f * intensity;
+                    v.Density += noise(perlin,coords)*2 * island1Size * 0.3f * intensity; // Maybenot *2?
+                    v.Density += noise(perlin,coords * 3.1f)*2 * island1Size * 0.1f * intensity; // maybenot*2
 
 
 
@@ -268,9 +265,9 @@ namespace Assets.MarchingCubes.Scenes
             return 0;
         }
 
-        float noise(TreeEditor.Perlin perlin, Vector3 p)
+        float noise(long seed, Vector3 p)
         {
-            return perlin.Noise(p.x, p.y, p.z) * (0.5f / 0.6f);
+            return (float)(Utils.GradientCoherentNoise3D(p.x, p.y, p.z, seed, QualityMode.Medium) * 0.5);// / 0.6);
         }
 
     }
