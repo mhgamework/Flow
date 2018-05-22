@@ -5,9 +5,9 @@ using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
 using Assets.MarchingCubes.World;
+using LibNoise;
 using MHGameWork.TheWizards;
 using MHGameWork.TheWizards.DualContouring.Terrain;
-using TreeEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -79,14 +79,12 @@ namespace Assets.MarchingCubes.Scenes
 
         private void createPerlinNoise(Vector3 vector3)
         {
-            var perlin = new Perlin();
-            perlin.SetSeed(0);
             var mat = new VoxelMaterial(Color.gray);
             var size = new Vector3(1, 1, 1) * 32;
             world.RunKernel1by1(vector3.ToFloored(), (vector3 + size).ToCeiled(), (v,p) =>
             {
                 var coords = p.ToVector3() * 0.11f;
-                v.Density = perlin.Noise(coords.x,coords.y,coords.z);
+                v.Density = (float)Utils.GradientCoherentNoise3D( coords.x, coords.y,coords.z,0,QualityMode.Medium); // TODO check if this still works
                 v.Material = mat;
                 return v;
             }, 123);
@@ -120,14 +118,13 @@ namespace Assets.MarchingCubes.Scenes
         private void createSDFWithNoise(Vector3 vector3)
         {
             var s2 = new Ball(vector3 + new Vector3(1, 1, 1)*16, 11);
-            var perlin = new Perlin();
-            perlin.SetSeed(0);
+           
             var mat = new VoxelMaterial(Color.gray);
             var size = new Vector3(1, 1, 1) * 32;
             world.RunKernel1by1(vector3.ToFloored(), (vector3 + size).ToCeiled(), (v, p) =>
             {
                 var coords = p.ToVector3() * 0.33f;
-                v.Density = perlin.Noise(coords.x, coords.y, coords.z)*3;
+                v.Density = (float)Utils.GradientCoherentNoise3D(coords.x, coords.y, coords.z, 0, QualityMode.Medium)*3; // TODO check if this still worksperlin.Noise(coords.x, coords.y, coords.z)*3;
                 v.Density += s2.Sdf(p);
                 v.Material = mat;
                 return v;
@@ -138,14 +135,13 @@ namespace Assets.MarchingCubes.Scenes
         private void createLocalityPrincipleDemo(Vector3 vector3)
         {
             var s2 = new Ball(vector3 + new Vector3(1, 1, 1) * 32, 24);
-            var perlin = new Perlin();
-            perlin.SetSeed(0);
+          
             var mat = new VoxelMaterial(Color.gray);
             var size = new Vector3(1, 1, 1) * 64;
             world.RunKernel1by1(vector3.ToFloored(), (vector3 + size).ToCeiled(), (v, p) =>
             {
                 var coords = p.ToVector3() * 0.33f;
-                v.Density = perlin.Noise(coords.x, coords.y, coords.z) * 3;
+                v.Density = (float)Utils.GradientCoherentNoise3D(coords.x, coords.y, coords.z, 0, QualityMode.Medium)*3; // TODO check if this still worksperlin.Noise(coords.x, coords.y, coords.z) * 3;
                 v.Density += s2.Sdf(p);
                 v.Material = mat;
                 return v;
@@ -165,7 +161,7 @@ namespace Assets.MarchingCubes.Scenes
                 {
                     var coords = p.ToVector3() * 0.5f;
 
-                    var n  = perlin.Noise(coords.x, coords.y, coords.z) * range*0.5f;
+                    var n  = (float)Utils.GradientCoherentNoise3D(coords.x, coords.y, coords.z, 0, QualityMode.Medium)*0.5f; // TODO check if this still worksperlin.Noise(coords.x, coords.y, coords.z) * range*0.5f;
                     n += s2.Sdf(p);
                     if (n < v.Density) v.Density = n;
 

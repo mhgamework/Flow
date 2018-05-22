@@ -22,7 +22,9 @@ namespace UnityEngine.PostProcessing
         public VignetteModel vignette = new VignetteModel();
         public DitheringModel dithering = new DitheringModel();
 
-#if UNITY_EDITOR
+
+
+//#if UNITY_EDITOR
         // Monitor settings
         [Serializable]
         public class MonitorSettings
@@ -63,6 +65,6 @@ namespace UnityEngine.PostProcessing
         }
 
         public MonitorSettings monitors = new MonitorSettings();
-#endif
+//#endif
     }
 }

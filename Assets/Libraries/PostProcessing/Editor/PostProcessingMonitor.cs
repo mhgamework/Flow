@@ -1,16 +1,17 @@
 using System;
 using UnityEngine;
+using UnityEngine.PostProcessing;
 
 namespace UnityEditor.PostProcessing
 {
-    using MonitorSettings = UnityEngine.PostProcessing.PostProcessingProfile.MonitorSettings;
+    //MH: Disabled because ide problemsusing MonitorSettings = UnityEngine.PostProcessing.PostProcessingProfile.MonitorSettings;
 
     public abstract class PostProcessingMonitor : IDisposable
     {
-        protected MonitorSettings m_MonitorSettings;
+        protected PostProcessingProfile.MonitorSettings m_MonitorSettings;
         protected PostProcessingInspector m_BaseEditor;
 
-        public void Init(MonitorSettings monitorSettings, PostProcessingInspector baseEditor)
+        public void Init(PostProcessingProfile.MonitorSettings monitorSettings, PostProcessingInspector baseEditor)
         {
             m_MonitorSettings = monitorSettings;
             m_BaseEditor = baseEditor;

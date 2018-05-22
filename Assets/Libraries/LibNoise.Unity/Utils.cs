@@ -2,7 +2,7 @@
 
 namespace LibNoise
 {
-    internal static class Utils
+    public static class Utils
     {
         #region Constants
 
@@ -163,7 +163,7 @@ namespace LibNoise
 
         #region Methods
 
-        internal static double GradientCoherentNoise3D(double x, double y, double z, long seed, QualityMode quality)
+        public static double GradientCoherentNoise3D(double x, double y, double z, long seed, QualityMode quality)
         {
             var x0 = x > 0.0 ? (int) x : (int) x - 1;
             var x1 = x0 + 1;

@@ -1,0 +1,13 @@
+{
+    "name": "MarchingCubesEngine.Editor",
+    "references": [
+        "Reusable",
+        "MarchingCubesEngine"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
