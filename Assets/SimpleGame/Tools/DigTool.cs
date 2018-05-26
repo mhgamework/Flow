@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using Assets.MarchingCubes.Domain;
 using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
+using Assets.MarchingCubes.World;
 using Assets.Reusable.Utils;
+using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame._UtilsToMove;
 using UnityEngine;
 
@@ -13,16 +15,20 @@ namespace Assets.SimpleGame.Tools
     {
         private VoxelWorldEditingHelper editor;
         private DigToolGizmoScript GizmoPrefab;
+        private readonly PlayerScript playerScript;
 
         private bool stopped = false;
         private float diggingProgress = 0;
         private float DigTime = 0.5f;
         private float DigRadius = 1f;
 
-        public DigTool(VoxelWorldEditingHelper editor, DigToolGizmoScript gizmoPrefab)
+        private SDFWorldEditingService.Counts counts = new SDFWorldEditingService.Counts();
+
+        public DigTool(VoxelWorldEditingHelper editor, DigToolGizmoScript gizmoPrefab, PlayerScript playerScript)
         {
             this.editor = editor;
             GizmoPrefab = gizmoPrefab;
+            this.playerScript = playerScript;
         }
 
         public IEnumerable<YieldInstruction> Start()
@@ -45,9 +51,9 @@ namespace Assets.SimpleGame.Tools
                 diggingProgress = 0;
                 yield return null;
 
-                if( Input.GetMouseButton(1))
+                if (Input.GetMouseButton(1))
                 {
-                    editor.Smooth(point.Value, DigRadius);
+                    editor.Smooth(point.Value, DigRadius, counts);
                     yield return null;
                     continue;
                 }
@@ -69,31 +75,39 @@ namespace Assets.SimpleGame.Tools
                 if (diggingProgress >= DigTime)
                 {
                     var obj = new Ball(point.Value, DigRadius);
-                    editor.Subtract(obj);
+                    //counts.Clear();
+                    editor.Subtract(obj, counts);
+
+                 
+                    Debug.Log(counts);
+
                     for (int i = 0; i < 5; i++)
                     {
-                        editor.Smooth(point.Value, DigRadius);
+                        editor.Smooth(point.Value, DigRadius,counts);
+                    }
+
+                    foreach (var am in counts.Amounts)
+                    {
+                        var type = am.Material.color == Color.red ? "iron" : "rock";
+                        var amount = Mathf.FloorToInt(am.Amount);
+                        if (amount < 0) continue;
+                        counts.Change(am.Material, -amount);
+                        playerScript.StoreItems(type, amount);
                     }
                 }
 
                 yield return null;
             }
 
-            GameObject.Destroy(gizmo);
+            GameObject.Destroy(gizmo.gameObject);
         }
 
-
-
-        private void updateGizmo(DigToolGizmoScript gizmo, Vector3? point)
-        {
-
-
-        }
 
 
         public void Stop()
         {
             stopped = true;
+
         }
     }
 }

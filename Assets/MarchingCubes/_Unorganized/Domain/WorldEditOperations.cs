@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Assets.MarchingCubes.VoxelWorldMVP;
+using Assets.MarchingCubes.World;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
@@ -94,7 +95,8 @@ namespace Assets.MarchingCubes.Domain
             }, 3, currentFrameCount);
         }
 
-        public static void SmoothTerrain(Point3 radius, VoxelMaterial material, int currentFrameCount, IEditableVoxelWorld world, Vector3 centerPoint)
+        public static void SmoothTerrain(Point3 radius, VoxelMaterial material, int currentFrameCount,
+            IEditableVoxelWorld world, Vector3 centerPoint, SDFWorldEditingService.Counts outCounts)
         {
             var weights = new[] { 0.1f, 2f, 0.1f };
             weights = weights.Select(f => f / weights.Sum()).ToArray();
@@ -109,9 +111,14 @@ namespace Assets.MarchingCubes.Domain
                     d += Mathf.Clamp(data[i].Density, -1, 1) * weights[i];
                 }
                 {
+                    if (val.Material.color == Color.red && val.Density < 0) return val;
+
                     if (d > 0 && val.Material == null)
                         val.Material = material;
                     //val.Material = material;
+                    if (outCounts != null && val.Material != null)
+                        outCounts.Change(val.Material, d , val.Density);
+
                     val.Density = d;
                     return val;
                 }

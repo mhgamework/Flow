@@ -4,6 +4,7 @@ using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.World;
 using Assets.Reusable.Utils;
+using Boo.Lang;
 using MHGameWork.TheWizards;
 using UnityEngine;
 
@@ -26,7 +27,7 @@ namespace Assets.SimpleGame._UtilsToMove
         }
 
 
-        public void Subtract(DistObject obj)
+        public void Subtract(DistObject obj, SDFWorldEditingService.Counts outCounts)
         {
             var scale = renderingEngine.RenderScale;
 
@@ -34,7 +35,7 @@ namespace Assets.SimpleGame._UtilsToMove
 
             var b = obj.GetBounds();
 
-            new SDFWorldEditingService().Subtract(world, obj, b);
+            new SDFWorldEditingService().Subtract(world, obj, b, outCounts);
         }
 
         public Vector3? RaycastPlayerCursor()
@@ -43,19 +44,15 @@ namespace Assets.SimpleGame._UtilsToMove
             return cast.Select(f => f.point);
         }
 
-        public class Counts
-        {
 
-        }
-
-        public void Smooth(Vector3 center, float radius)
+        public void Smooth(Vector3 center, float radius, SDFWorldEditingService.Counts counts)
         {
             var scale = renderingEngine.RenderScale;
 
             center /= scale;
             radius /= scale;
 
-            WorldEditOperations.SmoothTerrain((Vector3.one * radius).ToCeiled(), null, Time.frameCount, world, center);
+            WorldEditOperations.SmoothTerrain((Vector3.one * radius).ToCeiled(), null, Time.frameCount, world, center,counts);
         }
     }
 }

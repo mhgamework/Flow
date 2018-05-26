@@ -50,9 +50,12 @@ public class SimpleGameInputScript : MonoBehaviour
     [SerializeField]
     private DigToolGizmoScript DigToolGizmoPrefab;
 
+    private PlayerScript playerScript;
+
     public void Initialize(LocalPlayerScript localPlayer, VoxelRenderingEngineScript voxelRenderer, WardDrawingModeScript wardDrawingModeScript)
     {
         this.Player = localPlayer.transform;
+        playerScript =localPlayer.GetPlayer();
         this.Renderer = voxelRenderer;
         this.FirstPersonController = localPlayer.GetFirstPersonController();
         this.WardDrawingModeScript = wardDrawingModeScript;
@@ -113,6 +116,11 @@ public class SimpleGameInputScript : MonoBehaviour
         if (PlayerScript.Instance.AirSpellCasting)
         {
             updateGhost(false);
+            if (digTool != null)
+            {
+                digTool.Stop();
+                digTool = null;
+            }
             return;
         }
 
@@ -120,7 +128,7 @@ public class SimpleGameInputScript : MonoBehaviour
         {
             if (digTool == null)
             {
-                digTool = new DigTool(new VoxelWorldEditingHelper(Renderer, Renderer.GetWorld()), DigToolGizmoPrefab);
+                digTool = new DigTool(new VoxelWorldEditingHelper(Renderer, Renderer.GetWorld()), DigToolGizmoPrefab,playerScript);
                 StartCoroutine(digTool.Start().GetEnumerator());
             }
 

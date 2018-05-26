@@ -58,7 +58,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
         protected virtual void SmoothTerrain(float radius, VoxelMaterial material)
         {
             //var weights = new[] {0.5f, 1f, 0.5f};
-            WorldEditOperations.SmoothTerrain(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), material, Time.frameCount, world, point / VRSettings.RenderScale);
+            WorldEditOperations.SmoothTerrain(new Point3(1, 1, 1) * (int)Math.Ceiling(radius), material, Time.frameCount, world, point / VRSettings.RenderScale, null);
         }
 
 
