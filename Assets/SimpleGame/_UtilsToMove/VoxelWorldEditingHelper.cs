@@ -1,8 +1,10 @@
-﻿using Assets.MarchingCubes.Rendering;
+﻿using Assets.MarchingCubes.Domain;
+using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.World;
 using Assets.Reusable.Utils;
+using MHGameWork.TheWizards;
 using UnityEngine;
 
 namespace Assets.SimpleGame._UtilsToMove
@@ -44,6 +46,16 @@ namespace Assets.SimpleGame._UtilsToMove
         public class Counts
         {
 
+        }
+
+        public void Smooth(Vector3 center, float radius)
+        {
+            var scale = renderingEngine.RenderScale;
+
+            center /= scale;
+            radius /= scale;
+
+            WorldEditOperations.SmoothTerrain((Vector3.one * radius).ToCeiled(), null, Time.frameCount, world, center);
         }
     }
 }

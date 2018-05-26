@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Assets.MarchingCubes.Domain;
 using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.Reusable.Utils;
@@ -43,6 +44,15 @@ namespace Assets.SimpleGame.Tools
 
                 diggingProgress = 0;
                 yield return null;
+
+                if( Input.GetMouseButton(1))
+                {
+                    editor.Smooth(point.Value, DigRadius);
+                    yield return null;
+                    continue;
+                }
+
+
                 while (Input.GetMouseButton(0) && diggingProgress < DigTime)
                 {
                     var temp = editor.RaycastPlayerCursor();
@@ -60,6 +70,10 @@ namespace Assets.SimpleGame.Tools
                 {
                     var obj = new Ball(point.Value, DigRadius);
                     editor.Subtract(obj);
+                    for (int i = 0; i < 5; i++)
+                    {
+                        editor.Smooth(point.Value, DigRadius);
+                    }
                 }
 
                 yield return null;
