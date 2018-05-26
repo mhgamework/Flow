@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.World;
 using Assets.SimpleGame.Scripts;
@@ -54,18 +55,11 @@ namespace Assets.SimpleGame.Wards
             var colliders = Physics.OverlapSphere(transform.position, ExplosionRadius);
             foreach (var c in colliders)
             {
-                var enemy = c.GetComponentInParent<WoodDemonScript>();
-                if (enemy != null)
-                    Destroy(enemy.gameObject);
-                var player = c.GetComponentInChildren<PlayerScript>();
-                if (player != null)
-                {
-                    var dmg = Mathf.Lerp(ExplosionDamage, 10,
-                        Mathf.Clamp01((player.transform.position - transform.position).magnitude / ExplosionRadius));
-                    player.TakeDamage(dmg);
-                }
+                EntityDamageUtils.DoDamageToSmth(c, t => Mathf.Lerp(ExplosionDamage, 10, Mathf.Clamp01((t.position - transform.position).magnitude / ExplosionRadius)));
             }
         }
+
+  
 
         private void DestroyTerrain()
         {
@@ -74,12 +68,12 @@ namespace Assets.SimpleGame.Wards
 
             var scale = SimpleGameStartupScript.Instance.RenderingEngine.RenderScale;
 
-            var s = new Ball(transform.position/ scale, ExplosionRadius/ scale);
+            var s = new Ball(transform.position / scale, ExplosionRadius / scale);
 
             var b = new Bounds();
             b.SetMinMax((this.transform.position / scale - Vector3.one * ExplosionRadius / scale), (this.transform.position / scale + Vector3.one * ExplosionRadius / scale));
 
-            new SDFWorldEditingService() .Subtract(world, s, b);
+            new SDFWorldEditingService().Subtract(world, s, b);
         }
 
     }

@@ -45,7 +45,7 @@ namespace Assets.MarchingCubes.World
                 {
                     var newDensity = Mathf.Max(d.Density, -transform.Sdf(p));
 
-                    if (d.Material.color == Color.red && d.Density < 0)
+                    if (d.Material != null && (d.Material.color == Color.red || d.Material.color == new Color(1f, 0.9215686f, 0.01568628f, 1f)) && d.Density < 0)
                         newDensity = newDensity * 0.3f + d.Density * 0.7f;
 
                     hasDug = hasDug || (newDensity - d.Density > 0.01);

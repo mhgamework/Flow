@@ -22,6 +22,8 @@ namespace Assets.SimpleGame.Tools
         private float DigTime = 0.5f;
         private float DigRadius = 1f;
 
+        private float DigMaxDistance = 20f;
+
         private SDFWorldEditingService.Counts counts = new SDFWorldEditingService.Counts();
 
         public DigTool(VoxelWorldEditingHelper editor, DigToolGizmoScript gizmoPrefab, PlayerScript playerScript)
@@ -40,7 +42,7 @@ namespace Assets.SimpleGame.Tools
             while (!stopped)
             {
                 var point = editor.RaycastPlayerCursor();
-                if (!point.HasValue)
+                if (!point.HasValue || Vector3.Distance( point.Value, playerScript.GetPlayerPosition()) > DigMaxDistance)
                 {
                     gizmo.Hide();
                     yield return null;
@@ -78,17 +80,17 @@ namespace Assets.SimpleGame.Tools
                     //counts.Clear();
                     editor.Subtract(obj, counts);
 
-                 
+
                     Debug.Log(counts);
 
                     for (int i = 0; i < 5; i++)
                     {
-                        editor.Smooth(point.Value, DigRadius,counts);
+                        editor.Smooth(point.Value, DigRadius, counts);
                     }
 
                     foreach (var am in counts.Amounts)
                     {
-                        var type = am.Material.color == Color.red ? "iron" : "rock";
+                        var type = am.Material.color == Color.red ? "iron" : am.Material.color == Color.yellow ? "gold" : "rock";
                         var amount = Mathf.FloorToInt(am.Amount);
                         if (amount < 0) continue;
                         counts.Change(am.Material, -amount);

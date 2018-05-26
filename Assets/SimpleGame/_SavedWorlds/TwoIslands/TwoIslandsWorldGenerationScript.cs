@@ -61,10 +61,12 @@ namespace Assets.MarchingCubes.Scenes
         private void CreateScene()
         {
             //createSingleIsland(worldScale: 1, islandSize: 100f);
-            createSingleIsland(worldScale: 1, islandSize: 20f);
+            createSingleIsland(worldScale: 1, islandSize: 20f, position: new Vector3(20f, 20f, 20f));
+            createSingleIsland(worldScale: 1, islandSize: 25f, position: new Vector3(40f, 25, 35f));
+            createSingleIsland(worldScale: 1, islandSize: 15f, position: new Vector3(22, 30, 45));
         }
 
-        private void createSingleIsland(int worldScale, float islandSize)
+        private void createSingleIsland(int worldScale, float islandSize, Vector3 position)
         {
             //var scale = 1f/25;
             var scale = 1f / worldScale;
@@ -72,13 +74,13 @@ namespace Assets.MarchingCubes.Scenes
             //var scale = 1f / 2;
             //var scale = 1f / 1;
 
-            var vector3 = new Vector3(islandSize, islandSize, islandSize) * scale;
+            var vector3 = position * scale;
 
             float island1Size;
             Vector3 island1Pos;
 
             island1Size = islandSize * scale;
-            island1Pos = vector3 + new Vector3(island1Size, island1Size, island1Size) * 2;
+            island1Pos = vector3 + position * 2 * scale;
 
             Vector3 renderCenter = island1Pos;
             float renderRange = island1Size * 4;
@@ -166,8 +168,8 @@ namespace Assets.MarchingCubes.Scenes
 
                     v.Density = Mathf.Max(v.Density, (realP.y - (island1Pos.y)));
 
-                    v.Density += noise(perlin,coords)*2 * island1Size * 0.3f * intensity; // Maybenot *2?
-                    v.Density += noise(perlin,coords * 3.1f)*2 * island1Size * 0.1f * intensity; // maybenot*2
+                    v.Density += noise(perlin, coords) * 2 * island1Size * 0.3f * intensity; // Maybenot *2?
+                    v.Density += noise(perlin, coords * 3.1f) * 2 * island1Size * 0.1f * intensity; // maybenot*2
 
 
 

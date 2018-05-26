@@ -111,7 +111,7 @@ namespace Assets.MarchingCubes.Domain
                     d += Mathf.Clamp(data[i].Density, -1, 1) * weights[i];
                 }
                 {
-                    if (val.Material.color == Color.red && val.Density < 0) return val;
+                    if (val.Material != null && (val.Material.color == Color.red || val.Material.color == new Color(1f, 0.9215686f, 0.01568628f, 1f)) && val.Density < 0) return val;
 
                     if (d > 0 && val.Material == null)
                         val.Material = material;
