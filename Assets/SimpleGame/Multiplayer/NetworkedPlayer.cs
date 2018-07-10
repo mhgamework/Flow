@@ -25,5 +25,34 @@ namespace Assets.SimpleGame.Multiplayer
             GetComponentInChildren<AudioListener>().enabled = true;
         }
 
+
+        public GameObject bulletPrefab;
+        public float bulletSpeed;
+        [Command]
+        void CmdDoFire(float lifeTime)
+        {
+            GameObject bullet = (GameObject)Instantiate(
+                bulletPrefab,
+                transform.position + transform.forward+transform.up,
+                Quaternion.identity);
+
+            var bullet2D = bullet.GetComponent<Rigidbody>();
+            bullet2D.velocity = transform.forward * bulletSpeed;
+            Destroy(bullet, lifeTime);
+
+            NetworkServer.Spawn(bullet);
+        }
+
+        void Update()
+        {
+            if (!isLocalPlayer)
+                return;
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                CmdDoFire(3.0f);
+            }
+
+        }
     }
 }
