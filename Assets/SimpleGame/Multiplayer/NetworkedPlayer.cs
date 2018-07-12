@@ -46,6 +46,12 @@ namespace Assets.SimpleGame.Multiplayer
             NetworkServer.Spawn(bullet);
         }
 
+        [Command]
+        void CmdDoPush()
+        {
+            GetComponentInChildren<Rigidbody>().AddForce(Vector3.up*100, ForceMode.Acceleration);
+        }
+
         void Update()
         {
             if (!isLocalPlayer)
@@ -56,6 +62,10 @@ namespace Assets.SimpleGame.Multiplayer
                 CmdDoFire(3.0f);
             }
 
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                CmdDoPush();
+            }
         }
     }
 }
