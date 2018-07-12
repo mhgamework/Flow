@@ -9,8 +9,11 @@ using Object = System.Object;
 
 namespace Assets.SimpleGame.Multiplayer
 {
+    [Obsolete]
     public class NetworkedPlayer : NetworkBehaviour
     {
+        [SyncVar] public int Score = 0;
+
         public void Start()
         {
             Debug.Log("Start networked palyer");
