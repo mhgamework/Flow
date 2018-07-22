@@ -8,7 +8,8 @@ namespace Assets.SimpleGame.Multiplayer
     public class MultiplayerPlayerScript : NetworkBehaviour
     {
         //[SyncVar] public int Score = 0;
-
+        public float PushStrenght = 20;
+        public float PushStrenghtY = 3;
         public void Start()
         {
             Debug.Log("Start networked palyer");
@@ -44,17 +45,25 @@ namespace Assets.SimpleGame.Multiplayer
         //    NetworkServer.Spawn(bullet);
         //}
 
-        //void Update()
-        //{
-        //    if (!isLocalPlayer)
-        //        return;
+        void Update()
+        {
+            if (!isLocalPlayer)
+                return;
 
-        //    if (Input.GetMouseButtonDown(0))
-        //    {
-        //        CmdDoFire(3.0f);
-        //    }
+            if (Input.GetMouseButton(0))
+            {
+                var obj = GameObject.Find("Dummy");
 
-        //}
+                var pos = transform.position;
+                var targetPos = obj.transform.position;
+
+                var dir = (targetPos - pos).normalized * PushStrenght + Vector3.up * PushStrenghtY;
+
+                obj.GetComponent<FirstPersonController>().PushedVelocity += dir * Time.deltaTime;
+                //CmdDoFire(3.0f);
+            }
+
+        }
 
     }
 }

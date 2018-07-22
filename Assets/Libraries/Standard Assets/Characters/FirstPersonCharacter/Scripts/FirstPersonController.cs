@@ -44,6 +44,18 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         public float SpeedMultiplier = 1;
 
+        /// <summary>
+        /// MH: Disables this being controlled by player input and having a camera
+        /// </summary>
+        public bool DisablePlayerControlled = false;
+
+        /// <summary>
+        /// Feature to push things around
+        /// </summary>
+        public Vector3 PushedVelocity;
+        public float PushedVelocityDrag = 0.0f;
+        public float PushedVelocityDragOnGround = 0.9f;
+
         // Use this for initialization
         private void Start()
         {
@@ -56,13 +68,25 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_NextStep = m_StepCycle / 2f;
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
-            m_MouseLook.Init(transform, m_Camera.transform);
+            if (!DisablePlayerControlled)
+                m_MouseLook.Init(transform, m_Camera.transform);
         }
 
 
         // Update is called once per frame
         private void Update()
         {
+            if (DisablePlayerControlled)
+            {
+                if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
+                {
+                    m_MoveDir.y = 0f;
+                    m_Jumping = false;
+                }
+                m_PreviouslyGrounded = m_CharacterController.isGrounded;
+
+                return;
+            }
             RotateView();
             // the jump state needs to read here to make sure it is not missed
             if (!m_Jump)
@@ -96,8 +120,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void FixedUpdate()
         {
-            float speed;
-            GetInput(out speed);
+            float speed = 0;
+            if (!DisablePlayerControlled)
+                GetInput(out speed);
             // always move along the camera forward as it is the direction that it being aimed at
             Vector3 desiredMove = transform.forward * m_Input.y + transform.right * m_Input.x;
 
@@ -111,11 +136,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_MoveDir.z = desiredMove.z * speed;
 
 
+
             if (m_CharacterController.isGrounded)
             {
                 m_MoveDir.y = -m_StickToGroundForce;
 
-                if (m_Jump)
+                if (m_Jump || PushedVelocity.y > 0)
                 {
                     m_MoveDir.y = m_JumpSpeed;
                     PlayJumpSound();
@@ -127,9 +153,20 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
             }
-            m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
+            if (PushedVelocity.y > 0)
+            {
+                PushedVelocity.y += Physics.gravity.y * m_GravityMultiplier * Time.fixedDeltaTime;
+            }
+
+            m_CollisionFlags = m_CharacterController.Move((m_MoveDir + PushedVelocity) * Time.fixedDeltaTime);
+            var pushDrag = m_CharacterController.isGrounded ? PushedVelocityDragOnGround : PushedVelocityDrag;
+            PushedVelocity -= PushedVelocity * pushDrag * Time.fixedDeltaTime;
+            if (PushedVelocity.magnitude < 0.1) PushedVelocity = new Vector3();
+            if (DisablePlayerControlled)
+                Debug.Log(m_CollisionFlags);
             ProgressStepCycle(speed);
-            UpdateCameraPosition(speed);
+            if (!DisablePlayerControlled)
+                UpdateCameraPosition(speed);
 
             m_MouseLook.UpdateCursorLock();
         }
@@ -137,6 +174,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void PlayJumpSound()
         {
+            if (DisablePlayerControlled) return;
             m_AudioSource.clip = m_JumpSound;
             m_AudioSource.Play();
         }
