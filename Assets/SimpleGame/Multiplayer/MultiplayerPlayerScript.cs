@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 using UnityEngine.Networking;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityStandardAssets.Characters.ThirdPerson;
@@ -8,8 +9,12 @@ namespace Assets.SimpleGame.Multiplayer
     public class MultiplayerPlayerScript : NetworkBehaviour
     {
         //[SyncVar] public int Score = 0;
-        public float PushStrenght = 20;
-        public float PushStrenghtY = 3;
+
+        private PushSpellScript pushSpellScript;
+        public PushSpellScript PushSpellScriptPrefab;
+
+        [SyncVar] private bool casting;
+
         public void Start()
         {
             Debug.Log("Start networked palyer");
@@ -18,6 +23,9 @@ namespace Assets.SimpleGame.Multiplayer
                 GetComponent<FirstPersonController>().enabled = false;
                 GetComponentInChildren<Camera>().enabled = false;
             }
+
+
+            pushSpellScript = Instantiate(PushSpellScriptPrefab, transform.GetComponentsInChildren<Transform>().First(n => n.name == "Head"));
         }
 
         public override void OnStartLocalPlayer()
@@ -45,25 +53,56 @@ namespace Assets.SimpleGame.Multiplayer
         //    NetworkServer.Spawn(bullet);
         //}
 
+        [Command]
+        void CmdStartCast()
+        {
+            casting = true;
+
+        }
+        [Command]
+        void CmdStopCast()
+        {
+            casting = false;
+
+        }
+
         void Update()
         {
+            if (casting) pushSpellScript.Cast();
+
             if (!isLocalPlayer)
                 return;
 
             if (Input.GetMouseButton(0))
             {
-                var obj = GameObject.Find("Dummy");
-
-                var pos = transform.position;
-                var targetPos = obj.transform.position;
-
-                var dir = (targetPos - pos).normalized * PushStrenght + Vector3.up * PushStrenghtY;
-
-                obj.GetComponent<FirstPersonController>().PushedVelocity += dir * Time.deltaTime;
+                CmdStartCast();
+                //CmdPushSpell();
                 //CmdDoFire(3.0f);
             }
+            else
+            {
+                CmdStopCast();
+            }
+
 
         }
 
+        [ClientRpc]
+        public void RpcPush(Vector3 push)
+        {
+            GetComponent<FirstPersonController>().PushedVelocity += push;
+        }
+        public void ApplyPushSpell(Vector3 dir)
+        {
+            if (!isServer) return;
+            RpcPush(dir * Time.deltaTime);
+        }
+
+        public void OnFallOfWorld()
+        {
+            transform.position = new Vector3();
+            GetComponent<FirstPersonController>().PushedVelocity  = new Vector3();
+
+        }
     }
 }

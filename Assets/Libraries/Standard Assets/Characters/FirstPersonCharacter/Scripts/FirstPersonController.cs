@@ -61,7 +61,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             m_CharacterController = GetComponent<CharacterController>();
             m_Camera = Camera.main;
-            m_OriginalCameraPosition = m_Camera.transform.localPosition;
+            if (!DisablePlayerControlled)
+                m_OriginalCameraPosition = m_Camera.transform.localPosition;
             m_FovKick.Setup(m_Camera);
             m_HeadBob.Setup(m_Camera, m_StepInterval);
             m_StepCycle = 0f;
@@ -162,8 +163,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
             var pushDrag = m_CharacterController.isGrounded ? PushedVelocityDragOnGround : PushedVelocityDrag;
             PushedVelocity -= PushedVelocity * pushDrag * Time.fixedDeltaTime;
             if (PushedVelocity.magnitude < 0.1) PushedVelocity = new Vector3();
-            if (DisablePlayerControlled)
-                Debug.Log(m_CollisionFlags);
             ProgressStepCycle(speed);
             if (!DisablePlayerControlled)
                 UpdateCameraPosition(speed);
