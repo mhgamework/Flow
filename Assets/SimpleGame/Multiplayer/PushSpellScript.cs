@@ -49,7 +49,7 @@ namespace Assets.SimpleGame.Multiplayer
 
             var dir = (fps.transform.position - transform.position).normalized * PushStrenght + Vector3.up * PushStrenghtY;
 
-            fps.ApplyPushSpell(dir);
+            fps.ApplyPushAway(transform.position, PushStrenght, PushStrenghtY, Time.deltaTime);
         }
 
         private void OnTriggerExit(Collider other)

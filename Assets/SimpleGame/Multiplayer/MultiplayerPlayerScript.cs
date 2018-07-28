@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Assets.SimpleGame.Multiplayer.Players;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityStandardAssets.Characters.FirstPerson;
@@ -10,13 +11,22 @@ namespace Assets.SimpleGame.Multiplayer
     {
         //[SyncVar] public int Score = 0;
 
+        public BombScript BombScriptPrefab;
+
         private PushSpellScript pushSpellScript;
         public PushSpellScript PushSpellScriptPrefab;
 
         [SyncVar] private bool casting;
 
+        private PlayerGrenadeScript playerGrenadeScript;
+
         public void Start()
         {
+            var head = transform.GetComponentsInChildren<Transform>().First(n => n.name == "Head");
+
+            playerGrenadeScript = GetComponent<PlayerGrenadeScript>();
+            playerGrenadeScript.SetPlayerTransform(head);
+
             Debug.Log("Start networked palyer");
             if (!isLocalPlayer)
             {
@@ -25,7 +35,7 @@ namespace Assets.SimpleGame.Multiplayer
             }
 
 
-            pushSpellScript = Instantiate(PushSpellScriptPrefab, transform.GetComponentsInChildren<Transform>().First(n => n.name == "Head"));
+            pushSpellScript = Instantiate(PushSpellScriptPrefab, head);
         }
 
         public override void OnStartLocalPlayer()
@@ -85,6 +95,10 @@ namespace Assets.SimpleGame.Multiplayer
             }
 
 
+            playerGrenadeScript.SetFireGrenadeDown(Input.GetMouseButton(1));
+
+
+
         }
 
         [ClientRpc]
@@ -92,16 +106,19 @@ namespace Assets.SimpleGame.Multiplayer
         {
             GetComponent<FirstPersonController>().PushedVelocity += push;
         }
-        public void ApplyPushSpell(Vector3 dir)
+
+        public void ApplyPushAway(Vector3 pushOrigin, float strength, float strenghtY, float amount)
         {
             if (!isServer) return;
-            RpcPush(dir * Time.deltaTime);
+
+            var dir = (transform.position - pushOrigin).normalized * strength + Vector3.up * strenghtY;
+            RpcPush(dir);
         }
 
         public void OnFallOfWorld()
         {
             transform.position = new Vector3();
-            GetComponent<FirstPersonController>().PushedVelocity  = new Vector3();
+            GetComponent<FirstPersonController>().PushedVelocity = new Vector3();
 
         }
     }
