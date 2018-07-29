@@ -11,8 +11,6 @@ namespace Assets.SimpleGame.Multiplayer
     {
         //[SyncVar] public int Score = 0;
 
-        public BombScript BombScriptPrefab;
-
         private PushSpellScript pushSpellScript;
         public PushSpellScript PushSpellScriptPrefab;
 
@@ -20,8 +18,12 @@ namespace Assets.SimpleGame.Multiplayer
 
         private PlayerGrenadeScript playerGrenadeScript;
 
+        private Vector3 spawnLocation;
+
+
         public void Start()
         {
+            
             var head = transform.GetComponentsInChildren<Transform>().First(n => n.name == "Head");
 
             playerGrenadeScript = GetComponent<PlayerGrenadeScript>();
@@ -36,6 +38,7 @@ namespace Assets.SimpleGame.Multiplayer
 
 
             pushSpellScript = Instantiate(PushSpellScriptPrefab, head);
+            spawnLocation = transform.position;
         }
 
         public override void OnStartLocalPlayer()
@@ -112,11 +115,12 @@ namespace Assets.SimpleGame.Multiplayer
             if (!isServer) return;
 
             var dir = (transform.position - pushOrigin).normalized * strength + Vector3.up * strenghtY;
-            RpcPush(dir);
+            RpcPush(dir* amount);
         }
 
         public void OnFallOfWorld()
         {
+            if (!isLocalPlayer) return;
             transform.position = new Vector3();
             GetComponent<FirstPersonController>().PushedVelocity = new Vector3();
 
