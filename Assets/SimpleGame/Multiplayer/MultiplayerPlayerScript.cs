@@ -112,7 +112,15 @@ namespace Assets.SimpleGame.Multiplayer
             playerGrenadeScript.SetFireGrenadeDown(Input.GetMouseButton(1));
 
 
+            checkOutOfMap();
+        }
 
+        private void checkOutOfMap()
+        {
+            if (transform.position.y < -100)
+            {
+                OnFallOfWorld();
+            }
         }
 
         [ClientRpc]
