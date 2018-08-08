@@ -20,10 +20,15 @@ namespace Assets.SimpleGame.Multiplayer
 
         private Vector3 spawnLocation;
 
+        [SyncVar]
+        private Color playerColor;
 
         public void Start()
         {
-            
+            if (isServer)
+                SetPlayerColor(MultiplayerGameManager.Instance.GetFreePlayerColor());
+            else
+                setModelColor(playerColor);
             var head = transform.GetComponentsInChildren<Transform>().First(n => n.name == "Head");
 
             playerGrenadeScript = GetComponent<PlayerGrenadeScript>();
@@ -41,11 +46,17 @@ namespace Assets.SimpleGame.Multiplayer
             spawnLocation = transform.position;
         }
 
+        private void SetModelColor(Transform capsule, Color color)
+        {
+            capsule.GetComponent<MeshRenderer>().material.color = color;
+        }
+
         public override void OnStartLocalPlayer()
         {
             Debug.Log("OnStartLocalPlayer");
             GetComponent<FirstPersonController>().enabled = true;
             GetComponentInChildren<Camera>().enabled = true;
+
         }
 
 
@@ -115,15 +126,39 @@ namespace Assets.SimpleGame.Multiplayer
             if (!isServer) return;
 
             var dir = (transform.position - pushOrigin).normalized * strength + Vector3.up * strenghtY;
-            RpcPush(dir* amount);
+            RpcPush(dir * amount);
         }
 
         public void OnFallOfWorld()
         {
             if (!isLocalPlayer) return;
-            transform.position = new Vector3();
+            transform.position = spawnLocation;
             GetComponent<FirstPersonController>().PushedVelocity = new Vector3();
 
+        }
+
+        public Color GetPlayerColor()
+        {
+            return playerColor;
+        }
+
+        public void SetPlayerColor(Color color)
+        {
+            playerColor = color;
+            RpcSetPlayerColor(color);
+        }
+
+        [ClientRpc]
+        public void RpcSetPlayerColor(Color color)
+        {
+            playerColor = color;
+            setModelColor(color);
+        }
+
+        private void setModelColor(Color color)
+        {
+            var capsule = transform.GetComponentsInChildren<Transform>().First(n => n.name == "Capsule");
+            SetModelColor(capsule, color);
         }
     }
 }
