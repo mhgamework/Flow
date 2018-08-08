@@ -20,7 +20,8 @@ namespace Assets.SimpleGame.Multiplayer
             LobbyCamera.enabled = true;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
-            
+            ScoreManager.Instance.Clear();
+
 
         }
 

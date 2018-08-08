@@ -25,6 +25,8 @@ namespace Assets.SimpleGame.Multiplayer
 
         public void Start()
         {
+            ScoreManager.Instance.RegisterPlayer(GetComponent<PlayerLivesScript>());
+
             if (isServer)
                 SetPlayerColor(MultiplayerGameManager.Instance.GetFreePlayerColor());
             else
@@ -37,8 +39,7 @@ namespace Assets.SimpleGame.Multiplayer
             Debug.Log("Start networked palyer");
             if (!isLocalPlayer)
             {
-                GetComponent<FirstPersonController>().enabled = false;
-                GetComponentInChildren<Camera>().enabled = false;
+                disableLocalPlayerOnlyComponents();
             }
 
 
@@ -46,6 +47,20 @@ namespace Assets.SimpleGame.Multiplayer
             spawnLocation = transform.position;
         }
 
+        private void disableLocalPlayerOnlyComponents()
+        {
+            GetComponent<FirstPersonController>().enabled = false;
+            GetComponentInChildren<Camera>().enabled = false;
+            GetComponentInChildren<AudioListener>().enabled = false;
+
+        }
+
+        private void enableLocalPlayerOnlyComponents()
+        {
+            GetComponent<FirstPersonController>().enabled = true;
+            GetComponentInChildren<Camera>().enabled = true;
+            GetComponentInChildren<AudioListener>().enabled = true;
+        }
         private void SetModelColor(Transform capsule, Color color)
         {
             capsule.GetComponent<MeshRenderer>().material.color = color;
@@ -54,9 +69,17 @@ namespace Assets.SimpleGame.Multiplayer
         public override void OnStartLocalPlayer()
         {
             Debug.Log("OnStartLocalPlayer");
-            GetComponent<FirstPersonController>().enabled = true;
-            GetComponentInChildren<Camera>().enabled = true;
+            enableLocalPlayerOnlyComponents();
 
+
+        }
+
+      
+
+        public override void OnNetworkDestroy()
+        {
+            ScoreManager.Instance.UnRegisterPlayer(GetComponent<PlayerLivesScript>());
+            base.OnNetworkDestroy();
         }
 
 
@@ -140,6 +163,7 @@ namespace Assets.SimpleGame.Multiplayer
         public void OnFallOfWorld()
         {
             if (!isLocalPlayer) return;
+            GetComponent<PlayerLivesScript>().TakeLife();
             transform.position = spawnLocation;
             GetComponent<FirstPersonController>().PushedVelocity = new Vector3();
 
