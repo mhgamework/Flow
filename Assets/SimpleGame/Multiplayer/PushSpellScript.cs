@@ -37,7 +37,7 @@ namespace Assets.SimpleGame.Multiplayer
 
         private void OnTriggerEnter(Collider other)
         {
-            Debug.Log(other);
+            //Debug.Log(other);
         }
 
         private void OnTriggerStay(Collider other)
