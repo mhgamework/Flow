@@ -1,6 +1,7 @@
 ﻿using System;
 using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.Scenes.Persistence;
+using Assets.SimpleGame.Multiplayer;
 using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame.VoxelEngine;
 using Assets.SimpleGame.WardDrawing;
@@ -26,6 +27,8 @@ namespace Assets.SimpleGame
         [SerializeField] private RenderToTextureScript RenderToTextureSystemPrefab;
         [SerializeField] private ResourceTypesScript ResourceTypesScriptPrefab;
         //SimpleGameHUDScript
+
+        [SerializeField] private MultiplayerNetworkManagerScript multiplayerNetworkManagerPrefab;
 
         [Obsolete]
         public VoxelRenderingEngineScript VoxelRenderingEngine { get; private set; }
@@ -68,6 +71,13 @@ namespace Assets.SimpleGame
 
 
             giveStartItems(player.GetPlayer());
+
+
+
+            var networkManager = Instantiate(multiplayerNetworkManagerPrefab);
+
+            networkManager.StartHost();
+
 
         }
 

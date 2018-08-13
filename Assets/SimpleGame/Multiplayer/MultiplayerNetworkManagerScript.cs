@@ -1,18 +1,36 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
 
 namespace Assets.SimpleGame.Multiplayer
 {
-    public class MultiplayerNetworkManager : NetworkManager
+    public class MultiplayerNetworkManagerScript : NetworkManager
     {
-        // TODO move to a lobby component, or use the NetworkManagers scene mechanism
-        public Camera LobbyCamera;
+        public event Action OnConnectedToGame;
+        public event Action OnDisconnectedFromGame;
 
-        void Startup()
+
+
+
+        [SerializeField] private Camera LobbyCamera;
+
+
+        public void Start()
         {
+            // TODO move to a lobby component, or use the NetworkManagers scene mechanism
             showLobby();
+
+            OnConnectedToGame += hideLobby;
+            OnDisconnectedFromGame += showLobby;
+
+           
+
+        }
+
+        public void Update()
+        {
         }
 
         private void showLobby()
@@ -21,8 +39,6 @@ namespace Assets.SimpleGame.Multiplayer
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
             ScoreManager.Instance.Clear();
-
-
         }
 
         private void hideLobby()
@@ -31,10 +47,9 @@ namespace Assets.SimpleGame.Multiplayer
         }
 
 
-
         public override void OnClientConnect(NetworkConnection conn)
         {
-            hideLobby();
+            if (OnConnectedToGame != null) OnConnectedToGame();
             Debug.Log("OnClientConnect");
             base.OnClientConnect(conn);
         }
@@ -42,8 +57,8 @@ namespace Assets.SimpleGame.Multiplayer
         {
             Debug.Log("OnStopClient");
 
-            showLobby();
-            
+            if (OnDisconnectedFromGame != null) OnDisconnectedFromGame();
+
 
             base.OnStopClient();
         }
