@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Assets.SimpleGame.Multiplayer
 {
+    /// <summary>
+    /// Script for an exploding grenade-like object with an arming + detonate after time mechanic
+    /// </summary>
     public class BombScript : MonoBehaviour
     {
         public float DetonateAfter = 3;
@@ -37,7 +40,7 @@ namespace Assets.SimpleGame.Multiplayer
             Destroy(gameObject);
 
             var colliders = Physics.OverlapSphere(transform.position, ExplosionRadius)
-                .Select(f => f.GetComponent<MultiplayerPlayerScript>()).Where(m => m != null);
+                .Select(f => f.GetComponent<MultiplayerScenePlayerScript>()).Where(m => m != null);
             foreach (var c in colliders) c.ApplyPushAway(transform.position, ExplosionPushForce, ExplosionPushForceY, 1);
         }
 

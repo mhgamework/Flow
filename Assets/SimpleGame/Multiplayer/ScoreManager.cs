@@ -2,6 +2,9 @@
 
 namespace Assets.SimpleGame.Multiplayer
 {
+    /// <summary>
+    /// Logic for managing player lives, not very good design
+    /// </summary>
     public class ScoreManager : Singleton<ScoreManager>
     {
         public int StartLives = 5;

@@ -6,7 +6,7 @@ using UnityEngine.Networking.Match;
 
 namespace Assets.SimpleGame.Multiplayer
 {
-    public class MultiplayerNetworkManagerScript : NetworkManager
+    public class CustomNetworkManagerScript : NetworkManager
     {
         public event Action OnConnectedToGame;
         public event Action OnDisconnectedFromGame;

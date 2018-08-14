@@ -7,7 +7,10 @@ using UnityStandardAssets.Characters.ThirdPerson;
 
 namespace Assets.SimpleGame.Multiplayer
 {
-    public class MultiplayerPlayerScript : NetworkBehaviour
+    /// <summary>
+    /// The player script used for the multiplayer demo scene
+    /// </summary>
+    public class MultiplayerScenePlayerScript : NetworkBehaviour
     {
         //[SyncVar] public int Score = 0;
 
@@ -28,7 +31,7 @@ namespace Assets.SimpleGame.Multiplayer
             ScoreManager.Instance.RegisterPlayer(GetComponent<PlayerLivesScript>());
 
             if (isServer)
-                SetPlayerColor(MultiplayerGameManager.Instance.GetFreePlayerColor());
+                SetPlayerColor(MultiplayerGameStateManager.Instance.GetFreePlayerColor());
             else
                 setModelColor(playerColor);
             var head = transform.GetComponentsInChildren<Transform>().First(n => n.name == "Head");

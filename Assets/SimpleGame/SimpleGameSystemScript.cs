@@ -28,7 +28,7 @@ namespace Assets.SimpleGame
         [SerializeField] private ResourceTypesScript ResourceTypesScriptPrefab;
         //SimpleGameHUDScript
 
-        [SerializeField] private MultiplayerNetworkManagerScript multiplayerNetworkManagerPrefab;
+        [SerializeField] private CustomNetworkManagerScript multiplayerNetworkManagerPrefab;
 
         [Obsolete]
         public VoxelRenderingEngineScript VoxelRenderingEngine { get; private set; }

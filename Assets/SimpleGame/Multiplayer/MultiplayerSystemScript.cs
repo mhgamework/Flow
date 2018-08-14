@@ -3,13 +3,13 @@
 namespace Assets.SimpleGame.Multiplayer
 {
     /// <summary>
-    /// Placeholder for the group prefab for the multiplayer system
+    /// Group script for the group prefab for the multiplayer system
     /// </summary>
     public class MultiplayerSystemScript:MonoBehaviour
     {
-        public MultiplayerNetworkManagerScript NetworkManager
+        public CustomNetworkManagerScript NetworkManager
         {
-            get { return GetComponentInChildren<MultiplayerNetworkManagerScript>(); }
+            get { return GetComponentInChildren<CustomNetworkManagerScript>(); }
         }
             
     }

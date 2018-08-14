@@ -6,10 +6,13 @@ using UnityEngine.UI;
 
 namespace Assets.SimpleGame.Multiplayer
 {
+    /// <summary>
+    /// Simple text based ui for the Player lives using the ScoreManager
+    /// </summary>
     public class PlayerLivesUIScript : MonoBehaviour
     {
         public RectTransform LinePrefab;
-        private static MultiplayerPlayerScript _multiplayerPlayerScript;
+        private static MultiplayerScenePlayerScript _multiplayerPlayerScript;
 
         public void Start()
         {
@@ -28,7 +31,7 @@ namespace Assets.SimpleGame.Multiplayer
 
         private static void updateLiveLine(RectTransform o, PlayerLivesScript p)
         {
-            _multiplayerPlayerScript = p.GetComponent<MultiplayerPlayerScript>();
+            _multiplayerPlayerScript = p.GetComponent<MultiplayerScenePlayerScript>();
             var pColor = _multiplayerPlayerScript.GetPlayerColor();
 
             string you = "";

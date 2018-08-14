@@ -6,15 +6,18 @@ using UnityEngine.Networking;
 
 namespace Assets.SimpleGame.Multiplayer
 {
-    public class MultiplayerGameManager : Singleton<MultiplayerGameManager>
+    /// <summary>
+    /// Manager gameplay state for the multiplayer game, for now just player colors
+    /// </summary>
+    public class MultiplayerGameStateManager : Singleton<MultiplayerGameStateManager>
     {
         public List<Color> PlayerColors;
 
 
-        public List<MultiplayerPlayerScript> GetActivePlayers()
+        public List<MultiplayerScenePlayerScript> GetActivePlayers()
         {
             return NetworkServer.connections.SelectMany(f => f.playerControllers)
-                .Select(f => f.gameObject.GetComponent<MultiplayerPlayerScript>())
+                .Select(f => f.gameObject.GetComponent<MultiplayerScenePlayerScript>())
                 .Where(f => f != null)
                 .ToList();
         }
