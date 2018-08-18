@@ -12,7 +12,7 @@ namespace Assets.SimpleGame.Multiplayer
         public bool DetonateOnImpact;
 
         public float ExplosionRadius = 5;
-        public float ExplosionPushForce = 20;
+        public float ExplosionPushForce = 21;
         public float ExplosionPushForceY = 20;
 
 

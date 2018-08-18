@@ -37,7 +37,7 @@ public class InteractableInventoryUIScript : MonoBehaviour
         transform.DetachChildren();
         for (int i = 0; i < NumSlots; i++)
         {
-            var slot = Instantiate(ItemSlotPrefab);
+            var slot = Instantiate(ItemSlotPrefab,transform);
             slot.transform.parent = transform;
             slot.inventoryUI = this;
             slot.SlotNum = i;

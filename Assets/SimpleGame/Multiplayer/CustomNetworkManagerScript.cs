@@ -15,16 +15,16 @@ namespace Assets.SimpleGame.Multiplayer
 
 
         [SerializeField] private Camera LobbyCamera;
-        public event Action OnGameStart;
+        //public event Action OnGameStart;
 
 
         public void Start()
         {
             // TODO move to a lobby component, or use the NetworkManagers scene mechanism
-            showLobby();
-
-            OnConnectedToGame += hideLobby;
-            OnDisconnectedFromGame += showLobby;
+//            showLobby();
+//
+//            OnConnectedToGame += hideLobby;
+//            OnDisconnectedFromGame += showLobby;
 
            
 
@@ -34,19 +34,19 @@ namespace Assets.SimpleGame.Multiplayer
         {
         }
 
-        private void showLobby()
-        {
-            LobbyCamera.enabled = true;
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
-            ScoreManager.Instance.Clear();
-        }
-
-        private void hideLobby()
-        {
-            LobbyCamera.enabled = false;
-            if (OnGameStart != null) OnGameStart();
-        }
+//        private void showLobby()
+//        {
+//            LobbyCamera.enabled = true;
+//            Cursor.visible = true;
+//            Cursor.lockState = CursorLockMode.None;
+//            ScoreManager.Instance.Clear();
+//        }
+//
+//        private void hideLobby()
+//        {
+//            LobbyCamera.enabled = false;
+//            //if (OnGameStart != null) OnGameStart();
+//        }
 
 
         public override void OnClientConnect(NetworkConnection conn)

@@ -1,6 +1,7 @@
 ﻿using System;
 using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.Scenes.Persistence;
+using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.SimpleGame.Multiplayer;
 using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame.VoxelEngine;
@@ -15,8 +16,12 @@ namespace Assets.SimpleGame
     /// </summary>
     public class SimpleGameSystemScript : Singleton<SimpleGameSystemScript>
     {
+        [Header("World Setup")]
         public string WorldToLoad = "";
         public string WorldsAssetFolder = "Assets/SimpleGame/_SavedWorlds";
+        public GameObject LevelGameobject;
+
+        [Header("Game system prefabs")]
 
         [SerializeField] private VoxelRenderingEngineScript VoxelRenderingEnginePrefab;
         [SerializeField] private GameObject SkyPrefab;
@@ -31,21 +36,36 @@ namespace Assets.SimpleGame
 
         [SerializeField] private MultiplayerSystemScript multiplayerSystem;
         [SerializeField] private PlayerScript playerPrefab;
+        [SerializeField] private GameObject multiplayerLobby;
 
 
         [Obsolete] public VoxelRenderingEngineScript VoxelRenderingEngine { get; private set; }
 
+
+        private MultiplayerSystemScript multiplayerSystemScript;
+        private OctreeVoxelWorld octreeVoxelWorld;
+
+
         public void Start()
         {
-//            var player = LocalPlayerScript.GetInstanceOrNull();
-//            if (player == null)
-//                throw new Exception("SimpleGameSystem needs a LocalPlayerScript instance in the scene!");
-//            
+            LevelGameobject.SetActive(false);
 
+            multiplayerSystemScript = createDevMultiplayerSystem();
+            multiplayerSystemScript.AutoHostInEditor = false;
+            multiplayerSystemScript.PlayerPrefab = playerPrefab.gameObject;
+            multiplayerSystemScript.LobbyPrefab = multiplayerLobby;
+
+            multiplayerSystemScript.NetworkManager.OnConnectedToGame += startGame;
+            multiplayerSystemScript.NetworkManager.OnDisconnectedFromGame += stopGame;
+
+
+        }
+        private void startGame()
+        {
+            LevelGameobject.SetActive(true);
             var voxelWorldPersister = new VoxelWorldPersister();
-            var world = voxelWorldPersister.LoadFromFolder(WorldsAssetFolder + "/" + WorldToLoad);
+            octreeVoxelWorld = voxelWorldPersister.LoadFromFolder(WorldsAssetFolder + "/" + WorldToLoad);
 
-            var hud = Instantiate(HudPrefab);
 
 
             Instantiate(RenderToTextureSystemPrefab);
@@ -55,35 +75,46 @@ namespace Assets.SimpleGame
             //createLocalPlayer();
             createSky();
 
+
+
+         
+
+        }
+        private void stopGame()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnLocalPlayerCreated(LocalPlayerScript player)
+        {
+            var hud = Instantiate(HudPrefab);
+
+            player.Initialize(hud);
+            var localPlayerCamrea = player.GetCamera();
+
+
+            var renderingEngine = VoxelEngineHelpers.CreateVoxelRenderingEngine(
+                VoxelRenderingEnginePrefab,
+                octreeVoxelWorld,
+                Instantiate,
+                lodCamera: localPlayerCamrea);
+            VoxelRenderingEngine = renderingEngine;
+
+            var localPlayerInput = Instantiate(LocalPlayerInputScriptPrefab);
             var wardDrawingModeScript = Instantiate(WardDrawingModeScript);
 
-
-            var mpSystem = Instantiate(multiplayerSystem);
-            mpSystem.SetPlayerPrefab(playerPrefab.gameObject);
-            mpSystem.AutostartHostIfEditor();
-
-            //Setup local player stuff
-
-            mpSystem.NetworkManager.OnGameStart += () =>
-            {
-                var player = LocalPlayerScript.Instance;
-                player.Initialize(hud);
-                var localPlayerCamrea = player.GetCamera();
+            localPlayerInput.Initialize(player, renderingEngine, wardDrawingModeScript);
 
 
-                var renderingEngine = VoxelEngineHelpers.CreateVoxelRenderingEngine(
-                    VoxelRenderingEnginePrefab,
-                    world,
-                    Instantiate,
-                    lodCamera: localPlayerCamrea);
-                VoxelRenderingEngine = renderingEngine;
-
-                var localPlayerInput = Instantiate(LocalPlayerInputScriptPrefab);
-                localPlayerInput.Initialize(player, renderingEngine, wardDrawingModeScript);
+            giveStartItems(player.GetPlayer());
 
 
-                giveStartItems(player.GetPlayer());
-            };
+        }
+
+
+        private MultiplayerSystemScript createDevMultiplayerSystem()
+        {
+            return Instantiate(multiplayerSystem,transform);
         }
 
         private void giveStartItems(PlayerScript player)

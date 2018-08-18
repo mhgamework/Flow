@@ -1,5 +1,6 @@
 ﻿using Assets.SimpleGame.Scripts;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityStandardAssets.Characters.FirstPerson;
 
 namespace Assets.SimpleGame
@@ -9,8 +10,26 @@ namespace Assets.SimpleGame
     /// Used to provide access to components of the local player
     /// Seems somewhat of a wiring component
     /// </summary>
-    public class LocalPlayerScript : Singleton<LocalPlayerScript>
+    public class LocalPlayerScript : NetworkBehaviour
     {
+        private static LocalPlayerScript staticInstance = null;
+
+        public override void OnStartLocalPlayer()
+        {
+            staticInstance = this;
+
+            SimpleGameSystemScript.Instance.OnLocalPlayerCreated(this);
+            base.OnStartLocalPlayer();
+        }
+
+        public override void OnNetworkDestroy()
+        {
+            base.OnNetworkDestroy();
+            if (staticInstance == this)
+                staticInstance = null;
+
+        }
+
         public Camera GetCamera()
         {
             return GetComponentInChildren<Camera>();
@@ -31,5 +50,7 @@ namespace Assets.SimpleGame
             //TODO this is shitty and should be inverted. Model should not depend on UI directly
             GetPlayer().Initialize(hud.GetHotbarInventory());
         }
+
+        public static LocalPlayerScript Instance { get { return staticInstance; } }
     }
 }

@@ -16,10 +16,9 @@ namespace Assets.SimpleGame.Multiplayer
         public void Start()
         {
             var mp = Instantiate(multiplayerSystemPrefab);
-            mp.SetPlayerPrefab(playerPrefab);
+            mp.PlayerPrefab = playerPrefab;
 
-            if (AutoHostInEditor)
-                mp.AutostartHostIfEditor();
+            mp.AutoHostInEditor = AutoHostInEditor;
 
         }
     }
