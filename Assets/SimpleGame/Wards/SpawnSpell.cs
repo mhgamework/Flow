@@ -20,7 +20,7 @@ namespace Assets.SimpleGame.Wards
 
             var inst = Instantiate(Prefab, camTransform.position + camTransform.forward * 1, camTransform.rotation);
             inst.GetComponentInChildren<MeshWardViewScript>().SetShape(Ward.Shape, inst.transform.localToWorldMatrix);
-            PlayerScript.Instance.AirSpellCasting = false;
+            LocalPlayerScript.Instance.GetPlayer().AirSpellCasting = false;
         }
 
     }

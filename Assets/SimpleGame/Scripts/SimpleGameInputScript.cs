@@ -70,8 +70,13 @@ public class SimpleGameInputScript : MonoBehaviour
     {
         var spell = Spells.FirstOrDefault(s => s.Ward == obj);
         if (spell == null) return;
-        spell.Cast(PlayerScript.Instance);
+        spell.Cast(getPlayer());
         updateWardDrawingState();
+    }
+
+    private static PlayerScript getPlayer()
+    {
+        return LocalPlayerScript.Instance.GetPlayer();
     }
 
 
@@ -81,7 +86,7 @@ public class SimpleGameInputScript : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            PlayerScript.Instance.ToggleAirSpellCasting();
+            getPlayer().ToggleAirSpellCasting();
             updateWardDrawingState();
 
         }
@@ -94,7 +99,7 @@ public class SimpleGameInputScript : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.R))
         {
-            Assets.SimpleGame.Scripts.PlayerScript.Instance.Respawn();
+            getPlayer().Respawn();
         }
 
         if (Input.mouseScrollDelta.y < 0)
@@ -113,7 +118,7 @@ public class SimpleGameInputScript : MonoBehaviour
     void doTool()
     {
 
-        if (PlayerScript.Instance.AirSpellCasting)
+        if (getPlayer().AirSpellCasting)
         {
             updateGhost(false);
             if (digTool != null)
@@ -148,7 +153,7 @@ public class SimpleGameInputScript : MonoBehaviour
         {
             // Hacky!
             var spellItem = tempMagicParticleSpellItem;
-            spellItem.UpdateTool(PlayerScript.Instance);
+            spellItem.UpdateTool(getPlayer());
             updateGhost(false);
             return;
         }
@@ -185,22 +190,22 @@ public class SimpleGameInputScript : MonoBehaviour
 
                 if (mats.Any(v => v.color == StoneColor))
                 {
-                    PlayerScript.Instance.StoreItems("stone", 1);
+                    getPlayer().StoreItems("stone", 1);
                 }
                 else if (mats.Any(v => v.color == WoodColor))
                 {
-                    PlayerScript.Instance.StoreItems("wood", 1);
+                    getPlayer().StoreItems("wood", 1);
                 }
                 else
                 {
-                    PlayerScript.Instance.StoreItems("dirt", 1);
+                    getPlayer().StoreItems("dirt", 1);
                 }
             }
         }
 
         if (Input.GetMouseButtonDown(1))
         {
-            var pl = Assets.SimpleGame.Scripts.PlayerScript.Instance;
+            var pl =getPlayer();
 
 
             var selectedItem = HotbarScript.Instance.GetSelectedInventoryItem();
@@ -223,10 +228,10 @@ public class SimpleGameInputScript : MonoBehaviour
 
     private void updateWardDrawingState()
     {
-        WardDrawingModeScript.SetModeEnabled(PlayerScript.Instance.AirSpellCasting);
-        FirstPersonController.enabled = !PlayerScript.Instance.AirSpellCasting;
+        WardDrawingModeScript.SetModeEnabled(getPlayer().AirSpellCasting);
+        FirstPersonController.enabled = !getPlayer().AirSpellCasting;
 
-        if (PlayerScript.Instance.AirSpellCasting)
+        if (getPlayer().AirSpellCasting)
         {
             var camTransform = FirstPersonController.GetComponentInChildren<Camera>().transform;
             WardDrawingModeScript.SetPlane(camTransform.position + camTransform.forward * 1, -camTransform.forward);

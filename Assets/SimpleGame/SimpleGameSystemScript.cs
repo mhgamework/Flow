@@ -25,37 +25,31 @@ namespace Assets.SimpleGame
         [SerializeField] private WardDrawingModeScript WardDrawingModeScript;
 
         [SerializeField] private RenderToTextureScript RenderToTextureSystemPrefab;
+
         [SerializeField] private ResourceTypesScript ResourceTypesScriptPrefab;
         //SimpleGameHUDScript
 
-        [SerializeField] private CustomNetworkManagerScript multiplayerNetworkManagerPrefab;
+        [SerializeField] private MultiplayerSystemScript multiplayerSystem;
+        [SerializeField] private PlayerScript playerPrefab;
 
-        [Obsolete]
-        public VoxelRenderingEngineScript VoxelRenderingEngine { get; private set; }
+
+        [Obsolete] public VoxelRenderingEngineScript VoxelRenderingEngine { get; private set; }
 
         public void Start()
         {
-
-            var player = LocalPlayerScript.GetInstanceOrNull();
-            if (player == null)
-                throw new Exception("SimpleGameSystem needs a LocalPlayerScript instance in the scene!");
-            
+//            var player = LocalPlayerScript.GetInstanceOrNull();
+//            if (player == null)
+//                throw new Exception("SimpleGameSystem needs a LocalPlayerScript instance in the scene!");
+//            
 
             var voxelWorldPersister = new VoxelWorldPersister();
             var world = voxelWorldPersister.LoadFromFolder(WorldsAssetFolder + "/" + WorldToLoad);
 
             var hud = Instantiate(HudPrefab);
 
-            player.Initialize(hud);
-            var localPlayerCamrea = player.GetCamera();
 
-
-            var renderingEngine = VoxelEngineHelpers.CreateVoxelRenderingEngine(
-                VoxelRenderingEnginePrefab,
-                world,
-                Instantiate,
-                lodCamera: localPlayerCamrea);
-            VoxelRenderingEngine = renderingEngine;
+            Instantiate(RenderToTextureSystemPrefab);
+            Instantiate(ResourceTypesScriptPrefab);
 
 
             //createLocalPlayer();
@@ -63,22 +57,33 @@ namespace Assets.SimpleGame
 
             var wardDrawingModeScript = Instantiate(WardDrawingModeScript);
 
-            var localPlayerInput = Instantiate(LocalPlayerInputScriptPrefab);
-            localPlayerInput.Initialize(player,renderingEngine,wardDrawingModeScript);
 
-            Instantiate(RenderToTextureSystemPrefab);
-            Instantiate(ResourceTypesScriptPrefab);
+            var mpSystem = Instantiate(multiplayerSystem);
+            mpSystem.SetPlayerPrefab(playerPrefab.gameObject);
+            mpSystem.AutostartHostIfEditor();
 
+            //Setup local player stuff
 
-            giveStartItems(player.GetPlayer());
-
-
-
-            var networkManager = Instantiate(multiplayerNetworkManagerPrefab);
-
-            networkManager.StartHost();
+            mpSystem.NetworkManager.OnGameStart += () =>
+            {
+                var player = LocalPlayerScript.Instance;
+                player.Initialize(hud);
+                var localPlayerCamrea = player.GetCamera();
 
 
+                var renderingEngine = VoxelEngineHelpers.CreateVoxelRenderingEngine(
+                    VoxelRenderingEnginePrefab,
+                    world,
+                    Instantiate,
+                    lodCamera: localPlayerCamrea);
+                VoxelRenderingEngine = renderingEngine;
+
+                var localPlayerInput = Instantiate(LocalPlayerInputScriptPrefab);
+                localPlayerInput.Initialize(player, renderingEngine, wardDrawingModeScript);
+
+
+                giveStartItems(player.GetPlayer());
+            };
         }
 
         private void giveStartItems(PlayerScript player)
@@ -91,7 +96,6 @@ namespace Assets.SimpleGame
             Instantiate(SkyPrefab);
         }
 
-    
 
         private void createLocalPlayer()
         {
@@ -106,12 +110,10 @@ namespace Assets.SimpleGame
 
         private void createPlayerCamera()
         {
-
         }
 
         private void createPlayerEntity(bool isLocal = true)
         {
-
         }
     }
 }

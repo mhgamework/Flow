@@ -6,7 +6,7 @@ using UnityStandardAssets.Characters.FirstPerson;
 
 namespace Assets.SimpleGame.Scripts
 {
-    public class PlayerScript : Singleton<PlayerScript>
+    public class PlayerScript : MonoBehaviour
     {
         public InventoryScript HotbarInventory;
         public float Health = 80;

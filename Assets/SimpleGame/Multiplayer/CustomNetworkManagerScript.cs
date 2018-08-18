@@ -15,6 +15,7 @@ namespace Assets.SimpleGame.Multiplayer
 
 
         [SerializeField] private Camera LobbyCamera;
+        public event Action OnGameStart;
 
 
         public void Start()
@@ -44,6 +45,7 @@ namespace Assets.SimpleGame.Multiplayer
         private void hideLobby()
         {
             LobbyCamera.enabled = false;
+            if (OnGameStart != null) OnGameStart();
         }
 
 

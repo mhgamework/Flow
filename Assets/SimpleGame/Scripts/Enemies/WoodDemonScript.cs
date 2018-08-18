@@ -48,7 +48,7 @@ namespace Assets.SimpleGame.Scripts.Enemies
 
         public void Start()
         {
-            player = PlayerScript.Instance;
+            player = LocalPlayerScript.Instance.GetPlayer();
             rigidbody = GetComponent<Rigidbody>();
 
             StartCoroutine(watchPlayerPos().GetEnumerator());

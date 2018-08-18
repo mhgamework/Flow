@@ -12,11 +12,12 @@ namespace Assets.SimpleGame.Wards
         private void OnEnable()
         {
             image = GetComponent<Image>();
-            playerScript = PlayerScript.Instance;
         }
 
         public void Update()
         {
+            if (playerScript == null)
+                playerScript = LocalPlayerScript.Instance.GetPlayer();
             image.enabled = playerScript.Entity.Invisible;
         }
     }
