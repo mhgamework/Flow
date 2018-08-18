@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Assets.SimpleGame.Multiplayer.Players;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -24,7 +25,7 @@ namespace Assets.SimpleGame.Multiplayer
 
         public Color GetFreePlayerColor()
         {
-            return PlayerColors.Except(GetActivePlayers().Select(p => p.GetPlayerColor())).First();
+            return PlayerColors.Except(GetActivePlayers().Select(p => p.GetComponent<PlayerColorScript>().GetPlayerColor())).First();
         }
     }
 }

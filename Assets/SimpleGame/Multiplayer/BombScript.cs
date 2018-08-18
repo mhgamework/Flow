@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Assets.SimpleGame.Multiplayer.Players;
 using UnityEngine;
 
 namespace Assets.SimpleGame.Multiplayer
@@ -41,7 +42,7 @@ namespace Assets.SimpleGame.Multiplayer
 
             var colliders = Physics.OverlapSphere(transform.position, ExplosionRadius)
                 .Select(f => f.GetComponent<MultiplayerScenePlayerScript>()).Where(m => m != null);
-            foreach (var c in colliders) c.ApplyPushAway(transform.position, ExplosionPushForce, ExplosionPushForceY, 1);
+            foreach (var c in colliders) c.GetComponent<PlayerMovementScript>().ApplyPushAway(transform.position, ExplosionPushForce, ExplosionPushForceY, 1);
         }
 
         private void OnCollisionEnter(Collision collision)

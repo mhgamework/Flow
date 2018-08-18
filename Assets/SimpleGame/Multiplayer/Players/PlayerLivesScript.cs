@@ -3,6 +3,9 @@ using UnityEngine.Networking;
 
 namespace Assets.SimpleGame.Multiplayer
 {
+    /// <summary>
+    /// Component for on player that implements MP player lives
+    /// </summary>
     public class PlayerLivesScript : NetworkBehaviour
     {
         [SyncVar] public int Lives;

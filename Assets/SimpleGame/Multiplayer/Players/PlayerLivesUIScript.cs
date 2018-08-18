@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Assets.SimpleGame.Multiplayer.Players;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,7 +33,7 @@ namespace Assets.SimpleGame.Multiplayer
         private static void updateLiveLine(RectTransform o, PlayerLivesScript p)
         {
             _multiplayerPlayerScript = p.GetComponent<MultiplayerScenePlayerScript>();
-            var pColor = _multiplayerPlayerScript.GetPlayerColor();
+            var pColor = _multiplayerPlayerScript.GetComponent<PlayerColorScript>().GetPlayerColor();
 
             string you = "";
             if (_multiplayerPlayerScript.isLocalPlayer)

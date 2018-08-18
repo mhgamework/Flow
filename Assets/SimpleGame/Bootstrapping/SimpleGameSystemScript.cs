@@ -71,13 +71,7 @@ namespace Assets.SimpleGame
             Instantiate(RenderToTextureSystemPrefab);
             Instantiate(ResourceTypesScriptPrefab);
 
-
-            //createLocalPlayer();
             createSky();
-
-
-
-         
 
         }
         private void stopGame()

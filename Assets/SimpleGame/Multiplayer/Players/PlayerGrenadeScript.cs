@@ -3,6 +3,9 @@ using UnityEngine.Networking;
 
 namespace Assets.SimpleGame.Multiplayer.Players
 {
+    /// <summary>
+    /// Component for on player that implements MP grenade firing script
+    /// </summary>
     public class PlayerGrenadeScript : NetworkBehaviour
     {
         private bool fireGrenadeDown;

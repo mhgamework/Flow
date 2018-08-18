@@ -10,14 +10,14 @@ namespace Assets.SimpleGame.Multiplayer
         [SerializeField] private bool AutoHostInEditor = true;
         [SerializeField] private MultiplayerSystemScript multiplayerSystemPrefab;
         [SerializeField] private GameObject playerPrefab;
-
+        [SerializeField] private GameObject LobbyPrefab;
 
 
         public void Start()
         {
             var mp = Instantiate(multiplayerSystemPrefab);
             mp.PlayerPrefab = playerPrefab;
-
+            mp.LobbyPrefab = LobbyPrefab;
             mp.AutoHostInEditor = AutoHostInEditor;
 
         }

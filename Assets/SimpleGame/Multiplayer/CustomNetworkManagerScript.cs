@@ -6,48 +6,23 @@ using UnityEngine.Networking.Match;
 
 namespace Assets.SimpleGame.Multiplayer
 {
+    /// <summary>
+    /// My override of the NetworkManager used for SimpleGame.
+    /// Currently only provides 2 events to listen to.
+    /// </summary>
     public class CustomNetworkManagerScript : NetworkManager
     {
         public event Action OnConnectedToGame;
         public event Action OnDisconnectedFromGame;
 
 
-
-
-        [SerializeField] private Camera LobbyCamera;
-        //public event Action OnGameStart;
-
-
         public void Start()
         {
-            // TODO move to a lobby component, or use the NetworkManagers scene mechanism
-//            showLobby();
-//
-//            OnConnectedToGame += hideLobby;
-//            OnDisconnectedFromGame += showLobby;
-
-           
-
         }
 
         public void Update()
         {
         }
-
-//        private void showLobby()
-//        {
-//            LobbyCamera.enabled = true;
-//            Cursor.visible = true;
-//            Cursor.lockState = CursorLockMode.None;
-//            ScoreManager.Instance.Clear();
-//        }
-//
-//        private void hideLobby()
-//        {
-//            LobbyCamera.enabled = false;
-//            //if (OnGameStart != null) OnGameStart();
-//        }
-
 
         public override void OnClientConnect(NetworkConnection conn)
         {

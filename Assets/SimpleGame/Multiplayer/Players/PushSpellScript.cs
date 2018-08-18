@@ -1,4 +1,5 @@
-﻿using Assets.UnityAdditions;
+﻿using Assets.SimpleGame.Multiplayer.Players;
+using Assets.UnityAdditions;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityStandardAssets.Characters.FirstPerson;
@@ -52,7 +53,7 @@ namespace Assets.SimpleGame.Multiplayer
 
             var dir = (fps.transform.position - transform.position).normalized * PushStrenght + Vector3.up * PushStrenghtY;
 
-            fps.ApplyPushAway(transform.position, PushStrenght, PushStrenghtY, Time.deltaTime);
+            fps.GetComponent<PlayerMovementScript>().ApplyPushAway(transform.position, PushStrenght, PushStrenghtY, Time.deltaTime);
         }
 
         private void OnTriggerExit(Collider other)
