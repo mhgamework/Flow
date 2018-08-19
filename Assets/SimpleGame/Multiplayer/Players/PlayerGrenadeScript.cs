@@ -22,10 +22,11 @@ namespace Assets.SimpleGame.Multiplayer.Players
 
         private Transform playerTransform;
 
-        public void SetPlayerTransform(Transform playerTransform)
+        void Start()
         {
-            this.playerTransform = playerTransform;
-
+            var model = GetComponent<PlayerModelScript>();
+            model.initialize();
+            playerTransform = model.GetHead();
         }
 
         [ClientCallback]

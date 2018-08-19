@@ -6,6 +6,7 @@ namespace Assets.SimpleGame.Multiplayer.Players
 {
     /// <summary>
     /// Component on player that loads in a player model from a prefab and adds it to the player's game object
+    /// Also holds the camera
     /// </summary>
     public class PlayerModelScript : MonoBehaviour
     {
@@ -36,5 +37,8 @@ namespace Assets.SimpleGame.Multiplayer.Players
         {
             capsule.GetComponent<MeshRenderer>().material.color = color;
         }
+
+
+
     }
 }

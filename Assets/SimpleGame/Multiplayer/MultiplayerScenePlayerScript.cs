@@ -33,7 +33,6 @@ namespace Assets.SimpleGame.Multiplayer
 
             
             playerGrenadeScript = GetComponent<PlayerGrenadeScript>();
-            playerGrenadeScript.SetPlayerTransform(model.GetHead());
             playerPushScript = GetComponent<PlayerPushScript>();
             playerPushScript.initialize(model.GetHead());
 

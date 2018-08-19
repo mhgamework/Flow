@@ -7,22 +7,39 @@ namespace Assets.SimpleGame.Multiplayer.Players
 {
     /// <summary>
     /// Component for player that implements MP player movement.
-    /// Uses the PlayerMovementPartPrefab to overlay the necessary components
+    /// Requires a charactercontroller and fpscontrolelr to be present, due to "limitations"
+    /// in unity this has to be done manually
     /// </summary>
     public class PlayerMovementScript : NetworkBehaviour
     {
-        [SerializeField] private PlayerMovementPartPrefabScript PlayerMovementPartPrefab;
+//        [SerializeField] private Transform PlayerControllerCamera;
 
+        private bool localInputEnabled = false;
         private bool init = false;
+        private Transform playerControllerCamera;
+
+        public void Start()
+        {
+            if(GetComponent<FirstPersonController>() == null) throw new Exception("Needs FPSControlelr");
+            if(GetComponent<CharacterController>() == null) throw new Exception("Needs Character controller");
+        }
         public void initialize()
         {
+            if (init) return;
             // Danger, hope this doesnt break shit
-            var temp = Instantiate(PlayerMovementPartPrefab);
             var playerModelScript = GetComponent<PlayerModelScript>();
             playerModelScript.initialize();// Initialize this, idempotent
-            temp.ApplyToPlayerGameObject(gameObject,playerModelScript.GetHead());
-            Destroy(temp.gameObject);
-            disableLocalPlayerOnlyComponents();
+            //playerControllerCamera = Instantiate(PlayerControllerCamera, playerModelScript.GetHead());
+
+            //TODO: this is a hacky solution
+            GetComponent<NetworkTransformChild>().target = playerModelScript.GetHead();
+
+            if (playerModelScript.GetHead().GetComponent<Camera>() == null)
+                throw new Exception("PlayerModel should have a camera attached to the head");
+            if (playerModelScript.GetHead().GetComponent<AudioListener>() == null)
+                throw new Exception("PlayerModel should have an audiolistener attached to the head");
+            if (!localInputEnabled)
+                disableLocalPlayerOnlyComponents();
             init = true;
         }
 
@@ -42,6 +59,7 @@ namespace Assets.SimpleGame.Multiplayer.Players
 
         private void enableLocalPlayerOnlyComponents()
         {
+            localInputEnabled = true;
             GetComponent<FirstPersonController>().enabled = true;
             GetComponentInChildren<Camera>().enabled = true;
             GetComponentInChildren<AudioListener>().enabled = true;

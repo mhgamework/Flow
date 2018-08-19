@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 
 namespace UnityStandardAssets.Characters.FirstPerson
 {
-    [RequireComponent(typeof(CharacterController))]
+    //[RequireComponent(typeof(CharacterController))]
     [RequireComponent(typeof(AudioSource))]
     public class FirstPersonController : MonoBehaviour
     {
@@ -27,6 +27,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
+
+        public CharacterController CharacterControllerOverride;
+        public Transform PlayerTransformOverride;
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -59,7 +62,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
         // Use this for initialization
         private void Start()
         {
+            if (PlayerTransformOverride == null) PlayerTransformOverride = transform;
             m_CharacterController = GetComponent<CharacterController>();
+            if (CharacterControllerOverride != null) m_CharacterController = CharacterControllerOverride;
             m_Camera = Camera.main;
             if (!DisablePlayerControlled)
                 m_OriginalCameraPosition = m_Camera.transform.localPosition;
@@ -70,7 +75,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
             if (!DisablePlayerControlled)
-                m_MouseLook.Init(transform, m_Camera.transform);
+                m_MouseLook.Init(PlayerTransformOverride, m_Camera.transform);
         }
 
 
@@ -125,11 +130,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
             if (!DisablePlayerControlled)
                 GetInput(out speed);
             // always move along the camera forward as it is the direction that it being aimed at
-            Vector3 desiredMove = transform.forward * m_Input.y + transform.right * m_Input.x;
+            Vector3 desiredMove = PlayerTransformOverride.forward * m_Input.y + PlayerTransformOverride.right * m_Input.x;
 
             // get a normal for the surface that is being touched to move along it
             RaycastHit hitInfo;
-            Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
+            Physics.SphereCast(PlayerTransformOverride.position, m_CharacterController.radius, Vector3.down, out hitInfo,
                                m_CharacterController.height / 2f, ~0, QueryTriggerInteraction.Ignore);
             desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
@@ -284,7 +289,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void RotateView()
         {
-            m_MouseLook.LookRotation(transform, m_Camera.transform);
+            m_MouseLook.LookRotation(PlayerTransformOverride, m_Camera.transform);
         }
 
 
