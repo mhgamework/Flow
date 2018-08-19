@@ -7,6 +7,8 @@ using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.SimpleGame;
 using Assets.SimpleGame.Items;
+using Assets.SimpleGame.Multiplayer;
+using Assets.SimpleGame.Multiplayer.Players;
 using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame.Tools;
 using Assets.SimpleGame.WardDrawing;
@@ -112,6 +114,12 @@ public class SimpleGameInputScript : MonoBehaviour
         {
             ShootSphere();
         }
+
+        getPlayer().GetComponent<PlayerGrenadeScript>().SetFireGrenadeDown(Input.GetKey(KeyCode.F));
+        if (Input.GetKeyDown(KeyCode.G))
+            getPlayer().GetComponent<PlayerPushScript>().DoStartCastPushSpell();
+        if (Input.GetKeyUp(KeyCode.G))
+            getPlayer().GetComponent<PlayerPushScript>().DoStopCastPushSpell();
     }
 
 

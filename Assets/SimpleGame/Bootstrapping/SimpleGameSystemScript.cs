@@ -51,7 +51,7 @@ namespace Assets.SimpleGame
             LevelGameobject.SetActive(false);
 
             multiplayerSystemScript = createDevMultiplayerSystem();
-            multiplayerSystemScript.AutoHostInEditor = false;
+            multiplayerSystemScript.AutoHostInEditor = true;
             multiplayerSystemScript.PlayerPrefab = playerPrefab.gameObject;
             multiplayerSystemScript.LobbyPrefab = multiplayerLobby;
 

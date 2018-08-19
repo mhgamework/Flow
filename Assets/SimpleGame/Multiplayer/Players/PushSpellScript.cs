@@ -47,7 +47,7 @@ namespace Assets.SimpleGame.Multiplayer
         private void OnTriggerStay(Collider other)
         {
             if (CastFrames == 0) return;
-            var fps = other.GetComponent<MultiplayerScenePlayerScript>();
+            var fps = other.GetComponent<PlayerMovementScript>();
             if (fps == null) return;
 
 

@@ -25,6 +25,7 @@ namespace Assets.SimpleGame.Multiplayer.Players
 
             OnPlayerColorChanged += c => GetComponent<PlayerModelScript>().SetColorOfPlayerModel(c);
 
+            GetComponent<PlayerModelScript>().SetColorOfPlayerModel(playerColor);
         }
 
         private void onColorChanged(Color color)

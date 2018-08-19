@@ -1,4 +1,5 @@
-﻿using Assets.SimpleGame.Scripts;
+﻿using Assets.SimpleGame.Multiplayer.Players;
+using Assets.SimpleGame.Scripts;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityStandardAssets.Characters.FirstPerson;
@@ -13,6 +14,10 @@ namespace Assets.SimpleGame
     public class LocalPlayerScript : NetworkBehaviour
     {
         private static LocalPlayerScript staticInstance = null;
+
+        void Start()
+        {
+        }
 
         public override void OnStartLocalPlayer()
         {
@@ -47,6 +52,10 @@ namespace Assets.SimpleGame
 
         public void Initialize(SimpleGameHUDScript hud)
         {
+            // Fast initialize this!, so camera exists!
+
+            GetComponent<PlayerModelScript>().initialize();
+
             //TODO this is shitty and should be inverted. Model should not depend on UI directly
             GetPlayer().Initialize(hud.GetHotbarInventory());
         }

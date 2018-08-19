@@ -41,8 +41,8 @@ namespace Assets.SimpleGame.Multiplayer
             Destroy(gameObject);
 
             var colliders = Physics.OverlapSphere(transform.position, ExplosionRadius)
-                .Select(f => f.GetComponent<MultiplayerScenePlayerScript>()).Where(m => m != null);
-            foreach (var c in colliders) c.GetComponent<PlayerMovementScript>().ApplyPushAway(transform.position, ExplosionPushForce, ExplosionPushForceY, 1);
+                .Select(f => f.GetComponent<PlayerMovementScript>()).Where(m => m != null);
+            foreach (var c in colliders) c.ApplyPushAway(transform.position, ExplosionPushForce, ExplosionPushForceY, 1);
         }
 
         private void OnCollisionEnter(Collision collision)
