@@ -14,7 +14,6 @@ namespace Assets.SimpleGame.Multiplayer.Players
     {
 //        [SerializeField] private Transform PlayerControllerCamera;
 
-        private bool localInputEnabled = false;
         private bool init = false;
         private Transform playerControllerCamera;
 
@@ -22,6 +21,8 @@ namespace Assets.SimpleGame.Multiplayer.Players
         {
             if(GetComponent<FirstPersonController>() == null) throw new Exception("Needs FPSControlelr");
             if(GetComponent<CharacterController>() == null) throw new Exception("Needs Character controller");
+
+            initialize();
         }
         public void initialize()
         {
@@ -38,15 +39,16 @@ namespace Assets.SimpleGame.Multiplayer.Players
                 throw new Exception("PlayerModel should have a camera attached to the head");
             if (playerModelScript.GetHead().GetComponent<AudioListener>() == null)
                 throw new Exception("PlayerModel should have an audiolistener attached to the head");
-            if (!localInputEnabled)
-                disableLocalPlayerOnlyComponents();
-            init = true;
-        }
 
-        public void StartLocalPlayerCameraAndInput()
-        {
-            if (!init) initialize();//Dangerous
-            enableLocalPlayerOnlyComponents();
+
+            if (isLocalPlayer)
+                enableLocalPlayerOnlyComponents();
+            else
+                disableLocalPlayerOnlyComponents();
+
+
+
+            init = true;
         }
 
         private void disableLocalPlayerOnlyComponents()
@@ -59,7 +61,6 @@ namespace Assets.SimpleGame.Multiplayer.Players
 
         private void enableLocalPlayerOnlyComponents()
         {
-            localInputEnabled = true;
             GetComponent<FirstPersonController>().enabled = true;
             GetComponentInChildren<Camera>().enabled = true;
             GetComponentInChildren<AudioListener>().enabled = true;

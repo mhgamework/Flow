@@ -16,6 +16,7 @@ namespace Assets.SimpleGame.Multiplayer.Players
 
         public void Start()
         {
+            initialize();
         }
 
         public void initialize()

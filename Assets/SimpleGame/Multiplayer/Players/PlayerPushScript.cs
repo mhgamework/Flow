@@ -22,12 +22,17 @@ namespace Assets.SimpleGame.Multiplayer
         private bool init = false;
         public void Start()
         {
+            initialize();
         }
 
-        public void initialize(Transform head)
+        public void initialize()
         {
+            if (init) return;
             init = true;
-        
+
+            var model = GetComponent<PlayerModelScript>();
+            model.initialize();
+            var head = model.GetHead();
             pushSpellScript = Instantiate(PushSpellScriptPrefab, head);
         }
 

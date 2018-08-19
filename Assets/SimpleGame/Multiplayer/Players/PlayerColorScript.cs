@@ -22,6 +22,9 @@ namespace Assets.SimpleGame.Multiplayer.Players
                 setColorServerside(MultiplayerGameStateManager.Instance.GetFreePlayerColor());
             else
                 onColorChanged(playerColor);
+
+            OnPlayerColorChanged += c => GetComponent<PlayerModelScript>().SetColorOfPlayerModel(c);
+
         }
 
         private void onColorChanged(Color color)
