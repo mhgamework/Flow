@@ -6,6 +6,7 @@ using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.MarchingCubes.World;
 using Assets.Reusable.Utils;
 using Assets.SimpleGame.Scripts;
+using Assets.SimpleGame.VoxelEngine;
 using Assets.SimpleGame._UtilsToMove;
 using UnityEngine;
 
@@ -42,12 +43,13 @@ namespace Assets.SimpleGame.Tools
             while (!stopped)
             {
                 var point = editor.RaycastPlayerCursor();
-                if (!point.HasValue || Vector3.Distance( point.Value, playerScript.GetPlayerPosition()) > DigMaxDistance)
+                if (!point.HasValue || Vector3.Distance(point.Value, playerScript.GetPlayerPosition()) > DigMaxDistance)
                 {
                     gizmo.Hide();
                     yield return null;
                     continue;
                 }
+
                 gizmo.Show(point.Value, false);
 
                 diggingProgress = 0;
@@ -71,31 +73,24 @@ namespace Assets.SimpleGame.Tools
                     diggingProgress += Time.deltaTime;
                     gizmo.Show(point.Value, true);
                     yield return null;
-
                 }
 
                 if (diggingProgress >= DigTime)
                 {
-                    var obj = new Ball(point.Value, DigRadius);
                     //counts.Clear();
-                    editor.Subtract(obj, counts);
-
-
-                    Debug.Log(counts);
-
-                    for (int i = 0; i < 5; i++)
-                    {
-                        editor.Smooth(point.Value, DigRadius, counts);
-                    }
-
-                    foreach (var am in counts.Amounts)
-                    {
-                        var type = am.Material.color == Color.red ? "iron" : am.Material.color == Color.yellow ? "gold" : "rock";
-                        var amount = Mathf.FloorToInt(am.Amount);
-                        if (amount < 0) continue;
-                        counts.Change(am.Material, -amount);
-                        playerScript.StoreItems(type, amount);
-                    }
+                    playerScript.AddVoxelEdit(point.Value,DigRadius);
+                    //TODO: was removed for multiplayer support
+//                    doDigTemp(DigRadius, counts, editor, point.Value);
+//
+//                    foreach (var am in counts.Amounts)
+//                    {
+//                        var type = am.Material.color == Color.red ? "iron" :
+//                            am.Material.color == Color.yellow ? "gold" : "rock";
+//                        var amount = Mathf.FloorToInt(am.Amount);
+//                        if (amount < 0) continue;
+//                        counts.Change(am.Material, -amount);
+//                        playerScript.StoreItems(type, amount);
+//                    }
                 }
 
                 yield return null;
@@ -104,12 +99,26 @@ namespace Assets.SimpleGame.Tools
             GameObject.Destroy(gizmo.gameObject);
         }
 
+        public static void doDigTemp(float digRadius, SDFWorldEditingService.Counts outCounts,
+            VoxelWorldEditingHelper voxelWorldEditingHelper, Vector3 point)
+        {
+            var obj = new Ball(point, digRadius);
+
+            voxelWorldEditingHelper.Subtract(obj, outCounts);
+
+
+            Debug.Log(outCounts);
+
+            for (int i = 0; i < 5; i++)
+            {
+                voxelWorldEditingHelper.Smooth(point, digRadius, outCounts);
+            }
+        }
 
 
         public void Stop()
         {
             stopped = true;
-
         }
     }
 }

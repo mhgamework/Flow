@@ -16,7 +16,7 @@ namespace Assets.MarchingCubes.VoxelWorldMVP
             //var ray = Camera.main.ScreenPointToRay(new Vector3(0.5f, 0.5f, 0));// new Ray(RayPosition, RayDirection.normalized);
             var ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
             RaycastHit hitInfo;
-            if (!Physics.Raycast(ray, out hitInfo)) return null;
+            if (!Physics.Raycast(ray, out hitInfo, float.MaxValue, int.MaxValue, QueryTriggerInteraction.Ignore)) return null;
 
             return hitInfo;
 

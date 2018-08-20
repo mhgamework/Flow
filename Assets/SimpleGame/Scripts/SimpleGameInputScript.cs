@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.MarchingCubes;
@@ -11,12 +12,14 @@ using Assets.SimpleGame.Multiplayer;
 using Assets.SimpleGame.Multiplayer.Players;
 using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame.Tools;
+using Assets.SimpleGame.VoxelEngine;
 using Assets.SimpleGame.WardDrawing;
 using Assets.SimpleGame.Wards;
 using Assets.SimpleGame._UtilsToMove;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityStandardAssets.Characters.FirstPerson;
 
 public class SimpleGameInputScript : MonoBehaviour
@@ -57,7 +60,7 @@ public class SimpleGameInputScript : MonoBehaviour
     public void Initialize(LocalPlayerScript localPlayer, VoxelRenderingEngineScript voxelRenderer, WardDrawingModeScript wardDrawingModeScript)
     {
         this.Player = localPlayer.transform;
-        playerScript =localPlayer.GetPlayer();
+        playerScript = localPlayer.GetPlayer();
         this.Renderer = voxelRenderer;
         this.FirstPersonController = localPlayer.GetFirstPersonController();
         this.WardDrawingModeScript = wardDrawingModeScript;
@@ -67,6 +70,9 @@ public class SimpleGameInputScript : MonoBehaviour
         WardDrawingModeScript.OnCorrectWard += OnCorrectWard;
     }
 
+
+
+   
 
     private void OnCorrectWard(Ward obj)
     {
@@ -141,7 +147,7 @@ public class SimpleGameInputScript : MonoBehaviour
         {
             if (digTool == null)
             {
-                digTool = new DigTool(new VoxelWorldEditingHelper(Renderer, Renderer.GetWorld()), DigToolGizmoPrefab,playerScript);
+                digTool = new DigTool(new VoxelWorldEditingHelper(Renderer, Renderer.GetWorld()), DigToolGizmoPrefab, playerScript);
                 StartCoroutine(digTool.Start().GetEnumerator());
             }
 
@@ -213,7 +219,7 @@ public class SimpleGameInputScript : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
         {
-            var pl =getPlayer();
+            var pl = getPlayer();
 
 
             var selectedItem = HotbarScript.Instance.GetSelectedInventoryItem();

@@ -1,12 +1,14 @@
 ﻿using System.Linq;
 using Assets.SimpleGame.Scripts.UI;
+using Assets.SimpleGame.VoxelEngine;
 using Assets.SimpleGame.Wards;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityStandardAssets.Characters.FirstPerson;
 
 namespace Assets.SimpleGame.Scripts
 {
-    public class PlayerScript : MonoBehaviour
+    public class PlayerScript : NetworkBehaviour
     {
         public InventoryScript HotbarInventory;
         public float Health = 80;
@@ -94,6 +96,20 @@ namespace Assets.SimpleGame.Scripts
             AirSpellCasting = !AirSpellCasting;
         }
 
-    
+
+
+        public void AddVoxelEdit(Vector3 pos, float digRadius)
+        {
+            //if (!isLocalPlayer) throw new Exception("Should only run on the local player");
+            if (!isLocalPlayer) return;
+            CmdAddEdit(pos, digRadius);
+        }
+
+        [Command]
+        private void CmdAddEdit(Vector3 pos, float digRadius)
+        {
+            SimpleGameSystemScript.Instance.Get<VoxelEngineEditingScript>().AddEdit(pos, digRadius);
+        }
+
     }
 }

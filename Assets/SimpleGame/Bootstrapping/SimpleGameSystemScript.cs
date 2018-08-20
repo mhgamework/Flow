@@ -7,6 +7,7 @@ using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame.VoxelEngine;
 using Assets.SimpleGame.WardDrawing;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Assets.SimpleGame
 {
@@ -44,6 +45,7 @@ namespace Assets.SimpleGame
 
         private MultiplayerSystemScript multiplayerSystemScript;
         private OctreeVoxelWorld octreeVoxelWorld;
+        private VoxelEngineEditingScript _voxelEngineEditingScript;
 
 
         public void Start()
@@ -85,7 +87,7 @@ namespace Assets.SimpleGame
 
             player.Initialize(hud);
             var localPlayerCamrea = player.GetCamera();
-
+            if (localPlayerCamrea == null) throw new Exception("Should have a player camera!");
 
             var renderingEngine = VoxelEngineHelpers.CreateVoxelRenderingEngine(
                 VoxelRenderingEnginePrefab,
@@ -93,6 +95,10 @@ namespace Assets.SimpleGame
                 Instantiate,
                 lodCamera: localPlayerCamrea);
             VoxelRenderingEngine = renderingEngine;
+
+
+            _voxelEngineEditingScript = GetComponentInChildren<VoxelEngineEditingScript>();
+            _voxelEngineEditingScript.Initialize(renderingEngine, octreeVoxelWorld);
 
             var localPlayerInput = Instantiate(LocalPlayerInputScriptPrefab);
             var wardDrawingModeScript = Instantiate(WardDrawingModeScript);
@@ -108,7 +114,7 @@ namespace Assets.SimpleGame
 
         private MultiplayerSystemScript createDevMultiplayerSystem()
         {
-            return Instantiate(multiplayerSystem,transform);
+            return Instantiate(multiplayerSystem, transform);
         }
 
         private void giveStartItems(PlayerScript player)
@@ -139,6 +145,25 @@ namespace Assets.SimpleGame
 
         private void createPlayerEntity(bool isLocal = true)
         {
+        }
+
+        public T Get<T>() where T : class
+        {
+            if (typeof(T) == typeof(VoxelEngineEditingScript))
+            {
+                return _voxelEngineEditingScript as T;
+            }
+
+            //            if (typeof(T) == typeof(OctreeVoxelWorld))
+            //                return octreeVoxelWorld as T; 
+            //
+            //            if (typeof(T) == typeof(VoxelRenderingEngineScript))
+            //                return VoxelRenderingEngine as T;
+
+            throw new Exception("Cannot find di type: " + typeof(T).Name);
+
+
+
         }
     }
 }

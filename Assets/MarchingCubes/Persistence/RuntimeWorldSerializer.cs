@@ -108,6 +108,9 @@ namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 
         public void LoadFromDisk(VoxelWorldAsset asset, bool metadataOnly = false)
         {
+            if (!File.Exists(getSavegameTxt()))
+                throw new Exception("Cannot load level file: " + getSavegameTxt());
+
             using (var fs = File.OpenRead(getSavegameTxt()))
             using (var r = new BinaryReader(File.OpenRead(getSavegameDat())))
             {
