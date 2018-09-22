@@ -53,5 +53,10 @@ namespace Assets.UnityAdditions
             }
             return null;
         }
+
+        public static Coroutine StartCoroutine(this MonoBehaviour mono, Func<IEnumerable<YieldInstruction>> coroutineFunc)
+        {
+            return mono.StartCoroutine(coroutineFunc().GetEnumerator());
+        }
     }
 }
