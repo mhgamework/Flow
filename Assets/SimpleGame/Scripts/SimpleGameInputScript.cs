@@ -7,6 +7,7 @@ using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.SdfModeling;
 using Assets.MarchingCubes.VoxelWorldMVP;
 using Assets.SimpleGame;
+using Assets.SimpleGame.BuilderSystem;
 using Assets.SimpleGame.Items;
 using Assets.SimpleGame.Multiplayer;
 using Assets.SimpleGame.Multiplayer.Players;
@@ -56,6 +57,8 @@ public class SimpleGameInputScript : MonoBehaviour
     private DigToolGizmoScript DigToolGizmoPrefab;
 
     private PlayerScript playerScript;
+    [SerializeField] private BuildSystemInputTool buildSystemInputTool;
+
 
     public void Initialize(LocalPlayerScript localPlayer, VoxelRenderingEngineScript voxelRenderer, WardDrawingModeScript wardDrawingModeScript)
     {
@@ -68,6 +71,9 @@ public class SimpleGameInputScript : MonoBehaviour
         WardDrawingModeScript.SetWards(Spells.Select(s => s.Ward).ToList());
 
         WardDrawingModeScript.OnCorrectWard += OnCorrectWard;
+
+        buildSystemInputTool.Init();
+
     }
 
 
@@ -143,7 +149,7 @@ public class SimpleGameInputScript : MonoBehaviour
             return;
         }
 
-        if (HotbarScript.Instance.GetSelectedInventoryItem().ResourceType == "digtool" && HotbarScript.Instance.GetSelectedInventoryItem().Amount > 0)
+        if (isResourceOfTypeSelectedOnHotbar("digtool"))
         {
             if (digTool == null)
             {
@@ -163,12 +169,18 @@ public class SimpleGameInputScript : MonoBehaviour
 
         }
 
-        if (HotbarScript.Instance.GetSelectedInventoryItem().ResourceType == "magicprojectile" && HotbarScript.Instance.GetSelectedInventoryItem().Amount > 0)
+        if (isResourceOfTypeSelectedOnHotbar("magicprojectile"))
         {
             // Hacky!
             var spellItem = tempMagicParticleSpellItem;
             spellItem.UpdateTool(getPlayer());
             updateGhost(false);
+            return;
+        }
+        if (isResourceOfTypeSelectedOnHotbar("boxBuilding"))
+        {
+            buildSystemInputTool.DoUpdate();
+
             return;
         }
 
@@ -177,6 +189,11 @@ public class SimpleGameInputScript : MonoBehaviour
             updateToolDig();
         }
 
+    }
+
+    private static bool isResourceOfTypeSelectedOnHotbar(string type)
+    {
+        return HotbarScript.Instance.GetSelectedInventoryItem().ResourceType == type && HotbarScript.Instance.GetSelectedInventoryItem().Amount > 0;
     }
 
     private void updateToolDig()

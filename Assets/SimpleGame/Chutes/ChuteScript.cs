@@ -74,9 +74,11 @@ namespace Assets.SimpleGame.Chutes
 
                 if (speed < 0.1f)
                 {
-                    speed = 0.1f;
+                    speed = initialVelocity; //0.1f;
                     item.Direction = -Mathf.Sign(calculateItemForward(item.Position).y);
                 }
+              
+
                 item.Position += speed * item.Direction * Time.deltaTime;
                 if (item.Position > totalChuteLength) item.Position = totalChuteLength;
 
@@ -85,10 +87,16 @@ namespace Assets.SimpleGame.Chutes
                 if (next) collide(item, next);
                 if (prev) collide(prev, item);
 
-           
+
                 if (item.Position > length) item.Position = length;
+                var pos = calculateItemPos(item.Position);
+                var normal = calculateItemNormal(item.Position);
+                var forward = calculateItemForward(item.Position);
+                Debug.DrawLine(pos,pos+normal,Color.green);
+                Debug.DrawLine(pos,pos+forward*0.1f* item.Direction, Color.blue);
+                Debug.DrawLine(pos + forward * 0.1f* item.Direction, pos+forward*(0.1f+speed*0.2f)* item.Direction, new Color(0.5f,0.5f,1));
                 item.transform.position =  calculateItemPos(item.Position);
-                item.transform.localRotation = Quaternion.AngleAxis(Mathf.Rad2Deg * (item.Position / itemRadius), new Vector3(1, 0, 0));
+                item.transform.localRotation = Quaternion.AngleAxis(Mathf.Rad2Deg * (item.Position / itemRadius), Vector3.Cross(normal,forward));
             }
         }
 
@@ -120,7 +128,16 @@ namespace Assets.SimpleGame.Chutes
 
             item.StartY = Mathf.Max(energy / 2, calculateItemPos(item.Position).y);
             next.StartY = Mathf.Max(energy / 2, calculateItemPos(next.Position).y);
-            item.Position = next.Position - itemDistance;
+
+            var posmid = (next.Position + item.Position) / 2f;
+
+            //TODO
+            // One option, causes jitter
+            item.Position = posmid - itemDistance/2f;
+            next.Position = posmid + itemDistance / 2f;
+
+            //Second option causes: causes the last item in a chain to push elements back wierdly
+            //next.Position = item.Position - itemDistance;
         }
 
         private float calculateItemSpeed(ChuteItemScript item)

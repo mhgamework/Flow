@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Assets.MarchingCubes.Rendering;
 using Assets.MarchingCubes.Scenes.Persistence;
 using Assets.MarchingCubes.VoxelWorldMVP;
+using Assets.SimpleGame.BuilderSystem;
 using Assets.SimpleGame.Multiplayer;
 using Assets.SimpleGame.Scripts;
 using Assets.SimpleGame.VoxelEngine;
@@ -46,7 +48,7 @@ namespace Assets.SimpleGame
         private MultiplayerSystemScript multiplayerSystemScript;
         private OctreeVoxelWorld octreeVoxelWorld;
         private VoxelEngineEditingScript _voxelEngineEditingScript;
-
+        protected internal DynamicObjectsContainerScript dynamicObjectsContainerScript;
 
         public void Start()
         {
@@ -60,8 +62,16 @@ namespace Assets.SimpleGame
             multiplayerSystemScript.NetworkManager.OnConnectedToGame += startGame;
             multiplayerSystemScript.NetworkManager.OnDisconnectedFromGame += stopGame;
 
+            setupBuilderSystem();
 
         }
+
+        void setupBuilderSystem()
+        {
+            var gameObject = new GameObject("DynamicObjectsContainerScript");
+            dynamicObjectsContainerScript = gameObject.AddComponent<DynamicObjectsContainerScript>();
+        }
+
         private void startGame()
         {
             LevelGameobject.SetActive(true);
@@ -109,6 +119,8 @@ namespace Assets.SimpleGame
             giveStartItems(player.GetPlayer());
 
 
+            var levelCallbacks = LevelGameobject.GetComponent<ILevelCallbacks>();
+            if (levelCallbacks != null) levelCallbacks.OnLocalPlayerConnected(player);
         }
 
 
@@ -153,6 +165,9 @@ namespace Assets.SimpleGame
             {
                 return _voxelEngineEditingScript as T;
             }
+
+            if (typeof(T) == typeof(DynamicObjectsContainerScript))
+                return dynamicObjectsContainerScript as T;
 
             //            if (typeof(T) == typeof(OctreeVoxelWorld))
             //                return octreeVoxelWorld as T; 
