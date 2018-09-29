@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Assets.Reusable.Utils;
 using Assets.SimpleGame.Wards;
@@ -21,11 +22,15 @@ namespace Assets.SimpleGame.Chutes
         [SerializeField] private float collisionEnergyLossThreshold = 1f;
 
         [SerializeField] private ChuteScript nextChute;
-        [SerializeField] private ChuteScript initialChute;
+        private ChuteScript initialChute;
 
         private float totalChuteLength;
 
         private List<ChuteItemScript> items;
+
+        private ChuteTransportPointScript startPoint;
+        private ChuteTransportPointScript endPoint;
+
 
 
 
@@ -37,6 +42,35 @@ namespace Assets.SimpleGame.Chutes
             items = new List<ChuteItemScript>();
             chuteItemTemplate.gameObject.SetActive(false);
             this.StartCoroutine(start);
+        }
+
+        public void SetupChute(ChuteTransportPointScript start, ChuteTransportPointScript end)
+        {
+            transform.position = start.transform.position;
+            chuteBody.localScale = new Vector3(1,1,Vector3.Distance(end.transform.position,start.transform.position));
+            transform.LookAt(end.transform.position);
+
+            // Create chute
+            startPoint = start;
+            endPoint = end;
+            if (start.ChuteA != null) start.ChuteA.ConnectNextChute(this);
+            if (end.ChuteB != null) this.ConnectNextChute(end.ChuteB);
+        }
+
+        public void Destroy()
+        {
+            if (startPoint != null )
+            {
+                if (startPoint.ChuteA != null) startPoint.ChuteA.nextChute = null;
+                startPoint.ChuteB = null;
+            }
+
+            if (endPoint != null)
+            {
+                if (endPoint.ChuteB != null) endPoint.ChuteB.initialChute = endPoint.ChuteB;
+                endPoint.ChuteA = null;
+            }
+            Destroy(gameObject);
         }
 
 
@@ -266,6 +300,20 @@ namespace Assets.SimpleGame.Chutes
 
             spawn();
 
+        }
+
+        public void ConnectNextChute(ChuteScript chute)
+        {
+            // Prevent loops
+            var curr = chute.nextChute;
+            for (int i = 0; i < 1000; i++)
+            {
+                if (curr == null) break;
+                if (curr == this) throw new Exception("chute loop not allowd!");
+                curr = curr.nextChute;
+            }
+            // No loop, set it
+            nextChute = chute;
         }
     }
 }

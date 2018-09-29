@@ -43,7 +43,7 @@ namespace Assets.SimpleGame.PowerBeams
         {
             RaycastHit hitInfo;
 
-            var result = Physics.Raycast(transform.position, transform.forward, out hitInfo, maxLength);
+            var result = Physics.Raycast(transform.position, transform.forward, out hitInfo, maxLength,int.MaxValue,QueryTriggerInteraction.Ignore);
             
             if (!result)
             {

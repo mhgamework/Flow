@@ -5,9 +5,13 @@ namespace Assets.SimpleGame.PowerBeams
     public class MirrorDiscScript : MonoBehaviour, IBeamPowerReceiver
     {
         [SerializeField] private BeamScript beamPrefab;
+        [SerializeField] private float userRotateSpeed = 20;
 
         private BeamScript currentIncomingBeam;
         private BeamScript outgoingBeam;
+
+        private float rotY;
+        private float rotX;
 
         public void Start()
         {
@@ -39,6 +43,8 @@ namespace Assets.SimpleGame.PowerBeams
                 if (outgoingBeam.gameObject.activeSelf)
                     outgoingBeam.gameObject.SetActive(false);
             }
+
+            transform.localRotation = Quaternion.Euler(rotX, rotY, 0);
         }
 
         public void OnBeamRemoved(BeamScript beamScript)
@@ -58,6 +64,26 @@ namespace Assets.SimpleGame.PowerBeams
             if (currentIncomingBeam != beamScript) return; // Ignore other beams
             outgoingBeam.EmitPacket();
 
+        }
+
+        public void PushRotate(Vector3 resultPosition, Vector3 resultNormal, int direction)
+        {
+            var y =Vector3.Dot(transform.up, (resultPosition - transform.position).normalized);
+            var x =Vector3.Dot(transform.right, (resultPosition - transform.position).normalized);
+            if (Mathf.Abs(y) > Mathf.Abs(x))
+            {
+                var partDir = -Mathf.Sign(Vector3.Dot(Vector3.Cross((resultPosition - transform.position).normalized, resultNormal), transform.right));
+
+                // Rotate x
+                rotX += (direction * Time.deltaTime * userRotateSpeed * partDir);
+            }
+            else
+            {
+                var partDir = -Mathf.Sign(Vector3.Dot(Vector3.Cross((resultPosition-transform.position).normalized, resultNormal), transform.up));
+
+                rotY += (direction * Time.deltaTime * userRotateSpeed * partDir);
+
+            }
         }
     }
 }

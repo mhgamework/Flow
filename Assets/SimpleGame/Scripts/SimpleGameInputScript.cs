@@ -177,7 +177,9 @@ public class SimpleGameInputScript : MonoBehaviour
             updateGhost(false);
             return;
         }
-        if (isResourceOfTypeSelectedOnHotbar("boxBuilding"))
+
+        var selectedInventoryItem = HotbarScript.Instance.GetSelectedInventoryItem();
+        if (selectedInventoryItem.Amount > 0 && buildSystemInputTool.tryTempHackySetToolActive(selectedInventoryItem.ResourceType))
         {
             buildSystemInputTool.DoUpdate();
 
