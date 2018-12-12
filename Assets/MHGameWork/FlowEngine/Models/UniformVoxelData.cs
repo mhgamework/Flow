@@ -1,6 +1,6 @@
 ﻿using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP
+namespace Assets.MHGameWork.FlowEngine.Models
 {
     /// <summary>
     /// Represents the data of a single voxel

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Assets.MarchingCubes.SdfModeling
+namespace Assets.MHGameWork.FlowEngine.SdfModeling
 {
     public class UnionN : DistObject
     {

@@ -1,6 +1,7 @@
-﻿using DirectX11;
+﻿using Assets.MHGameWork.FlowEngine.Models;
+using DirectX11;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP
+namespace Assets.MHGameWork.FlowEngine.OctreeWorld
 {
     /// <summary>
     /// Interface to implement terrain generation logic

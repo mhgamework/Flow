@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.MarchingCubes.ComputeShader;
-using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
+using Assets.MHGameWork.FlowEngine.Models;
+using Assets.MHGameWork.FlowEngine.OctreeWorld;
+using Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer;
+using Assets.MHGameWork.FlowEngine._Cleanup.Domain;
 using DirectX11;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
 using UnityEngine.Profiling;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP
+namespace Assets.MHGameWork.FlowEngine.Rendering.GPURenderer
 {
     public class GpuVoxelMeshGenerator : IVoxelMeshGenerator, IConcurrentVoxelGenerator
     {

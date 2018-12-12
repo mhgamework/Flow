@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Assets.MarchingCubes.Rendering.AsyncCPURenderer;
-using Assets.MarchingCubes.VoxelWorldMVP;
-using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
+using Assets.MHGameWork.FlowEngine.Models;
+using Assets.MHGameWork.FlowEngine.OctreeWorld;
 using UnityEngine;
 using UnityEngine.Profiling;
 
-namespace Assets.MarchingCubes.Rendering
+namespace Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer
 {
     /// <summary>
     /// TODO: Hide/Show is not idempotent. Probably now called exactly once correctly by other classes

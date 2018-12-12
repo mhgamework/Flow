@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using Assets.MarchingCubes.Persistence;
 using Assets.MarchingCubes.VoxelWorldMVP;
-using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
+using Assets.MHGameWork.FlowEngine.Models;
+using Assets.MHGameWork.FlowEngine.OctreeWorld;
 using DirectX11;
 using UnityEngine;
 

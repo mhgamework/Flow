@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using Assets.MarchingCubes.Rendering.AsyncCPURenderer;
-using Assets.MarchingCubes.VoxelWorldMVP;
+using Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer;
 
-namespace Assets.MarchingCubes.Rendering
+namespace Assets.MHGameWork.FlowEngine.Rendering
 {
     public interface IVoxelRenderer
     {

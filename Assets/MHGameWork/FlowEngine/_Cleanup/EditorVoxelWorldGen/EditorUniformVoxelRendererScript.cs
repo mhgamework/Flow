@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.MarchingCubes.VoxelWorldMVP;
+using Assets.MHGameWork.FlowEngine.Models;
+using Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer;
+using Assets.MHGameWork.FlowEngine._Cleanup.Domain;
 using DirectX11;
 using MHGameWork.TheWizards;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Profiling;
 #if UNITY_EDITOR
-using UnityEditor;
+
 #endif
 
-namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
+namespace Assets.MHGameWork.FlowEngine._Cleanup.EditorVoxelWorldGen
 {
     [ExecuteInEditMode]
 #if UNITY_EDITOR
@@ -30,7 +33,7 @@ namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
             if (i != null) i.Update();
         }
         public SDFWorldGeneratorScript World;
-        private VoxelChunkMeshGenerator meshGen = new VoxelChunkMeshGenerator(new MarchingCubes.MarchingCubesService());
+        private VoxelChunkMeshGenerator meshGen = new VoxelChunkMeshGenerator(new MarchingCubesService());
 
         public VoxelChunkRendererScript renderer;
 

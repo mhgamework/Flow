@@ -2,7 +2,7 @@
 using Assets.Reusable.Threading;
 using UnityEngine;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP
+namespace Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer
 {
     public class VoxelChunkRendererPoolScript : MonoBehaviour
     {

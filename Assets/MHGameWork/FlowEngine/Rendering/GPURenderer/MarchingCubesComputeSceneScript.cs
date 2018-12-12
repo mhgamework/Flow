@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using Debug = UnityEngine.Debug;
 
-namespace Assets.MarchingCubes.ComputeShader
+namespace Assets.MHGameWork.FlowEngine.Rendering.GPURenderer
 {
     public class Buffers
     {

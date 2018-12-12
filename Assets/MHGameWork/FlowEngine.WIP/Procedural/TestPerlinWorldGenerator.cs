@@ -1,4 +1,6 @@
 ﻿using Assets.MarchingCubes.VoxelWorldMVP;
+using Assets.MHGameWork.FlowEngine.Models;
+using Assets.MHGameWork.FlowEngine.OctreeWorld;
 using UnityEngine;
 
 namespace Assets.MarchingCubes.Procedural

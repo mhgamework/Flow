@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.MHGameWork.FlowEngine.Models;
+using Assets.MHGameWork.FlowEngine._Cleanup;
+using Assets.MHGameWork.FlowEngine._Cleanup.Domain;
 using DirectX11;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP
+namespace Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer
 {
     public class VoxelChunkMeshGenerator : IVoxelMeshGenerator
     {

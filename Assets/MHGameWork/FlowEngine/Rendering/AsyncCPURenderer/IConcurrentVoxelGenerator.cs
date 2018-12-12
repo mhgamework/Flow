@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using Assets.MHGameWork.FlowEngine.OctreeWorld;
+using Assets.MHGameWork.FlowEngine._Cleanup.Domain;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
+namespace Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer
 {
     public interface IConcurrentVoxelGenerator
     {

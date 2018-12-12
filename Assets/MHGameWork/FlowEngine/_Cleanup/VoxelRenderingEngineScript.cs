@@ -1,11 +1,13 @@
 ﻿using System;
-using Assets.MarchingCubes.Rendering.ClipmapsOctree;
-using Assets.MarchingCubes.VoxelWorldMVP;
-using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
+using Assets.MHGameWork.FlowEngine.OctreeWorld;
+using Assets.MHGameWork.FlowEngine.Rendering;
+using Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer;
+using Assets.MHGameWork.FlowEngine.Rendering.ClipmapsOctree;
+using Assets.MHGameWork.FlowEngine.Rendering.GPURenderer;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Assets.MarchingCubes.Rendering
+namespace Assets.MHGameWork.FlowEngine._Cleanup
 {
     public class VoxelRenderingEngineScript : MonoBehaviour, IVoxelRenderingEngineConfigProvider
     {

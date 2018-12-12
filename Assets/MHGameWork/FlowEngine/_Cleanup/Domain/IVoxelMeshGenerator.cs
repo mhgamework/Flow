@@ -1,6 +1,7 @@
-﻿using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
+﻿using Assets.MHGameWork.FlowEngine.Models;
+using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP
+namespace Assets.MHGameWork.FlowEngine._Cleanup.Domain
 {
     public interface IVoxelMeshGenerator
     {

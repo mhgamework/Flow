@@ -1,8 +1,8 @@
-﻿
-using System;
+﻿using System;
+using Assets.MHGameWork.FlowEngine.Models;
 using DirectX11;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP
+namespace Assets.MHGameWork.FlowEngine.OctreeWorld
 {
     public interface IEditableVoxelWorld
     {

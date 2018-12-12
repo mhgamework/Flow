@@ -1,8 +1,9 @@
-﻿using Assets.MarchingCubes.Rendering.ClipmapsOctree;
+﻿using Assets.MHGameWork.FlowEngine.OctreeWorld;
+using Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer;
 using DirectX11;
 using MHGameWork.TheWizards.DualContouring.Terrain;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
+namespace Assets.MHGameWork.FlowEngine.Rendering.ClipmapsOctree
 {
     public class RenderOctreeNode : IOctreeNode<RenderOctreeNode>
     {

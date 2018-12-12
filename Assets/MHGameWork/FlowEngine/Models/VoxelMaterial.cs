@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP
+namespace Assets.MHGameWork.FlowEngine.Models
 {
     public class VoxelMaterial
     {

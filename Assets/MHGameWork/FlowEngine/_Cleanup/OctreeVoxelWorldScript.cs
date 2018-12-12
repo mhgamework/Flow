@@ -1,12 +1,12 @@
 ﻿using System;
-using Assets.MarchingCubes.VoxelWorldMVP;
+using Assets.MHGameWork.FlowEngine.Models;
+using Assets.MHGameWork.FlowEngine.OctreeWorld;
+using Assets.MHGameWork.FlowEngine._Cleanup.EditorVoxelWorldGen;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
-using Assets.SimpleGame.Scripts.EditorVoxelWorldGen;
-using Assets.SimpleGame.Scripts;
 
-namespace Assets.MarchingCubes
+namespace Assets.MHGameWork.FlowEngine._Cleanup
 {
     public interface IGenericVoxelWorldGenerator
     {

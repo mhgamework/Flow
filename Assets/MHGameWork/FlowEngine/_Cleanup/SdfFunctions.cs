@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Assets.MarchingCubes
+namespace Assets.MHGameWork.FlowEngine._Cleanup
 {
     public static class SdfFunctions
     {

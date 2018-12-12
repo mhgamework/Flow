@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Assets.MarchingCubes.SdfModeling
+namespace Assets.MHGameWork.FlowEngine.SdfModeling
 {
     public abstract class DistObject
     {

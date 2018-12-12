@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Assets.MHGameWork.FlowEngine._Cleanup.Domain;
 using UnityEngine;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP
+namespace Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer
 {
     /// <summary>
     /// Responsible for rendering and physics of a single chunk of a VoxelWorld

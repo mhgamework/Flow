@@ -1,7 +1,8 @@
-﻿using DirectX11;
+﻿using Assets.MHGameWork.FlowEngine.Models;
+using DirectX11;
 using MHGameWork.TheWizards.DualContouring.Terrain;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP.Octrees
+namespace Assets.MHGameWork.FlowEngine.OctreeWorld
 {
     public class OctreeNode : IOctreeNode<OctreeNode>
     {

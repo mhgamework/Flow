@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Assets.MarchingCubes.Rendering
+namespace Assets.MHGameWork.FlowEngine.Rendering
 {
     public interface IVoxelRenderingEngineConfigProvider
     {

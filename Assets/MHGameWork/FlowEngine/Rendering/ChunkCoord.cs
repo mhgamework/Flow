@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using DirectX11;
 
-namespace Assets.MarchingCubes.Rendering.AsyncCPURenderer
+namespace Assets.MHGameWork.FlowEngine.Rendering
 {
     public struct ChunkCoord
     {

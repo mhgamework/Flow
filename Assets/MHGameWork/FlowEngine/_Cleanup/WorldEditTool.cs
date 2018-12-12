@@ -1,8 +1,9 @@
 ﻿using System;
+using Assets.MHGameWork.FlowEngine.Models;
 using DirectX11;
 using UnityEngine;
 
-namespace Assets.MarchingCubes.VoxelWorldMVP
+namespace Assets.MHGameWork.FlowEngine._Cleanup
 {
     /// <summary>
     /// Service class

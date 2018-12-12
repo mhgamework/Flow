@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
-using Assets.MarchingCubes.VoxelWorldMVP;
+using Assets.MHGameWork.FlowEngine.Models;
 using Assets.Reusable;
 using DirectX11;
 using MHGameWork.TheWizards.SkyMerchant._Engine.DataStructures;
 using UnityEngine;
 using UnityEngine.Profiling;
 
-namespace Assets.SimpleGame.Scripts.EditorVoxelWorldGen
+namespace Assets.MHGameWork.FlowEngine._Cleanup.EditorVoxelWorldGen
 {
     public class SDFWorldGeneratorScript : MonoBehaviour
     {

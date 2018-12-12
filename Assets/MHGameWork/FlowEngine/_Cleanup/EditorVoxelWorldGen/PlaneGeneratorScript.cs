@@ -1,9 +1,9 @@
-﻿using Assets.MarchingCubes.VoxelWorldMVP;
+﻿using Assets.MHGameWork.FlowEngine.Models;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
 
-namespace Assets.SimpleGame.Scripts
+namespace Assets.MHGameWork.FlowEngine._Cleanup.EditorVoxelWorldGen
 {
     [ExecuteInEditMode]
     public class PlaneGeneratorScript : BaseVoxelObjectScript

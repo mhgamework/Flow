@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using Assets.MarchingCubes.Rendering.AsyncCPURenderer;
-using Assets.MarchingCubes.VoxelWorldMVP;
-using Assets.MarchingCubes.VoxelWorldMVP.Octrees;
+using Assets.MHGameWork.FlowEngine.OctreeWorld;
 using DirectX11;
 using MHGameWork.TheWizards.DualContouring.Terrain;
 using UnityEngine;
 using UnityEngine.Profiling;
 
-namespace Assets.MarchingCubes.Rendering.ClipmapsOctree
+namespace Assets.MHGameWork.FlowEngine.Rendering.ClipmapsOctree
 {
     /// <summary>
     /// Algorithm to determine which size voxel chunks to render given the camera position

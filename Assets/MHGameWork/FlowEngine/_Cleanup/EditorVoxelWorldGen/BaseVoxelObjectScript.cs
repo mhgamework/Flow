@@ -1,9 +1,8 @@
-using Assets.MarchingCubes.VoxelWorldMVP;
-using Assets.SimpleGame.Scripts.EditorVoxelWorldGen;
+using Assets.MHGameWork.FlowEngine.Models;
 using DirectX11;
 using UnityEngine;
 
-namespace Assets.SimpleGame.Scripts
+namespace Assets.MHGameWork.FlowEngine._Cleanup.EditorVoxelWorldGen
 {
     [ExecuteInEditMode]
     public abstract class BaseVoxelObjectScript : MonoBehaviour, IVoxelObject

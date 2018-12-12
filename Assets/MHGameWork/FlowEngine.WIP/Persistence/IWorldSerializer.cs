@@ -1,4 +1,6 @@
-﻿namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
+﻿using Assets.MHGameWork.FlowEngine.OctreeWorld;
+
+namespace Assets.MarchingCubes.VoxelWorldMVP.Persistence
 {
     public interface IWorldSerializer
     {
