@@ -1,7 +1,9 @@
 {
     "name": "FlowEngine",
     "references": [
-        "TheWizardsTools"
+        "TheWizardsTools",
+        "DualContouringEngine",
+        "Reusable"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
