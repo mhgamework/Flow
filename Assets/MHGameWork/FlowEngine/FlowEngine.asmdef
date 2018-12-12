@@ -1,0 +1,10 @@
+{
+    "name": "FlowEngine",
+    "references": [
+        "TheWizardsTools"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
