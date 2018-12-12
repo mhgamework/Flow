@@ -28,8 +28,8 @@ namespace Assets.SimpleGame.Chutes
 
         private List<ChuteItemScript> items;
 
-        private ChuteTransportPointScript startPoint;
-        private ChuteTransportPointScript endPoint;
+        public ChuteTransportPointScript startPoint;
+        public ChuteTransportPointScript endPoint;
 
 
 
@@ -41,35 +41,42 @@ namespace Assets.SimpleGame.Chutes
             initialChute = this;
             items = new List<ChuteItemScript>();
             chuteItemTemplate.gameObject.SetActive(false);
+            nextChute = null;
+            if (startPoint != null && endPoint != null)
+                SetupChute(startPoint, endPoint);
+
             this.StartCoroutine(start);
         }
 
         public void SetupChute(ChuteTransportPointScript start, ChuteTransportPointScript end)
         {
             transform.position = start.transform.position;
-            chuteBody.localScale = new Vector3(1,1,Vector3.Distance(end.transform.position,start.transform.position));
+            chuteBody.localScale = new Vector3(1, 1, Vector3.Distance(end.transform.position, start.transform.position));
             transform.LookAt(end.transform.position);
 
             // Create chute
             startPoint = start;
             endPoint = end;
-            if (start.ChuteA != null) start.ChuteA.ConnectNextChute(this);
-            if (end.ChuteB != null) this.ConnectNextChute(end.ChuteB);
+            start.Chute = this;
+            end.Chute = this;
+            //            if (start.ChuteA != null) start.ChuteA.ConnectNextChute(this);
+            //            if (end.ChuteB != null) this.ConnectNextChute(end.ChuteB);
         }
 
         public void Destroy()
         {
-            if (startPoint != null )
-            {
-                if (startPoint.ChuteA != null) startPoint.ChuteA.nextChute = null;
-                startPoint.ChuteB = null;
-            }
-
-            if (endPoint != null)
-            {
-                if (endPoint.ChuteB != null) endPoint.ChuteB.initialChute = endPoint.ChuteB;
-                endPoint.ChuteA = null;
-            }
+            //TODO:
+            //            if (startPoint != null )
+            //            {
+            //                if (startPoint.ChuteA != null) startPoint.ChuteA.nextChute = null;
+            //                startPoint.ChuteB = null;
+            //            }
+            //
+            //            if (endPoint != null)
+            //            {
+            //                if (endPoint.ChuteB != null) endPoint.ChuteB.initialChute = endPoint.ChuteB;
+            //                endPoint.ChuteA = null;
+            //            }
             Destroy(gameObject);
         }
 
@@ -89,13 +96,19 @@ namespace Assets.SimpleGame.Chutes
                 count = count.nextChute;
             }
 
+            SimulateMarbles();
+        }
+
+        private void SimulateMarbles()
+        {
             for (int i = 0; i < items.Count; i++)
             {
                 var item = items[i];
 
                 var acceleration = g;
                 var initialVelocity = acceleration * Time.deltaTime;
-                var pushAwayForce = -Vector3.Dot(initialVelocity * Vector3.down, calculateItemNormal(item.Position)) * calculateItemNormal(item.Position);
+                var pushAwayForce = -Vector3.Dot(initialVelocity * Vector3.down, calculateItemNormal(item.Position)) *
+                                    calculateItemNormal(item.Position);
                 var initialVelocityProjected = (initialVelocity * Vector3.down + pushAwayForce).magnitude;
 
                 var speed = calculateItemSpeed(item);
@@ -111,7 +124,7 @@ namespace Assets.SimpleGame.Chutes
                     speed = initialVelocity; //0.1f;
                     item.Direction = -Mathf.Sign(calculateItemForward(item.Position).y);
                 }
-              
+
 
                 item.Position += speed * item.Direction * Time.deltaTime;
                 if (item.Position > totalChuteLength) item.Position = totalChuteLength;
@@ -126,13 +139,55 @@ namespace Assets.SimpleGame.Chutes
                 var pos = calculateItemPos(item.Position);
                 var normal = calculateItemNormal(item.Position);
                 var forward = calculateItemForward(item.Position);
-                Debug.DrawLine(pos,pos+normal,Color.green);
-                Debug.DrawLine(pos,pos+forward*0.1f* item.Direction, Color.blue);
-                Debug.DrawLine(pos + forward * 0.1f* item.Direction, pos+forward*(0.1f+speed*0.2f)* item.Direction, new Color(0.5f,0.5f,1));
-                item.transform.position =  calculateItemPos(item.Position);
-                item.transform.localRotation = Quaternion.AngleAxis(Mathf.Rad2Deg * (item.Position / itemRadius), Vector3.Cross(normal,forward));
+                //Debug.DrawLine(pos, pos + normal, Color.green);
+                //Debug.DrawLine(pos, pos + forward * 0.1f * item.Direction, Color.blue);
+                //Debug.DrawLine(pos + forward * 0.1f * item.Direction, pos + forward * (0.1f + speed * 0.2f) * item.Direction, new Color(0.5f, 0.5f, 1));
+                //Debug.DrawLine(pos, pos + Vector3.Cross(normal, forward), Color.red);
+                item.transform.position = calculateItemPos(item.Position);
+                item.transform.rotation =
+                    Quaternion.AngleAxis(Mathf.Rad2Deg * (item.Position / itemRadius), Vector3.Cross(normal, forward));
+
+
+                //                if (item.Position > getChuteLength() - 0.01f && item.Direction > 0)
+                //                {
+                //                    // Moved outside
+                //                    tryEmitToTransportPoint(item, endPoint);
+                //                }
+                //                else if (item.Position < 0.01f && item.Direction < 0)
+                //                {
+                //                    tryEmitToTransportPoint(item, startPoint);
+                //                }
             }
         }
+
+        public ChuteItemScript GetItemAtTransportPoint(ChuteTransportPointScript point)
+        {
+            if (items.Count == 0) return null;
+            var first = items[0];
+            var last = items[items.Count - 1];
+            if (point == endPoint)
+            {
+                if (last.Position > getChuteLength() - 0.01f) return last;
+            }
+
+            if (point == startPoint)
+            {
+                if (first.Position < 0.01f) return first;
+            }
+
+            return null;
+        }
+
+        public ChuteItemScript TakeItemAtTransportPoint(ChuteTransportPointScript point)
+        {
+            var get = GetItemAtTransportPoint(point);
+            if (get == null) return null;
+            items.Remove(get);
+            return get;
+        }
+
+
+
 
         private ChuteItemScript getNextItem(int i)
         {
@@ -143,7 +198,7 @@ namespace Assets.SimpleGame.Chutes
         private ChuteItemScript getPrevItem(int i)
         {
             if (i == 0) return null;
-            return items[i-1];
+            return items[i - 1];
         }
 
         private void collide(ChuteItemScript item, ChuteItemScript next)
@@ -167,7 +222,7 @@ namespace Assets.SimpleGame.Chutes
 
             //TODO
             // One option, causes jitter
-            item.Position = posmid - itemDistance/2f;
+            item.Position = posmid - itemDistance / 2f;
             next.Position = posmid + itemDistance / 2f;
 
             //Second option causes: causes the last item in a chain to push elements back wierdly
@@ -242,7 +297,7 @@ namespace Assets.SimpleGame.Chutes
                 chute = chute.nextChute;
             }
 
-            return getLocalChutePos(chute,pos);
+            return getLocalChutePos(chute, pos);
             //return Mathf.Clamp(pos, 0, getChuteLength()) * transform.forward;
             //return Mathf.Clamp(pos, 0, chuteBody.localScale.z) * transform.forward +
             //       Mathf.Clamp(pos - chuteBody.localScale.z, 0, chuteBody.localScale.z) * Vector3.forward +
@@ -273,7 +328,7 @@ namespace Assets.SimpleGame.Chutes
             yield return null;
         }
 
-        private void spawn()
+        private void spawn(ChuteTransportPointScript point,ChuteItemType type)
         {
             if (initialChute == null)
             {
@@ -287,33 +342,83 @@ namespace Assets.SimpleGame.Chutes
             }
             var item = Instantiate(chuteItemTemplate, transform);
             item.gameObject.SetActive(true);
+            item.InitType(type);
 
-            items.Insert(0, item);
-
-            item.Position = 0;
+            Insert(item, point);
             item.StartY = calculateItemPos(item.Position).y;
-        }
-
-        public void EmitIfFreeSpace()
-        {
-            if (items.Any() && !(items.First().Position > itemDistance * 1.2f)) return;
-
-            spawn();
 
         }
 
-        public void ConnectNextChute(ChuteScript chute)
+        public bool TryInsertItem(ChuteItemScript item, ChuteTransportPointScript point)
         {
-            // Prevent loops
-            var curr = chute.nextChute;
-            for (int i = 0; i < 1000; i++)
+            if (!HasFreeSpace(point)) return false;
+
+            Insert(item, point);
+            return true;
+        }
+
+        public bool HasFreeSpace(ChuteTransportPointScript point)
+        {
+
+            var f = itemDistance * 1.2f;
+            if (items.Count == 0 && getChuteLength() >= f) return true;
+
+            if (point == startPoint)
             {
-                if (curr == null) break;
-                if (curr == this) throw new Exception("chute loop not allowd!");
-                curr = curr.nextChute;
+                return ((items.First().Position > f));
+
             }
-            // No loop, set it
-            nextChute = chute;
+            else if (point == endPoint)
+            {
+                return ((items.Last().Position < getChuteLength() - f));
+
+            }
+            else
+            {
+                throw new Exception("Cannot emit on not-chute connected point");
+            }
         }
+        private void Insert(ChuteItemScript item, ChuteTransportPointScript point)
+        {
+            if (point == startPoint)
+            {
+                items.Insert(0, item);
+                item.Position = 0;
+            }
+            else if (point == endPoint)
+            {
+                items.Add(item);
+                item.Position = getChuteLength();
+
+            }
+            else
+            {
+                throw new Exception("Cannot emit on not-chute connected point");
+            }
+        }
+
+        public void EmitIfFreeSpace(ChuteTransportPointScript outputPoint, ChuteItemType type)
+        {
+            if (!HasFreeSpace(outputPoint)) return;
+
+            spawn(outputPoint,type);
+
+        }
+
+//        public void ConnectNextChute(ChuteScript chute)
+//        {
+//            // Prevent loops
+//            var curr = chute.nextChute;
+//            for (int i = 0; i < 1000; i++)
+//            {
+//                if (curr == null) break;
+//                if (curr == this) throw new Exception("chute loop not allowd!");
+//                curr = curr.nextChute;
+//            }
+//            // No loop, set it
+//            nextChute = chute;
+//        }
+
+
     }
 }

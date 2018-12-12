@@ -71,6 +71,7 @@ namespace Assets.SimpleGame.BuilderSystem
             }
         }
 
+      
         private bool isWrench()
         {
             return (activeBuilder == "wrench");
@@ -85,6 +86,11 @@ namespace Assets.SimpleGame.BuilderSystem
         {
             var result = raycast();
             if (result == null) return;
+
+            if (isWrench())
+            {
+                chuteBuilderInput.DoUpdate(result.position, result.normal, result.lookDir, result.MouseButton, result.interactable);
+            }
             if (Input.GetMouseButtonDown(0))
             {
                 result.MouseButton = MouseButton.Left;
@@ -95,6 +101,7 @@ namespace Assets.SimpleGame.BuilderSystem
                 result.MouseButton = MouseButton.Right;
                 OnClick(result.position, result.normal, result.lookDir, result.MouseButton, result.interactable);
             }
+
 
             if (isWrench() && result.interactable != null)
             {

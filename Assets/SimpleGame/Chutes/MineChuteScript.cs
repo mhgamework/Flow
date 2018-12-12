@@ -9,11 +9,12 @@ namespace Assets.SimpleGame.Chutes
     {
         [SerializeField] private float productionInterval = 1;
         [SerializeField] private ChuteTransportPointScript outputPoint;
+        [SerializeField] private string itemType;
 
         public void Start()
         {
 
-            outputPoint.IsOutput = true;
+//            outputPoint.IsOutput = true;
         }
 
         private void OnEnable()
@@ -37,9 +38,10 @@ namespace Assets.SimpleGame.Chutes
             yield return null;
             for (; ; )
             {
-                Debug.Log("Emit miner");
-                if (outputPoint.ChuteB != null)
-                    outputPoint.ChuteB.EmitIfFreeSpace();
+                Debug.Log("Emit miner " + gameObject.name);
+                if (outputPoint.Chute != null)
+                    outputPoint.EmitIfFreeSpace(ChuteItemType.GetById(itemType));
+                
                 yield return new WaitForSeconds(productionInterval);
             }
         }
