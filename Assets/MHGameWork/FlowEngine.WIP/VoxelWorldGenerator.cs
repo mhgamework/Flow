@@ -17,7 +17,7 @@ namespace Assets.MarchingCubes
    /// <summary>
     /// Temporary unity script to control the world config
     /// </summary>
-    public class VoxelWorldGenerator : MonoBehaviour
+    public class VoxelWorldGenerator : MonoBehaviour, IGenericVoxelWorldGenerator
     {
         public enum DrawMode { Noise, Color }
         public bool DrawMesh = false;

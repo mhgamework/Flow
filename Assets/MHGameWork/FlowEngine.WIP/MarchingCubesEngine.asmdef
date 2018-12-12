@@ -1,10 +1,11 @@
 {
-    "name": "MarchingCubesEngine",
+    "name": "FlowEngine.WIP",
     "references": [
         "TheWizardsTools",
         "Reusable",
         "DualContouringEngine",
-        "LibNoise.Unity"
+        "LibNoise.Unity",
+        "FlowEngine"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

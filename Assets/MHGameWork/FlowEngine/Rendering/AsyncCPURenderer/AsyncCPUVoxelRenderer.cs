@@ -22,7 +22,7 @@ namespace Assets.MarchingCubes.Rendering
     {
         private Material TemplateMaterial;
         private readonly Material vertexColorMaterial;
-        private readonly VoxelRenderingEngineScript voxelRenderingEngineScript;
+        private readonly IVoxelRenderingEngineConfigProvider voxelRenderingEngineScript;
         private readonly bool disableThreadingForDebugging;
         private Dictionary<Color, Material> materialsDictionary;
 
@@ -43,15 +43,15 @@ namespace Assets.MarchingCubes.Rendering
             List<VoxelMaterial> voxelMaterials,
             OctreeVoxelWorld octreeVoxelWorld,
             Transform transform,
-            VoxelRenderingEngineScript voxelRenderingEngineScript,
+            IVoxelRenderingEngineConfigProvider voxelRenderingEngineScript,
             bool disableThreadingForDebugging)
         {
             this.concurrentVoxelGenerator = concurrentVoxelGenerator;
             this.chunkPool = chunkPool;
             this.octreeVoxelWorld = octreeVoxelWorld;
             this.transform = transform;
-            TemplateMaterial = voxelRenderingEngineScript.TemplateMaterial;
-            vertexColorMaterial = voxelRenderingEngineScript.VertexColorMaterial;
+            TemplateMaterial = voxelRenderingEngineScript.GetTemplateMaterial();
+            vertexColorMaterial = voxelRenderingEngineScript.GetVertexColorMaterial();
             this.voxelRenderingEngineScript = voxelRenderingEngineScript;
 
             this.disableThreadingForDebugging = disableThreadingForDebugging;
@@ -191,8 +191,8 @@ namespace Assets.MarchingCubes.Rendering
             Profiler.EndSample();
 
             Profiler.BeginSample("PRF-SetToUnity");
-            var lowerleft = node.LowerLeft.ToVector3() * voxelRenderingEngineScript.RenderScale;
-            var scale = octreeVoxelWorld.GetNodeSize(node.Depth) / (float)(octreeVoxelWorld.ChunkSize.X) * voxelRenderingEngineScript.RenderScale;
+            var lowerleft = node.LowerLeft.ToVector3() * voxelRenderingEngineScript.GetRenderScale();
+            var scale = octreeVoxelWorld.GetNodeSize(node.Depth) / (float)(octreeVoxelWorld.ChunkSize.X) * voxelRenderingEngineScript.GetRenderScale();
 
             comp.AutomaticallyGenerateMesh = false;
             comp.MaterialsDictionary = materialsDictionary;

@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Assets.MarchingCubes.Rendering
 {
-    public class VoxelRenderingEngineScript : MonoBehaviour
+    public class VoxelRenderingEngineScript : MonoBehaviour, IVoxelRenderingEngineConfigProvider
     {
         public float RenderScale = 1;
         public bool UseGpuRenderer = false;
@@ -125,6 +125,21 @@ namespace Assets.MarchingCubes.Rendering
         public Vector3 ToVoxelSpace(Vector3 min)
         {
             return min / RenderScale;
+        }
+
+        public Material GetTemplateMaterial()
+        {
+            return TemplateMaterial;
+        }
+
+        public Material GetVertexColorMaterial()
+        {
+            return VertexColorMaterial;
+        }
+
+        public float GetRenderScale()
+        {
+            return RenderScale;
         }
     }
 }

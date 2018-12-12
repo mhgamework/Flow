@@ -2,7 +2,8 @@
     "name": "MarchingCubesEngine.Editor",
     "references": [
         "Reusable",
-        "MarchingCubesEngine"
+        "FlowEngine.WIP",
+        "FlowEngine"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [

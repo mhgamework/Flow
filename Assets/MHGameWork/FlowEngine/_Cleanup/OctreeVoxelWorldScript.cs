@@ -1,19 +1,23 @@
 ﻿using System;
 using Assets.MarchingCubes.VoxelWorldMVP;
-using Assets.SimpleGame.Scripts;
-using Assets.SimpleGame.Scripts.EditorVoxelWorldGen;
 using DirectX11;
 using MHGameWork.TheWizards;
 using UnityEngine;
+using Assets.SimpleGame.Scripts.EditorVoxelWorldGen;
+using Assets.SimpleGame.Scripts;
 
 namespace Assets.MarchingCubes
 {
+    public interface IGenericVoxelWorldGenerator
+    {
+        OctreeVoxelWorld CreateNewWorld();
+    }
     /// <summary>
     /// Can currently be either a VoxelWorldGenerator or SDFWorld, or a OctreeVoxelWorld set from code
     /// </summary>
     public class OctreeVoxelWorldScript : MonoBehaviour
     {
-        public VoxelWorldGenerator GeneratorWorld;
+        public IGenericVoxelWorldGenerator GeneratorWorld;
         public SDFWorldGeneratorScript SDFWorld;
         public int SDFChunkSize = 8;
         public int SDFChunkDepth = 2;
