@@ -4,7 +4,7 @@ namespace Assets.MHGameWork.FlowEngine.SdfModeling
 {
     public class Ball : DistObject
     {
-        public object color;
+        public Color color = UnityEngine.Color.black;
         private Vector3 center;
         private float radius;
 
@@ -14,10 +14,16 @@ namespace Assets.MHGameWork.FlowEngine.SdfModeling
             this.radius = v4;
         }
 
-        public Ball(Vector3 center, float radius)
+        public Ball(Vector3 center, float radius) : this(center, radius, UnityEngine.Color.black)
+        {
+            
+        }
+
+        public Ball(Vector3 center, float radius,Color c)
         {
             this.center = center;
             this.radius = radius;
+            this.color = c;
         }
 
         public override float Sdf(Vector3 p)
@@ -27,7 +33,7 @@ namespace Assets.MHGameWork.FlowEngine.SdfModeling
 
         public override Color Color(Vector3 p)
         {
-            throw new System.NotImplementedException();
+            return color;
         }
         public override void TransformScale(float f)
         {

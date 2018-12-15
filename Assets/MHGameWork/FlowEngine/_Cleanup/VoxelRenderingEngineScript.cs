@@ -16,6 +16,11 @@ namespace Assets.MHGameWork.FlowEngine._Cleanup
         public UnityEngine.ComputeShader GPUShader;
 
         public OctreeVoxelWorldScript World;
+        /// <summary>
+        /// This overrides the World if set
+        /// </summary>
+        [SerializeField]
+        private IVoxelWorldFactory overridingWorldFactory;
 
         public Camera LODCamera;
         [Range(0.5f,4)]
@@ -62,7 +67,7 @@ namespace Assets.MHGameWork.FlowEngine._Cleanup
             var rendererObject = new GameObject("Renderer");
             rendererObject.transform.SetParent(transform);
 
-            octreeVoxelWorld = World.CreateNewWorld();
+            octreeVoxelWorld = createWorld();
             // new OctreeVoxelWorld(new ConstantVoxelWorldGenerator(-1, new VoxelMaterial(Color.black)), 8, 6);//World.CreateNewWorld();
 
 
@@ -83,6 +88,19 @@ namespace Assets.MHGameWork.FlowEngine._Cleanup
 
             clipmapsOctreeService = new ClipmapsOctreeService(octreeVoxelWorld, renderingService, LodDistanceCurve, LodDistanceCurveEnd);
 
+        }
+
+        public void setWorld(OctreeVoxelWorld world)
+        {
+            if (init) throw new Exception("already initialized, call before initialize");
+            overridingWorldFactory = new DelegateVoxelWorldFactory(() => world);
+        }
+
+        private OctreeVoxelWorld createWorld()
+        {
+            if (overridingWorldFactory != null)
+                return overridingWorldFactory.CreateNewWorld();
+            return World.CreateNewWorld();
         }
 
         public OctreeVoxelWorld GetWorld()

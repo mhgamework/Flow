@@ -8,6 +8,9 @@ using UnityEngine.Profiling;
 
 namespace Assets.MHGameWork.FlowEngine._Cleanup.EditorVoxelWorldGen
 {
+    /**
+     * Provides a method to generate chunk data based on the Nested IVoxelObjects in the game object tree.
+     */
     public class SDFWorldGeneratorScript : MonoBehaviour
     {
         private Dictionary<Color, VoxelMaterial> materials;

@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Assets.MHGameWork.FlowEngine._Cleanup.EditorVoxelWorldGen
 {
+    /// <summary>
+    /// Used in the Unity editor voxel editing capabilities (eg rendering in unity editor)
+    /// </summary>
     public interface IVoxelObject
     {
         bool Subtract { get; }

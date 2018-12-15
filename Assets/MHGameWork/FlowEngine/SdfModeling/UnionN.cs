@@ -24,7 +24,19 @@ namespace Assets.MHGameWork.FlowEngine.SdfModeling
 
         public override Color Color(Vector3 p)
         {
-            throw new System.NotImplementedException();
+            //TODO: very suboptimal to evaluate sdf twice
+            var min = float.MaxValue;
+            var minI = 0;
+            for (int i = 0; i < obj.Length; i++)
+            {
+                var f = obj[i].Sdf(p);
+                if (f < min)
+                {
+                    min = f;
+                    minI = i;
+                }
+            }
+            return obj[minI].Color(p);
         }
     }
 }

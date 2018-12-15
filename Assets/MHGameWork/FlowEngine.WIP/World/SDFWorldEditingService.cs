@@ -9,6 +9,9 @@ using UnityEngine;
 
 namespace Assets.MarchingCubes.World
 {
+    /**
+     * Provides adding and substracting sdf objects for IEditableVoxelWorld
+     */
     public class SDFWorldEditingService
     {
 

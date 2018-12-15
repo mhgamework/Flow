@@ -8,7 +8,10 @@ using UnityEngine;
 
 namespace Assets.MHGameWork.FlowEngine._Cleanup
 {
-    public interface IGenericVoxelWorldGenerator
+    /// <summary>
+    /// Temporary constructor class for providing OctreeVoxelWorldScript with world
+    /// </summary>
+    public interface IVoxelWorldFactory
     {
         OctreeVoxelWorld CreateNewWorld();
     }
@@ -17,7 +20,7 @@ namespace Assets.MHGameWork.FlowEngine._Cleanup
     /// </summary>
     public class OctreeVoxelWorldScript : MonoBehaviour
     {
-        public IGenericVoxelWorldGenerator GeneratorWorld;
+        public IVoxelWorldFactory GeneratorWorld;
         public SDFWorldGeneratorScript SDFWorld;
         public int SDFChunkSize = 8;
         public int SDFChunkDepth = 2;

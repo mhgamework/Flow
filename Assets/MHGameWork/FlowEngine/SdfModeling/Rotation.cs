@@ -26,7 +26,9 @@ namespace Assets.MHGameWork.FlowEngine.SdfModeling
 
         public override Color Color(Vector3 p)
         {
-            throw new System.NotImplementedException();
+            p = angleAxis * p;
+
+            return pu.Color(p);
         }
     }
 }

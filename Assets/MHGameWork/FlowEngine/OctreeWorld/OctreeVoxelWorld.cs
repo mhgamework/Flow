@@ -368,6 +368,16 @@ namespace Assets.MHGameWork.FlowEngine.OctreeWorld
             octreeNode.VoxelData.LastChangeFrame = frame;
         }
 
+        /// <summary>
+        /// TODO: this is untested could break invariants!
+        /// </summary>
+        /// <param name="octreeNode"></param>
+        public void DiscardVoxelData(OctreeNode octreeNode)
+        {
+            octreeNode.VoxelData = null;
+            octreeNode.Modified = true;
+        }
+
 
         //public UniformVoxelData GetChunk(Point3 chunkCoord)
         //{

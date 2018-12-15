@@ -8,10 +8,15 @@ namespace Assets.MHGameWork.FlowEngine.SdfModeling
         private readonly float f1;
         public Color color;
 
-        public Cylinder(float radius, float length)
+        public Cylinder(float radius, float length) : this(radius, length, UnityEngine.Color.black)
+        {
+
+        }
+        public Cylinder(float radius, float length,Color c)
         {
             this.radius = radius;
             this.f1 = length;
+            this.color = c;
         }
 
         public override float Sdf(Vector3 p)
