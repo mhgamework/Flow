@@ -29,9 +29,11 @@ namespace Assets.MHGameWork.FlowEngine.Samples._NeedsCleanupFirst.SdfObjectRende
         {
             var translate = new Vector3(10, 10, 10);
 
-            generator = new DistObjectVoxelWorldGenerator(new Translation(GetSnowman(), translate),
+            //            generator = new DistObjectVoxelWorldGenerator(new Translation(GetSnowman(), translate),
+            //                new Bounds(new Vector3(0, 10, 0) + translate, new Vector3(20, 60, 20)));
+            var generator2 = new DistObject2VoxelWorldGenerator(new ExampleNoiseCylinder(), 
                 new Bounds(new Vector3(0, 10, 0) + translate, new Vector3(20, 60, 20)));
-            world = FlowEngineLodPrefab.CreateWorld(generator, 16, 5);
+            world = FlowEngineLodPrefab.CreateWorld(generator2, 16, 5);
             var tempEngine = FlowEngineLodPrefab.CreateFlowEngineLod(world);
             tempEngine.RenderScale = RenderResolution;
         }

@@ -9,7 +9,7 @@ namespace Assets.MHGameWork.FlowEngine.Samples._NeedsCleanupFirst.SdfObjectRende
     {
         public VoxelRenderingEngineScript VoxelRenderingEngine;
 
-        public OctreeVoxelWorld CreateWorld(DistObjectVoxelWorldGenerator gen, int chunkSzie, int depth)
+        public OctreeVoxelWorld CreateWorld(IWorldGenerator gen, int chunkSzie, int depth)
         {
             return new OctreeVoxelWorld(gen, chunkSzie, depth);
         }

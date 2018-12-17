@@ -3,6 +3,8 @@ namespace Assets.MHGameWork.FlowEngine.Models
     public struct VoxelData
     {
         public float Density;
+
+        //TODO: maybe remove voxelmaterial and replace it with data?
         public VoxelMaterial Material;
 
         public VoxelData(float density, VoxelMaterial material)
