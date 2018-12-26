@@ -4,16 +4,17 @@ using Assets.MHGameWork.FlowEngine.Rendering;
 using Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer;
 using Assets.MHGameWork.FlowEngine.Rendering.ClipmapsOctree;
 using Assets.MHGameWork.FlowEngine.Rendering.GPURenderer;
+using Assets.MHGameWork.FlowEngine.Samples._NeedsCleanupFirst.SdfObjectRenderingSample;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Assets.MHGameWork.FlowEngine._Cleanup
 {
-    public class VoxelRenderingEngineScript : MonoBehaviour, IVoxelRenderingEngineConfigProvider
+    public class VoxelRenderingEngineScript : MonoBehaviour, IVoxelRenderingEngineConfigProvider, IFlowEngineLodRenderer
     {
         public float RenderScale = 1;
         public bool UseGpuRenderer = false;
-        public UnityEngine.ComputeShader GPUShader;
+        public ComputeShader GPUShader;
 
         public OctreeVoxelWorldScript World;
         /// <summary>

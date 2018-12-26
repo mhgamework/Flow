@@ -8,7 +8,7 @@ namespace Assets.MHGameWork.FlowEngine.Samples._NeedsCleanupFirst.SdfObjectRende
 {
     public class SdfObjectRenderingSampleScript : MonoBehaviour
     {
-        [SerializeField] private FlowEngineLodScript FlowEngineLodPrefab;
+        [SerializeField] private FlowEnginePrefabScript flowEnginePrefab;
 
         public Color SnowColor = Color.white;
         public Color NoseColor = Color.red;
@@ -20,7 +20,7 @@ namespace Assets.MHGameWork.FlowEngine.Samples._NeedsCleanupFirst.SdfObjectRende
         protected internal OctreeVoxelWorld world;
 
         protected internal DistObjectVoxelWorldGenerator generator;
-        //public FlowEngineLodScript flowEngine;
+        //public FlowEnginePrefabScript flowEngine;
 
         public float RenderResolution = 0.25f;
 
@@ -33,9 +33,11 @@ namespace Assets.MHGameWork.FlowEngine.Samples._NeedsCleanupFirst.SdfObjectRende
             //                new Bounds(new Vector3(0, 10, 0) + translate, new Vector3(20, 60, 20)));
             var generator2 = new DistObject2VoxelWorldGenerator(new ExampleNoiseCylinder(), 
                 new Bounds(new Vector3(0, 10, 0) + translate, new Vector3(20, 60, 20)));
-            world = FlowEngineLodPrefab.CreateWorld(generator2, 16, 5);
-            var tempEngine = FlowEngineLodPrefab.CreateFlowEngineLod(world);
-            tempEngine.RenderScale = RenderResolution;
+            world = flowEnginePrefab.CreateWorld(generator2, 16, 5);
+            var tempEngine = flowEnginePrefab.CreateFlowEngineLod(world, new LodRendererCreationParams()
+            {
+                RenderScale = RenderResolution
+            });
         }
 
         // Update is called once per frame

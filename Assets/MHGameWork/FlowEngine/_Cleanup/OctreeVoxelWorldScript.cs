@@ -81,20 +81,6 @@ namespace Assets.MHGameWork.FlowEngine._Cleanup
 
        
 
-        private void pregen(IVoxelObject c, OctreeVoxelWorld ret, int depth)
-        {
-            var res = 1 << depth;
-            var lower = (c.Min / SDFChunkSize / res).ToFloored();
-            var upper = (c.Max / SDFChunkSize / res).ToCeiled();
-            for (int x = lower.X; x < upper.X; x++)
-                for (int y = lower.Y; y < upper.Y; y++)
-                    for (int z = lower.Z; z < upper.Z; z++)
-                    {
-                        var f = ret.GetNode(new Point3(x, y, z) * SDFChunkSize * res, SDFChunkDepth - depth);
-                        if (f == null) throw new System.Exception();
-                    }
-        }
-
         private class SDFAdapterGenerator : IWorldGenerator
         {
             private SDFWorldGeneratorScript sdfWorld;

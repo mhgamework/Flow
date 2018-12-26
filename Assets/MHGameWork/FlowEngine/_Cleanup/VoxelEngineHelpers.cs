@@ -1,6 +1,7 @@
 ﻿using System;
 using Assets.MHGameWork.FlowEngine.OctreeWorld;
 using Assets.MHGameWork.FlowEngine._Cleanup;
+using Assets.UnityAdditions;
 using MHGameWork.TheWizards.DualContouring.Terrain;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ namespace Assets.SimpleGame.VoxelEngine
             Camera lodCamera = null)
         {
             var renderer = unityInstantiate(prefab);
-            renderer.World = new OctreeVoxelWorldScript();
+            renderer.World = renderer.GetOrAddComponent<OctreeVoxelWorldScript>();
             renderer.World.SetWorldDirectlyFromCodeMode(world);
             renderer.LODCamera = lodCamera ?? Camera.main;
             return renderer;

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Assets.MHGameWork.FlowEngine.Samples._NeedsCleanupFirst.SdfObjectRenderingSample
 {
-    public class FlowEngineLodScript : MonoBehaviour
+    public class FlowEnginePrefabScript : MonoBehaviour
     {
         public VoxelRenderingEngineScript VoxelRenderingEngine;
 
@@ -14,11 +14,13 @@ namespace Assets.MHGameWork.FlowEngine.Samples._NeedsCleanupFirst.SdfObjectRende
             return new OctreeVoxelWorld(gen, chunkSzie, depth);
         }
 
-        public VoxelRenderingEngineScript CreateFlowEngineLod(OctreeVoxelWorld world)
+        public IFlowEngineLodRenderer CreateFlowEngineLod(OctreeVoxelWorld world, LodRendererCreationParams parameters = null) 
         {
+            if (parameters == null) parameters = new LodRendererCreationParams();;
             var engine = VoxelEngineHelpers.CreateVoxelRenderingEngine(VoxelRenderingEngine,world,Instantiate);
 
             engine.setWorld(world);
+            engine.RenderScale = parameters.RenderScale;
             return engine;
         }
     }

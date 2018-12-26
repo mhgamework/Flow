@@ -5,6 +5,8 @@ namespace Assets.MHGameWork.FlowEngine.OctreeWorld
 {
     /// <summary>
     /// Interface to implement terrain generation logic
+    /// TODO: this maybe better named: IWorldSampler
+    /// TODO: probably also useful to include a change notification, so it can be used for push/pull world generation
     /// </summary>
     public interface IWorldGenerator
     {
