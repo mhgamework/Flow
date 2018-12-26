@@ -2,6 +2,6 @@
 {
     public interface IFlowEngineLodRenderer
     {
-        
+        float LodDistanceFactor { get; set; }
     }
 }

@@ -38,6 +38,8 @@ namespace Assets.MHGameWork.FlowGame.Scenes.BoxLevelGenerator
                     RenderScale = 1 //0.25f
                 });
 
+            engine.LodDistanceFactor = 0.8f;
+
             sdfLevel.Find("All").gameObject.SetActive(false);
             sdfLevel.Find("Extractors").gameObject.SetActive(false);
             sdfLevel.Find("Placeables").gameObject.SetActive(false);

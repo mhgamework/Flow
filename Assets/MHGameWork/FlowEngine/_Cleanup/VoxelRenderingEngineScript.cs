@@ -162,5 +162,11 @@ namespace Assets.MHGameWork.FlowEngine._Cleanup
         {
             return RenderScale;
         }
+
+        public float LodDistanceFactor
+        {
+            get { return LODDistanceFactor; }
+            set { LODDistanceFactor = value; }
+        }
     }
 }
