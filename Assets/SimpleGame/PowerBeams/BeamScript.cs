@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using MHGameWork.TheWizards;
-using NUnit.Framework;
-using UnityEditor.Experimental.UIElements.GraphView;
 using UnityEngine;
 
 namespace Assets.SimpleGame.PowerBeams
