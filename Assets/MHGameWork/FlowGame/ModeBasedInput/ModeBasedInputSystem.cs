@@ -6,7 +6,10 @@
 
         public void SwitchActiveMode(IInputMode mode)
         {
-            if (activeMode != null) activeMode.Stop();
+            if (activeMode == mode) return;
+
+            if (activeMode != null)
+                activeMode.Stop();
             activeMode = mode;
             if (activeMode != null)
                 activeMode.Start();
