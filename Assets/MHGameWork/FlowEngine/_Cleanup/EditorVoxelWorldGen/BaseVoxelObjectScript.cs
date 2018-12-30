@@ -19,6 +19,13 @@ namespace Assets.MHGameWork.FlowEngine._Cleanup.EditorVoxelWorldGen
             onChange(); // Init at runtime
         }
 
+        private void OnEnable()
+        {
+            onChange(); // Init for build release?
+        }
+
+
+
         public void Update()
         {
             if (transform.hasChanged)
