@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Assets.MHGameWork.FlowGame.ModeBasedInput;
 using UnityEngine;
 
@@ -16,6 +17,14 @@ namespace Assets.MHGameWork.FlowGame.PlayerInput
 
         public List<InputModeInfo> Modes { get; private set; }
 
+        public InputModeInfo ActiveMode
+        {
+            get
+            {
+                return Modes.FirstOrDefault(f => f.Mode == modeBasedInputSystem.ActiveMode);
+            }
+        }
+
         public FlowGamePlayerInput(ModeBasedInputSystem modeBasedInputSystem)
         {
             this.modeBasedInputSystem = modeBasedInputSystem;
@@ -23,9 +32,9 @@ namespace Assets.MHGameWork.FlowGame.PlayerInput
             Modes = new List<InputModeInfo>();
         }
 
-        public void BindInputModeToKey(KeyCode key, IInputMode mode)
+        public void BindInputModeToKey(KeyCode key, IInputMode mode,string name)
         {
-            Modes.Add(new InputModeInfo(key, mode));
+            Modes.Add(new InputModeInfo(key, mode,name));
         }
 
         public void Update()
@@ -46,11 +55,14 @@ namespace Assets.MHGameWork.FlowGame.PlayerInput
         {
             public KeyCode Key;
             public IInputMode Mode;
+            public string ModeName ;
 
-            public InputModeInfo(KeyCode key, IInputMode mode)
+
+            public InputModeInfo(KeyCode key, IInputMode mode, string modeName)
             {
                 Key = key;
                 Mode = mode;
+                ModeName = modeName;
             }
         }
     }

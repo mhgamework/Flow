@@ -4,6 +4,12 @@
     {
         private IInputMode activeMode;
 
+        public IInputMode ActiveMode
+        {
+            get { return activeMode; }
+        }
+
+
         public void SwitchActiveMode(IInputMode mode)
         {
             if (activeMode == mode) return;

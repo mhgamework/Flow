@@ -19,10 +19,15 @@ namespace Assets.MHGameWork.FlowGame.UI
 
         public void Start()
         {
-            provider = new ExampleFlowGameUiProvider();
-            var buttonActions = provider.ButtonDescriptions.Select(f => f.ButtonName + " " + f.ActionDescription);
-            helpText.text = string.Join("\n", new[] {"Help:"}.Concat(buttonActions).ToArray());
+         
+            SetProvider(new ExampleFlowGameUiProvider());
+        }
 
+        public void SetProvider(IFlowGameUiProvider value)
+        {
+            provider = value;
+            var buttonActions = provider.ButtonDescriptions.Select(f => f.ButtonName + " " + f.ActionDescription);
+            helpText.text = string.Join("\n", new[] { "Help:" }.Concat(buttonActions).ToArray());
         }
 
         public void Update()
