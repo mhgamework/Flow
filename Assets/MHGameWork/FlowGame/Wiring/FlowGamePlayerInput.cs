@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Assets.MHGameWork.FlowGame.ModeBasedInput;
+using Assets.MHGameWork.FlowGame.PlayerInputting.Interacting;
 using UnityEngine;
 
 namespace Assets.MHGameWork.FlowGame.PlayerInput
@@ -12,8 +13,10 @@ namespace Assets.MHGameWork.FlowGame.PlayerInput
     public class FlowGamePlayerInput
     {
         private ModeBasedInputSystem modeBasedInputSystem;
+        private readonly FlowGameInteractionSystem flowGameInteractionSystem;
 
         public KeyCode DisableActiveModeKey { get; set; }
+        public KeyCode InteractKey { get; set; }
 
         public List<InputModeInfo> Modes { get; private set; }
 
@@ -25,10 +28,12 @@ namespace Assets.MHGameWork.FlowGame.PlayerInput
             }
         }
 
-        public FlowGamePlayerInput(ModeBasedInputSystem modeBasedInputSystem)
+        public FlowGamePlayerInput(ModeBasedInputSystem modeBasedInputSystem,FlowGameInteractionSystem flowGameInteractionSystem)
         {
             this.modeBasedInputSystem = modeBasedInputSystem;
+            this.flowGameInteractionSystem = flowGameInteractionSystem;
             DisableActiveModeKey = KeyCode.Alpha0;
+            InteractKey = KeyCode.E;
             Modes = new List<InputModeInfo>();
         }
 
@@ -48,6 +53,11 @@ namespace Assets.MHGameWork.FlowGame.PlayerInput
             if (Input.GetKeyDown(DisableActiveModeKey))
             {
                 modeBasedInputSystem.DisableActiveMode();
+            }
+
+            if (Input.GetKeyDown(InteractKey))
+            {
+                flowGameInteractionSystem.TriggerPlayerInteract();
             }
         }
 

@@ -35,5 +35,10 @@ namespace Assets.MHGameWork.FlowGame.PlayerInputting.Interacting
                 CurrentTargetedInteractable.ShowHighlight();
             }
         }
+
+        public void TriggerPlayerInteract()
+        {
+            if (CurrentTargetedInteractable != null) CurrentTargetedInteractable.OnPlayerInteract();
+        }
     }
 }

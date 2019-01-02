@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Assets.MHGameWork.FlowGame.PlayerInputting.Interacting
 {
@@ -6,6 +7,8 @@ namespace Assets.MHGameWork.FlowGame.PlayerInputting.Interacting
     {
         [SerializeField]
         private Transform highlight;
+
+        public Action PlayerInteractHandler { get; set; }
 
         public void Start()
         {
@@ -20,5 +23,11 @@ namespace Assets.MHGameWork.FlowGame.PlayerInputting.Interacting
         {
             highlight.gameObject.SetActive(true);
         }
+
+        public void OnPlayerInteract()
+        {
+            if (PlayerInteractHandler != null) PlayerInteractHandler();
+        }
+
     }
 }

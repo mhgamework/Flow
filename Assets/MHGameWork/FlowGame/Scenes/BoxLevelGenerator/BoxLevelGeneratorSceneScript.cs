@@ -4,9 +4,12 @@ using Assets.MHGameWork.FlowEngine.OctreeWorld;
 using Assets.MHGameWork.FlowEngine.Samples._NeedsCleanupFirst.SdfObjectRenderingSample;
 using Assets.MHGameWork.FlowEngine.SdfWorldGeneration;
 using Assets.MHGameWork.FlowEngine._Cleanup.EditorVoxelWorldGen;
+using Assets.MHGameWork.FlowGame.DI;
+using Assets.MHGameWork.FlowGame.Domain;
 using Assets.MHGameWork.FlowGame.ModeBasedInput;
 using Assets.MHGameWork.FlowGame.PlayerInput;
 using Assets.MHGameWork.FlowGame.PlayerInputting.Interacting;
+using Assets.MHGameWork.FlowGame.PlayerStating;
 using Assets.MHGameWork.FlowGame.UI;
 using Assets.MHGameWork.FlowGame.UnityEditorVoxelUtils;
 using UnityEngine;
@@ -45,17 +48,25 @@ namespace Assets.MHGameWork.FlowGame.Scenes.BoxLevelGenerator
 
             engine.LodDistanceFactor = 0.8f;
 
+            var globalResources = new PlayerGlobalResourcesRepository();
+
+
+            flowGameInteractionSystem = new FlowGameInteractionSystem();
 
             var modeBasedInputSystem = new ModeBasedInputSystem();
-            playerInput = new FlowGamePlayerInput(modeBasedInputSystem);
+            playerInput = new FlowGamePlayerInput(modeBasedInputSystem, flowGameInteractionSystem);
             playerInput.DisableActiveModeKey = KeyCode.Alpha1;
             playerInput.BindInputModeToKey(KeyCode.Alpha2,new ExampleInputMode(),"does nothing");
             playerInput.BindInputModeToKey(KeyCode.Alpha3, new ExampleInputMode(),"does even less");
        
-            uiScript.SetProvider(new WiredFlowGameUiProvider(playerInput));
+            uiScript.SetProvider(new WiredFlowGameUiProvider(playerInput, globalResources));
 
-            flowGameInteractionSystem = new FlowGameInteractionSystem();
-            
+            FlowGameServiceProvider.Instance.RegisterService(globalResources);
+
+            globalResources.SetMaxResourceAmount(ResourceTypeFactory.MagicCrystals, 100);
+            globalResources.SetMaxResourceAmount(ResourceTypeFactory.Rock, 50);
+            globalResources.SetMaxResourceAmount(ResourceTypeFactory.Firestone, 10);
+
         }
 
         // Update is called once per frame
