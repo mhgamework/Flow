@@ -45,7 +45,7 @@ namespace Assets.MHGameWork.FlowEngine.Rendering.ClipmapsOctree
         private List<ChunkCoord> tempTaskList = new List<ChunkCoord>();
 
 
-        public ClipmapsOctreeService(OctreeVoxelWorld voxelWorld, IVoxelRenderer rendererService,AnimationCurve lodCurve, float lodCurveEnd)
+        public ClipmapsOctreeService(OctreeVoxelWorld voxelWorld, IVoxelRenderer rendererService, AnimationCurve lodCurve, float lodCurveEnd)
         {
             VoxelWorld = voxelWorld;
             this.rendererService = rendererService;
@@ -160,7 +160,7 @@ namespace Assets.MHGameWork.FlowEngine.Rendering.ClipmapsOctree
             bool parentDirty = false)
         {
             Profiler.BeginSample("A");
-            if (isQualityGoodEnoughCurve(node, cameraPosition, LODDistanceFactor,lodCurve, lodCurveEnd))
+            if (isQualityGoodEnoughCurve(node, cameraPosition, LODDistanceFactor, lodCurve, lodCurveEnd))
             {
                 node.ShouldRender = true;
                 checkDirty(node, outDirtyNodes, outMissingRenderdataNodes, parentDirty);
@@ -219,13 +219,13 @@ namespace Assets.MHGameWork.FlowEngine.Rendering.ClipmapsOctree
             var qualityGoodEnough = dist > node.Size * distanceFactor;
             return qualityGoodEnough;
         }
-        private static bool isQualityGoodEnoughCurve(RenderOctreeNode node, Vector3 cameraPosition, float distanceFactor,AnimationCurve curve, float curveEnd)
+        private static bool isQualityGoodEnoughCurve(RenderOctreeNode node, Vector3 cameraPosition, float distanceFactor, AnimationCurve curve, float curveEnd)
         {
             var center = (Vector3)node.LowerLeft.ToVector3() + Vector3.one * node.Size * 0.5f;
             var dist = Vector3.Distance(cameraPosition, center);
 
             // Should take into account the fact that if minNodeSize changes, the quality of far away nodes changes so the threshold maybe should change too
-            var qualityGoodEnough = dist * curve.Evaluate(dist/curveEnd) * distanceFactor > node.Size;
+            var qualityGoodEnough = dist * curve.Evaluate(dist / curveEnd) * distanceFactor > node.Size;
             return qualityGoodEnough;
         }
 
@@ -324,7 +324,7 @@ namespace Assets.MHGameWork.FlowEngine.Rendering.ClipmapsOctree
         }
 
 
-    
+
         public void OnDestroyRenderNode(RenderOctreeNode renderOctreeNode)
         {
             DestroyRenderObject(renderOctreeNode);
@@ -339,6 +339,34 @@ namespace Assets.MHGameWork.FlowEngine.Rendering.ClipmapsOctree
                 //GameObject.Destroy(RenderObject.gameObject);
             }
             renderOctreeNode.RenderObject = null;
+        }
+
+        /// <summary>
+        /// Experimental
+        /// Should return true if the renderer is rendering something relevant at this position.
+        /// Currenlty this is used to see if the collision mesh is loaded, so probably not the best solution
+        /// make this temporary
+        /// </summary>
+        /// <param name="pos"></param>
+        public bool IsChunkLoadedAt(Vector3 pos)
+        {
+            var ret = false;
+            helper.VisitTopDown(root, node =>
+            {
+                var b = new Bounds();
+                b.SetMinMax(node.LowerLeft, node.LowerLeft + Vector3.one * node.Size);
+                if (!b.Contains(pos)) return VisitOptions.SkipChildren;
+
+                if (node.RenderObject != null)
+                {
+                    ret = true;
+                    return VisitOptions.AbortVisit;
+                }
+
+                return VisitOptions.Continue;
+
+            });
+            return ret;
         }
     }
 }

@@ -83,10 +83,14 @@ namespace Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer
                 Debug.Log("Start " + num);
                 int amount = 10;
                 var buf = new List<ChunkCoord>();
-                for (; ; )
+                for (;;)
                 {
                     PregenerateChunksThread(num, buf, amount);
                 }
+            }
+            catch (ThreadAbortException e)
+            {
+                // Ignore
             }
             catch (Exception e)
             {
@@ -239,6 +243,6 @@ namespace Assets.MHGameWork.FlowEngine.Rendering.AsyncCPURenderer
             nodeLookup[f] = ret;
             return ret;
         }
-
+      
     }
 }

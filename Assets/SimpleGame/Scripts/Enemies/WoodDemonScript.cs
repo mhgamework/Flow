@@ -46,7 +46,7 @@ namespace Assets.SimpleGame.Scripts.Enemies
         public Transform Model;
 
         //private EntityScript Entity;
-
+        private AiCapsuleMovingBehaviour movingBehaviour;
         public void Start()
         {
             player = LocalPlayerScript.Instance.GetPlayer();
@@ -54,19 +54,24 @@ namespace Assets.SimpleGame.Scripts.Enemies
 
             StartCoroutine(watchPlayerPos().GetEnumerator());
             //Entity = GetComponent<EntityScript>();
+            movingBehaviour = new AiCapsuleMovingBehaviour(rigidbody,transform);
+
         }
 
         private Vector3 desiredPos;
 
-        private float timeStuck = 0;
 
-        private Vector3 lastPos;
 
 
         private float lastAttack = float.MinValue;
 
         public void FixedUpdate()
         {
+            movingBehaviour.JumpSpeed = JumpSpeed;
+            movingBehaviour.SphereCastRadius = SphereCastRadius;
+            movingBehaviour.NotMovingThreshold = notMovingThreshold;
+            movingBehaviour.MoveSpeed = getActualMovespeed();
+            movingBehaviour.GoalDistToGround = distToGround;
 
             if (DayNightCycleScript.Instance.IsDay())
             {
@@ -107,7 +112,7 @@ namespace Assets.SimpleGame.Scripts.Enemies
             }
 
             //Debug.Log(canJump() + "    " + isStuck());
-            MoveTo(player.GetPlayerPosition());
+            movingBehaviour.MoveTo(player.GetPlayerPosition());
         }
 
 
@@ -229,24 +234,7 @@ namespace Assets.SimpleGame.Scripts.Enemies
             return ((player.GetPlayerPosition() - transform.position).magnitude < PlayerDetectionDistance);
         }
 
-        private void MoveTo(Vector3 targetPos)
-        {
-            if (isStuck(targetPos)) timeStuck += Time.fixedDeltaTime;
-            else timeStuck = 0;
-
-            if (canJump() && timeStuck > 0.2f)
-            {
-                rigidbody.velocity = rigidbody.velocity.ChangeY(JumpSpeed);
-            }
-
-            var dir = (targetPos - transform.position).normalized;
-
-            var speed = getActualMovespeed();
-
-            rigidbody.velocity = (dir * speed).ChangeY(rigidbody.velocity.y);
-
-            lastPos = rigidbody.position;
-        }
+      
 
         private float getActualMovespeed()
         {
@@ -258,7 +246,7 @@ namespace Assets.SimpleGame.Scripts.Enemies
             randomWalkTarget.y = transform.position.y;
             if (isRandomWalking)
             {
-                MoveTo(randomWalkTarget);
+                movingBehaviour.MoveTo(randomWalkTarget);
                 if (Vector3.Distance(randomWalkTarget, transform.position) < 1)
                 {
                     isRandomWalking = false;
@@ -289,22 +277,7 @@ namespace Assets.SimpleGame.Scripts.Enemies
 
         }
 
-        private bool isStuck(Vector3 targetPos)
-        {
-            if ((targetPos - transform.position).magnitude < 0.1f / 3f * getActualMovespeed()) return false;
-            if ((lastPos - rigidbody.position).magnitude > Time.fixedDeltaTime * MoveSpeed * notMovingThreshold) return false;
-            return true;
-        }
+     
 
-        private bool canJump()
-        {
-            return IsGrounded() && rigidbody.velocity.y < 0.01f;
-        }
-
-        bool IsGrounded()
-        {
-            var ray = new Ray(transform.position, -Vector3.up);
-            return Physics.SphereCast(ray, SphereCastRadius, distToGround + 0.1f - SphereCastRadius);
-        }
     }
 }

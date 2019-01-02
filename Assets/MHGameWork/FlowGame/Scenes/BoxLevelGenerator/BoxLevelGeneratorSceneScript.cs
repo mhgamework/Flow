@@ -3,6 +3,7 @@ using System.Linq;
 using Assets.MHGameWork.FlowEngine.OctreeWorld;
 using Assets.MHGameWork.FlowEngine.Samples._NeedsCleanupFirst.SdfObjectRenderingSample;
 using Assets.MHGameWork.FlowEngine.SdfWorldGeneration;
+using Assets.MHGameWork.FlowEngine._Cleanup;
 using Assets.MHGameWork.FlowEngine._Cleanup.EditorVoxelWorldGen;
 using Assets.MHGameWork.FlowGame.DI;
 using Assets.MHGameWork.FlowGame.Domain;
@@ -47,11 +48,14 @@ namespace Assets.MHGameWork.FlowGame.Scenes.BoxLevelGenerator
                 });
 
             engine.LodDistanceFactor = 0.8f;
+            FlowGameServiceProvider.Instance.RegisterService(engine);
+            FlowGameServiceProvider.Instance.RegisterService((VoxelRenderingEngineScript)engine); // Hacky temp, needs to be removed when proper physics support i guess
 
             var globalResources = new PlayerGlobalResourcesRepository();
 
 
             flowGameInteractionSystem = new FlowGameInteractionSystem();
+            FlowGameServiceProvider.Instance.RegisterService(flowGameInteractionSystem);
 
             var modeBasedInputSystem = new ModeBasedInputSystem();
             playerInput = new FlowGamePlayerInput(modeBasedInputSystem, flowGameInteractionSystem);
@@ -66,6 +70,8 @@ namespace Assets.MHGameWork.FlowGame.Scenes.BoxLevelGenerator
             globalResources.SetMaxResourceAmount(ResourceTypeFactory.MagicCrystals, 100);
             globalResources.SetMaxResourceAmount(ResourceTypeFactory.Rock, 50);
             globalResources.SetMaxResourceAmount(ResourceTypeFactory.Firestone, 10);
+
+                
 
         }
 

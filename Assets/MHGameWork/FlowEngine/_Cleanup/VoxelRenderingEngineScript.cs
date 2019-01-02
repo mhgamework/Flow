@@ -24,7 +24,7 @@ namespace Assets.MHGameWork.FlowEngine._Cleanup
         private IVoxelWorldFactory overridingWorldFactory;
 
         public Camera LODCamera;
-        [Range(0.5f,4)]
+        [Range(0.5f, 4)]
         public float LODDistanceFactor = 1.2f;
 
         //TODO add render scale
@@ -167,6 +167,17 @@ namespace Assets.MHGameWork.FlowEngine._Cleanup
         {
             get { return LODDistanceFactor; }
             set { LODDistanceFactor = value; }
+        }
+
+        /// <summary>
+        /// Experimental, should probably be replaced with a check in the collision mesh generation engine
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <returns></returns>
+        public bool IsChunkLoadedAt(Vector3 pos)
+        {
+            if (clipmapsOctreeService == null) return false;
+            return clipmapsOctreeService.IsChunkLoadedAt(pos);
         }
     }
 }

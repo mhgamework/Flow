@@ -28,7 +28,7 @@ namespace Assets.MHGameWork.FlowGame.PlayerStating
         /// </summary>
         public int RequestStoreResources(ResourceType type, int amount)
         {
-            return changeResourceAmount(type, amount);
+            return RequestChangeResourceAmount(type, amount);
         }
 
         /// <summary>
@@ -38,10 +38,10 @@ namespace Assets.MHGameWork.FlowGame.PlayerStating
         /// <returns></returns>
         public int RequestTakeResources(ResourceType type, int amount)
         {
-            return -changeResourceAmount(type, -amount);
+            return -RequestChangeResourceAmount(type, -amount);
         }
 
-        private int changeResourceAmount(ResourceType type, int amount)
+        public int RequestChangeResourceAmount(ResourceType type, int amount)
         {
             var max = GetMaxResourceAmount(type);
             var val = GetResourceAmount(type);
